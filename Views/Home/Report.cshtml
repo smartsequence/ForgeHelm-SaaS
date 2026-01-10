@@ -1,0 +1,1453 @@
+@{
+    ViewData["Title"] = "風險評估報告";
+}
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.svg" alt="智序資訊" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <svg class="logo-svg" style="display:none;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="40" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="60" width="60" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="100" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 20 L140 80 L180 80 L180 60 L160 60 L160 20 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 100 L140 140 L180 140 L180 120 L160 120 L160 100 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M120 140 L120 160 L180 160 L180 140 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="140" y="20" width="40" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h2 class="sidebar-title">DocEngine</h2>
+                    <p class="sidebar-subtitle">智序資訊</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Home")" class="nav-item" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
+            </a>
+            <a href="#" class="nav-item" data-page="projects">
+                <span class="nav-icon">📁</span>
+                <span class="nav-text" data-i18n="Nav.Projects">專案</span>
+            </a>
+            <a href="@Url.Action("Assessment", "Home")" class="nav-item" data-page="assessment">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text" data-i18n="Nav.Assessment">評估</span>
+            </a>
+            <a href="@Url.Action("Report", "Home")" class="nav-item active" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text" data-i18n="Nav.Report">報告</span>
+            </a>
+            <a href="#" class="nav-item" data-page="documentation">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
+            </a>
+            <a href="#" class="nav-item" data-page="risks">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-text" data-i18n="Nav.Risks">風險</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header with Hamburger and Language Switcher -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="mobile-title">DocEngine</h1>
+            <div class="mobile-header-actions">
+                <div class="language-switcher-top">
+                    <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                        <span data-i18n="Common.Chinese">繁體中文</span>
+                    </button>
+                    <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                        <span data-i18n="Common.English">English</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <div class="report-header">
+                <div class="report-header-top">
+                    <div class="report-header-left">
+                        <h1 class="report-title" data-i18n="Report.Title">風險評估報告</h1>
+                        <p class="report-subtitle" data-i18n="Report.Subtitle">根據您的問卷結果自動生成的風險指紋分析</p>
+                    </div>
+                    <div class="report-header-right">
+                        <div class="report-header-meta">
+                            <div class="report-meta-item">
+                                <span class="report-meta-label" data-i18n="Report.SystemName">系統名稱</span>
+                                <span class="report-meta-value" id="systemNameDisplay">-</span>
+                            </div>
+                            <div class="report-meta-item">
+                                <span class="report-meta-label" data-i18n="Report.AssessmentDate">評估日期</span>
+                                <span class="report-meta-value" id="assessmentDate">-</span>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <div class="language-switcher-top">
+                                <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                                    <span data-i18n="Common.Chinese">繁體中文</span>
+                                </button>
+                                <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                                    <span data-i18n="Common.English">English</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="maturity-info-box">
+                    <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span class="info-text">
+                        <strong data-i18n="Assessment.MaturityLabel">M = 成熟度 (Maturity)</strong>
+                        <span data-i18n="Assessment.MaturityDesc">：評估各項流程與能力的成熟程度，分數越高表示該領域越成熟</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- No Data Guide Section (當沒有報告數據時顯示) -->
+            <div id="noReportGuide" class="report-no-data-guide" style="display: none;">
+                <div class="no-data-card">
+                    <div class="no-data-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h2 class="no-data-title" data-i18n="Report.NoReportTitle">尚未生成報告</h2>
+                    <p class="no-data-description" data-i18n="Report.NoReportDesc">完成風險評估問卷並付款後，即可查看您的專屬風險評估報告。</p>
+                    <div class="no-data-actions">
+                        <a href="@Url.Action("Assessment", "Home")" class="report-button primary">
+                            <span data-i18n="Report.GoToAssessment">前往評估問卷</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="reportContent" class="report-layout" style="display: none;">
+                <!-- System Name Display (for PDF) -->
+                <div class="pdf-system-name" id="pdfSystemName" style="display: none;">
+                    <h2 class="pdf-system-name-text" id="pdfSystemNameText"></h2>
+                </div>
+                
+                <!-- Radar + Summary -->
+                <section class="report-top" data-section="radar-summary">
+                    <div class="report-card radar-card" data-block="radar">
+                        <div class="section-header">
+                            <h2 class="section-title" data-i18n="Report.RadarTitle">M1-M5 分數雷達圖</h2>
+                            <p class="section-description" data-i18n="Report.RadarDesc">視覺化顯示五項關鍵風險指標</p>
+                        </div>
+                        <div class="radar-chart-container report-radar-container">
+                            <div class="radar-chart">
+                                <svg id="reportRadar" class="radar-svg" viewBox="-20 -20 240 240" preserveAspectRatio="xMidYMid meet">
+                                    <!-- Background circles -->
+                                    <circle cx="100" cy="100" r="80" class="radar-circle" />
+                                    <circle cx="100" cy="100" r="60" class="radar-circle" />
+                                    <circle cx="100" cy="100" r="40" class="radar-circle" />
+                                    <circle cx="100" cy="100" r="20" class="radar-circle" />
+
+                                    <!-- 5 axes -->
+                                    <line x1="100" y1="100" x2="100" y2="20" class="radar-line" />
+                                    <line x1="100" y1="100" x2="167" y2="70" class="radar-line" />
+                                    <line x1="100" y1="100" x2="147" y2="160" class="radar-line" />
+                                    <line x1="100" y1="100" x2="53" y2="160" class="radar-line" />
+                                    <line x1="100" y1="100" x2="33" y2="70" class="radar-line" />
+
+                                    <!-- Dynamic polygon for M1-M5 -->
+                                    <polygon id="radarPolygon" points="" class="radar-polygon" />
+
+                                    <!-- Axis labels -->
+                                    <text x="100" y="15" class="radar-label" data-i18n="Report.RadarM1">M1 交接</text>
+                                    <text x="180" y="75" class="radar-label" data-i18n="Report.RadarM2">M2 追溯</text>
+                                    <text x="165" y="170" class="radar-label" data-i18n="Report.RadarM3">M3 變更</text>
+                                    <text x="35" y="170" class="radar-label" data-i18n="Report.RadarM4">M4 驗收</text>
+                                    <text x="20" y="75" class="radar-label" data-i18n="Report.RadarM5">M5 溝通</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card fingerprint-card" data-block="fingerprint">
+                        <div class="section-header">
+                            <h2 class="section-title" data-i18n="Report.FingerprintTitle">風險指紋總結</h2>
+                            <p class="section-description" data-i18n="Report.FingerprintDesc">整體風險輪廓與建議</p>
+                        </div>
+                        <div class="fingerprint-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label" data-i18n="Report.TotalScore">總分</span>
+                                <span class="metric-value" id="totalScore">0</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label" data-i18n="Report.RiskLevel">風險等級</span>
+                                <span class="metric-badge" id="riskLevel">-</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label" data-i18n="Report.SampleTime">樣本時間</span>
+                                <span class="metric-value" id="surveyTime">-</span>
+                            </div>
+                        </div>
+                        <!-- 分數說明表（移到風險分數下方） -->
+                        <div class="score-description-table" id="scoreDescriptionTable" style="margin-top: 24px; padding: 16px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; display: none;">
+                            <h3 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #e0e0e0;" data-i18n="Score.TableTitle">各指標分數說明</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                        <th style="padding: 8px; text-align: left; color: #b0b0b0; font-weight: 600;" data-i18n="Score.Indicator">指標</th>
+                                        <th style="padding: 8px; text-align: center; color: #b0b0b0; font-weight: 600; width: 80px;" data-i18n="Score.Value">分數</th>
+                                        <th style="padding: 8px; text-align: left; color: #b0b0b0; font-weight: 600;" data-i18n="Score.Description">說明</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scoreTableBody">
+                                    <!-- 動態填充 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Personalized Advice Section (獨立區塊) -->
+                <section class="report-advice-section" data-section="advice">
+                    <div class="report-card advice-card" data-block="advice">
+                        <div class="section-header">
+                            <h2 class="section-title" data-i18n="Report.PersonalizedAdvice">個人化建議</h2>
+                        </div>
+                        <div class="advice-block">
+                            <p class="advice-text" id="adviceText" data-i18n="Report.DefaultAdvice">
+                                將根據您的問卷結果產生具體建議。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Open Questions Section -->
+                <section class="report-open-questions" id="openQuestionsSection" style="display: none;" data-section="open-questions">
+                    <div class="report-card" data-block="open-questions">
+                        <div class="section-header">
+                            <h2 class="section-title" data-i18n="Report.OpenQuestions">開放式問題回覆</h2>
+                            <p class="section-description" data-i18n="Report.OpenQuestionsDesc">您的詳細回饋與補充資訊</p>
+                        </div>
+                        <div class="open-questions-content">
+                            <div class="open-question-item" id="openQ1" style="display: none;">
+                                <h4 class="open-question-label" data-i18n="Assessment.OpenQ6">問題 6. 請描述您的專案面臨的主要挑戰</h4>
+                                <p class="open-question-answer" id="answer-open1"></p>
+                            </div>
+                            <div class="open-question-item" id="openQ2" style="display: none;">
+                                <h4 class="open-question-label" data-i18n="Assessment.OpenQ7">問題 7. 請說明您期望改善的領域</h4>
+                                <p class="open-question-answer" id="answer-open2"></p>
+                            </div>
+                            <div class="open-question-item" id="openQ3" style="display: none;">
+                                <h4 class="open-question-label" data-i18n="Assessment.OpenQ8">問題 8. 請提供其他相關資訊</h4>
+                                <p class="open-question-answer" id="answer-open3"></p>
+                            </div>
+                            <div class="no-open-answers" id="noOpenAnswers" style="display: none;">
+                                <p data-i18n="Report.NoOpenAnswers">未填寫開放式問題</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Actions -->
+                <section class="report-actions">
+                    <button id="downloadPdfBtn" class="report-button primary" data-i18n="Report.DownloadPDF">
+                        下載 PDF 報告
+                    </button>
+                    <button id="viewTrackingBtn" class="report-button secondary" data-i18n="Report.ViewTracking">
+                        查看 3 個月追蹤
+                    </button>
+                    <button id="inviteBtn" class="report-button accent" data-i18n="Report.InviteColleague">
+                        邀請同事 NT$2,490/人（17% 折扣）
+                    </button>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const overlay = document.getElementById('overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        hamburger?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+                if (this.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        function parseSurveyData() {
+            // 先嘗試從 survey_data 讀取
+            const raw = localStorage.getItem('survey_data');
+            if (raw) {
+                try {
+                    const data = JSON.parse(raw);
+                    // 如果數據存在且有內容，返回它
+                    if (data && Object.keys(data).length > 0) {
+                        console.log('✓ 從 survey_data 讀取到數據:', data);
+                        return data;
+                    }
+                } catch (e) {
+                    console.error('✗ 解析 survey_data 失敗:', e);
+                }
+            }
+            
+            // 如果 survey_data 不存在或為空，從個別 localStorage 項目讀取
+            const data = {};
+            const keys = ['M1', 'M2', 'M3', 'M4', 'M5', 'open1', 'open2', 'open3', 'systemName'];
+            keys.forEach(key => {
+                const value = localStorage.getItem(`survey_${key}`);
+                if (value !== null && value !== '') {
+                    data[key] = value;
+                }
+            });
+            
+            // 如果至少有一個值，返回數據
+            if (Object.keys(data).length > 0) {
+                console.log('✓ 從個別項目讀取到數據:', data);
+                return data;
+            }
+            
+            console.warn('⚠ 未找到任何問卷數據');
+            const allSurveyKeys = Object.keys(localStorage).filter(k => k.startsWith('survey_'));
+            console.log('localStorage 中的所有 survey_ 項目:', allSurveyKeys);
+            if (allSurveyKeys.length > 0) {
+                console.log('這些項目的值:', allSurveyKeys.map(k => ({ key: k, value: localStorage.getItem(k) })));
+            }
+            
+            return null;
+        }
+
+        function toNumber(value) {
+            const n = Number(value);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function computeRiskLevel(avg) {
+            // 始終返回中文，在顯示時再翻譯
+            if (avg >= 7) return '低';
+            if (avg >= 4) return '中';
+            return '高';
+        }
+        
+        // 監聽語言變更事件，更新報告
+        window.addEventListener('languageChanged', function() {
+            updateReport();
+        });
+
+        function updateRadarChart(m1, m2, m3, m4, m5) {
+            const centerX = 100;
+            const centerY = 100;
+            const maxRadius = 80;
+            const values = [m1, m2, m3, m4, m5];
+            const angles = [-90, -18, 54, 126, 198].map(deg => (deg * Math.PI) / 180);
+
+            const points = values.map((v, i) => {
+                const ratio = Math.max(0, Math.min(10, v)) / 10;
+                const r = maxRadius * ratio;
+                const x = centerX + r * Math.cos(angles[i]);
+                const y = centerY + r * Math.sin(angles[i]);
+                return `${x},${y}`;
+            });
+
+            const polygon = document.getElementById('radarPolygon');
+            if (polygon) {
+                polygon.setAttribute('points', points.join(' '));
+            }
+        }
+
+        function formatTimestamp(ts) {
+            if (!ts) return '-';
+            const d = new Date(ts);
+            if (isNaN(d.getTime())) return '-';
+            // 使用24小時制格式（日期不補零，時間補零）
+            const year = d.getFullYear();
+            const month = d.getMonth() + 1;  // 不補零：1, 2, ..., 12
+            const day = d.getDate();  // 不補零：1, 2, ..., 31
+            const hours = String(d.getHours()).padStart(2, '0');  // 補零：00, 01, ..., 23
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const seconds = String(d.getSeconds()).padStart(2, '0');
+            
+            // 統一格式：2026/1/11 00:36:58
+            return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        function updateReport() {
+            const data = parseSurveyData();
+            
+            // 更新系統名稱
+            const systemNameEl = document.getElementById('systemNameDisplay');
+            const pdfSystemNameEl = document.getElementById('pdfSystemNameText');
+            const systemName = (data && data.systemName) || localStorage.getItem('survey_systemName') || '-';
+            
+            if (systemNameEl) {
+                systemNameEl.textContent = systemName;
+            }
+            
+            // 更新PDF專用的系統名稱顯示（只在需要生成PDF時顯示）
+            if (pdfSystemNameEl) {
+                pdfSystemNameEl.textContent = systemName;
+            }
+            
+            // 更新評估日期（無論是否有數據都顯示）
+            const assessmentDateEl = document.getElementById('assessmentDate');
+            if (assessmentDateEl) {
+                const ts = localStorage.getItem('survey_timestamp');
+                assessmentDateEl.textContent = formatTimestamp(ts) || '-';
+            }
+            
+            // 檢查是否有有效的問卷數據（至少有一個 M 分數）
+            const hasValidData = data && (data.M1 || data.M2 || data.M3 || data.M4 || data.M5 || 
+                                          data.m1 || data.m2 || data.m3 || data.m4 || data.m5);
+            
+            if (!hasValidData) {
+                // 沒有問卷數據，顯示引導頁面，隱藏報告內容
+                const reportContent = document.getElementById('reportContent');
+                const noReportGuide = document.getElementById('noReportGuide');
+                const reportActions = document.querySelector('.report-actions');
+                
+                if (reportContent) {
+                    reportContent.style.display = 'none';
+                }
+                if (noReportGuide) {
+                    noReportGuide.style.display = 'flex';
+                }
+                if (reportActions) {
+                    reportActions.style.display = 'none';
+                }
+                return;
+            }
+            
+            // 有數據，顯示報告內容，隱藏引導頁面
+            const reportContent = document.getElementById('reportContent');
+            const noReportGuide = document.getElementById('noReportGuide');
+            const reportActions = document.querySelector('.report-actions');
+            
+            if (reportContent) {
+                reportContent.style.display = 'flex';
+            }
+            if (noReportGuide) {
+                noReportGuide.style.display = 'none';
+            }
+            if (reportActions) {
+                reportActions.style.display = 'flex';
+            }
+
+            console.log('處理問卷數據:', data);
+
+            // 確保所有值都存在，如果沒有則使用 0
+            const m1 = toNumber(data.M1 || data.m1 || 0);
+            const m2 = toNumber(data.M2 || data.m2 || 0);
+            const m3 = toNumber(data.M3 || data.m3 || 0);
+            const m4 = toNumber(data.M4 || data.m4 || 0);
+            const m5 = toNumber(data.M5 || data.m5 || 0);
+            
+            console.log('M1-M5 分數:', { m1, m2, m3, m4, m5 });
+            console.log('原始數據:', data);
+
+            const total = m1 + m2 + m3 + m4 + m5;
+            const avg = total / 5;
+            const level = computeRiskLevel(avg);
+
+            const totalScoreEl = document.getElementById('totalScore');
+            if (totalScoreEl) {
+                totalScoreEl.textContent = total.toFixed(1);
+            }
+            
+            const levelEl = document.getElementById('riskLevel');
+            if (levelEl) {
+                // 風險等級翻譯
+                const levelMap = {
+                    'zh-TW': { '低': '低', '中': '中', '高': '高' },
+                    'en-US': { '低': 'Low', '中': 'Medium', '高': 'High' }
+                };
+                levelEl.textContent = levelMap[i18n.currentLang]?.[level] || level;
+                levelEl.classList.remove('low', 'medium', 'high');
+                if (level === '低') levelEl.classList.add('low');
+                else if (level === '中') levelEl.classList.add('medium');
+                else levelEl.classList.add('high');
+            }
+
+            const ts = localStorage.getItem('survey_timestamp');
+            const surveyTimeEl = document.getElementById('surveyTime');
+            if (surveyTimeEl) {
+                surveyTimeEl.textContent = formatTimestamp(ts);
+            }
+            
+            // 更新評估日期
+            if (assessmentDateEl) {
+                assessmentDateEl.textContent = formatTimestamp(ts);
+            }
+
+            const adviceEl = document.getElementById('adviceText');
+            if (adviceEl) {
+                if (m3 <= 6) {
+                    adviceEl.textContent = i18n.t('Report.AdviceLow');
+                } else {
+                    adviceEl.textContent = i18n.t('Report.AdviceNormal');
+                }
+            }
+
+            updateRadarChart(m1, m2, m3, m4, m5);
+
+            // 更新分數說明表
+            updateScoreDescriptionTable(m1, m2, m3, m4, m5);
+
+            // Update open questions
+            updateOpenQuestions(data);
+        }
+
+        function updateScoreDescriptionTable(m1, m2, m3, m4, m5) {
+            const tableBody = document.getElementById('scoreTableBody');
+            const scoreTable = document.getElementById('scoreDescriptionTable');
+            
+            if (!tableBody || !scoreTable) return;
+
+            // 指標配置
+            const metrics = [
+                { key: 'M1', label: 'M1 交接', value: m1, i18nKey: 'Report.RadarM1' },
+                { key: 'M2', label: 'M2 追溯', value: m2, i18nKey: 'Report.RadarM2' },
+                { key: 'M3', label: 'M3 變更', value: m3, i18nKey: 'Report.RadarM3' },
+                { key: 'M4', label: 'M4 驗收', value: m4, i18nKey: 'Report.RadarM4' },
+                { key: 'M5', label: 'M5 溝通', value: m5, i18nKey: 'Report.RadarM5' }
+            ];
+
+            // 清空表格內容
+            tableBody.innerHTML = '';
+
+            // 填充表格
+            metrics.forEach(metric => {
+                const description = i18n.getScoreDescription(metric.key, metric.value);
+                const label = i18n.t(metric.i18nKey);
+                
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                
+                row.innerHTML = `
+                    <td style="padding: 10px 8px; color: #e0e0e0;">${label}</td>
+                    <td style="padding: 10px 8px; text-align: center; color: #ffffff; font-weight: 600;">${metric.value.toFixed(1)}</td>
+                    <td style="padding: 10px 8px; color: #b0b0b0; line-height: 1.5;">${description || '-'}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // 顯示表格
+            scoreTable.style.display = 'block';
+        }
+
+        function updateOpenQuestions(data) {
+            const openQuestionsSection = document.getElementById('openQuestionsSection');
+            const noOpenAnswers = document.getElementById('noOpenAnswers');
+            let hasAnswers = false;
+
+            // Check and display open1
+            if (data.open1 && data.open1.trim()) {
+                const answerEl = document.getElementById('answer-open1');
+                const questionEl = document.getElementById('openQ1');
+                if (answerEl && questionEl) {
+                    answerEl.textContent = data.open1;
+                    questionEl.style.display = 'block';
+                    hasAnswers = true;
+                }
+            } else {
+                const questionEl = document.getElementById('openQ1');
+                if (questionEl) questionEl.style.display = 'none';
+            }
+
+            // Check and display open2
+            if (data.open2 && data.open2.trim()) {
+                const answerEl = document.getElementById('answer-open2');
+                const questionEl = document.getElementById('openQ2');
+                if (answerEl && questionEl) {
+                    answerEl.textContent = data.open2;
+                    questionEl.style.display = 'block';
+                    hasAnswers = true;
+                }
+            } else {
+                const questionEl = document.getElementById('openQ2');
+                if (questionEl) questionEl.style.display = 'none';
+            }
+
+            // Check and display open3
+            if (data.open3 && data.open3.trim()) {
+                const answerEl = document.getElementById('answer-open3');
+                const questionEl = document.getElementById('openQ3');
+                if (answerEl && questionEl) {
+                    answerEl.textContent = data.open3;
+                    questionEl.style.display = 'block';
+                    hasAnswers = true;
+                }
+            } else {
+                const questionEl = document.getElementById('openQ3');
+                if (questionEl) questionEl.style.display = 'none';
+            }
+
+            // Show/hide section
+            if (openQuestionsSection) {
+                if (hasAnswers) {
+                    openQuestionsSection.style.display = 'block';
+                    if (noOpenAnswers) noOpenAnswers.style.display = 'none';
+                } else {
+                    openQuestionsSection.style.display = 'none';
+                }
+            }
+        }
+
+        // 添加頁首頁尾的輔助函數
+        function addHeaderFooter(pdf, pageNumber, totalPages, systemName) {
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            const headerHeight = 15;
+            const footerHeight = 15;
+            
+            // 保存當前狀態
+            pdf.saveGraphicsState();
+            
+            // 頁首
+            pdf.setDrawColor(200, 200, 200);
+            pdf.setLineWidth(0.1);
+            pdf.line(margin, margin + headerHeight, pageWidth - margin, margin + headerHeight);
+            
+            pdf.setTextColor(100, 100, 100);
+            pdf.setFontSize(8);
+            pdf.setFont('helvetica', 'normal');
+            
+            // 左側：系統名稱（如果是中文，使用 canvas 渲染為圖片）
+            if (systemName) {
+                // 檢查是否包含中文字符
+                const hasChinese = /[\u4e00-\u9fa5]/.test(systemName);
+                
+                if (hasChinese) {
+                    // 使用 canvas 同步渲染中文文字為圖片
+                    try {
+                        const textCanvas = document.createElement('canvas');
+                        const ctx = textCanvas.getContext('2d');
+                        
+                        // 設置字體和樣式（使用支持中文的字體）
+                        const fontSize = 8;
+                        // 嘗試使用系統支持中文的字體
+                        ctx.font = `${fontSize}px "Microsoft YaHei", "SimHei", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", Arial, sans-serif`;
+                        ctx.fillStyle = 'rgb(100, 100, 100)';
+                        ctx.textBaseline = 'top';
+                        
+                        // 計算文字寬度（對於中文，measureText 可能不準確，使用更大的寬度）
+                        let textWidth = 0;
+                        for (let i = 0; i < systemName.length; i++) {
+                            const char = systemName[i];
+                            if (/[\u4e00-\u9fa5]/.test(char)) {
+                                // 中文字符，大約是字體大小的 1.2 倍
+                                textWidth += fontSize * 1.2;
+                            } else {
+                                textWidth += ctx.measureText(char).width;
+                            }
+                        }
+                        
+                        textCanvas.width = Math.ceil(textWidth) + 4;
+                        textCanvas.height = fontSize + 4;
+                        
+                        // 重新設置字體（canvas 大小改變後需要重新設置）
+                        ctx.font = `${fontSize}px "Microsoft YaHei", "SimHei", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", Arial, sans-serif`;
+                        ctx.fillStyle = 'rgb(100, 100, 100)';
+                        ctx.textBaseline = 'top';
+                        
+                        // 繪製文字
+                        ctx.fillText(systemName, 2, 2);
+                        
+                        // 轉換為圖片並添加到 PDF
+                        const nameImgData = textCanvas.toDataURL('image/png');
+                        const nameImgWidth = (textCanvas.width * 0.264583); // px to mm (96 DPI)
+                        const nameImgHeight = (textCanvas.height * 0.264583);
+                        pdf.addImage(nameImgData, 'PNG', margin, margin + 5, nameImgWidth, nameImgHeight);
+                    } catch (e) {
+                        console.warn('中文系統名稱渲染失敗:', e);
+                        // 如果失敗，跳過（系統名稱已在報告內容中顯示）
+                    }
+                } else {
+                    // 沒有中文，直接顯示
+                    pdf.text(systemName, margin, margin + 10);
+                }
+            }
+            
+            // 右側：Smart Sequence Tech
+            const headerText = 'Smart Sequence Tech';
+            const headerTextWidth = pdf.getTextWidth(headerText);
+            pdf.text(headerText, pageWidth - margin - headerTextWidth, margin + 10);
+            
+            // 頁尾
+            pdf.setDrawColor(200, 200, 200);
+            pdf.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
+            
+            // 左側：頁碼（根據語言顯示）
+            const currentLang = i18n.currentLang || 'zh-TW';
+            const pageText = currentLang === 'zh-TW' 
+                ? `第 ${pageNumber} 頁 / 共 ${totalPages} 頁`
+                : `Page ${pageNumber} / ${totalPages}`;
+            
+            // 檢查是否包含中文，如果包含則使用 Canvas 渲染
+            const hasChinese = /[\u4e00-\u9fa5]/.test(pageText);
+            if (hasChinese) {
+                try {
+                    // 使用 Canvas 渲染中文頁碼
+                    const textCanvas = document.createElement('canvas');
+                    const ctx = textCanvas.getContext('2d');
+                    if (!ctx) throw new Error('無法獲取 canvas context');
+                    
+                    const fontSize = 9;
+                    ctx.font = `${fontSize}px "Microsoft YaHei", "SimHei", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", Arial, sans-serif`;
+                    ctx.fillStyle = 'rgb(100, 100, 100)';
+                    ctx.textBaseline = 'top';
+                    
+                    // 計算文字寬度
+                    let textWidth = 0;
+                    for (let i = 0; i < pageText.length; i++) {
+                        const char = pageText[i];
+                        if (/[\u4e00-\u9fa5]/.test(char)) {
+                            textWidth += fontSize * 1.2;
+                        } else {
+                            textWidth += ctx.measureText(char).width;
+                        }
+                    }
+                    
+                    textCanvas.width = Math.ceil(textWidth) + 4;
+                    textCanvas.height = fontSize + 4;
+                    
+                    // 重新設置字體
+                    ctx.font = `${fontSize}px "Microsoft YaHei", "SimHei", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", Arial, sans-serif`;
+                    ctx.fillStyle = 'rgb(100, 100, 100)';
+                    ctx.textBaseline = 'top';
+                    
+                    // 繪製文字
+                    ctx.fillText(pageText, 2, 2);
+                    
+                    // 轉換為圖片並添加到 PDF
+                    const pageImgData = textCanvas.toDataURL('image/png');
+                    const pageImgWidth = (textCanvas.width * 0.264583); // px to mm
+                    const pageImgHeight = (textCanvas.height * 0.264583);
+                    pdf.addImage(pageImgData, 'PNG', margin, pageHeight - margin - 5 - pageImgHeight, pageImgWidth, pageImgHeight);
+                } catch (e) {
+                    console.warn('中文頁碼渲染失敗，使用英文:', e);
+                    // 如果失敗，使用英文
+                    pdf.text(`Page ${pageNumber} / ${totalPages}`, margin, pageHeight - margin - 5);
+                }
+            } else {
+                // 沒有中文，直接顯示
+                pdf.text(pageText, margin, pageHeight - margin - 5);
+            }
+            
+            // 右側：版權信息
+            const footerText = '© Smart Sequence Tech';
+            const footerTextWidth = pdf.getTextWidth(footerText);
+            pdf.text(footerText, pageWidth - margin - footerTextWidth, pageHeight - margin - 5);
+            
+            // 恢復狀態
+            pdf.restoreGraphicsState();
+            
+            return headerHeight + footerHeight;
+        }
+
+        // 生成 PDF 分數表格行的輔助函數
+        function generateScoreTableRows(m1, m2, m3, m4, m5) {
+            const metrics = [
+                { key: 'M1', value: m1, label: i18n.t('Report.RadarM1') },
+                { key: 'M2', value: m2, label: i18n.t('Report.RadarM2') },
+                { key: 'M3', value: m3, label: i18n.t('Report.RadarM3') },
+                { key: 'M4', value: m4, label: i18n.t('Report.RadarM4') },
+                { key: 'M5', value: m5, label: i18n.t('Report.RadarM5') }
+            ];
+
+            return metrics.map(metric => {
+                const description = i18n.getScoreDescription(metric.key, metric.value);
+                return `
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 8px 4px; color: #333;">${metric.label}</td>
+                        <td style="padding: 8px 4px; text-align: center; color: #333; font-weight: 600;">${metric.value.toFixed(1)}</td>
+                        <td style="padding: 8px 4px; color: #666; line-height: 1.4;">${description || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 創建 PDF 專用的內容結構
+        function createPdfContent() {
+            const data = parseSurveyData();
+            if (!data) return null;
+
+            const systemName = localStorage.getItem('survey_systemName') || '-';
+            const timestamp = localStorage.getItem('survey_timestamp');
+            const m1 = toNumber(data.M1 || 0);
+            const m2 = toNumber(data.M2 || 0);
+            const m3 = toNumber(data.M3 || 0);
+            const m4 = toNumber(data.M4 || 0);
+            const m5 = toNumber(data.M5 || 0);
+            const total = m1 + m2 + m3 + m4 + m5;
+            const avg = total / 5;
+            const level = computeRiskLevel(avg);
+            const currentLang = i18n.currentLang || 'zh-TW';
+            
+            // 風險等級翻譯
+            const levelMap = {
+                'zh-TW': { '低': '低', '中': '中', '高': '高' },
+                'en-US': { '低': 'Low', '中': 'Medium', '高': 'High' }
+            };
+            const riskLevelText = levelMap[currentLang]?.[level] || level;
+            
+            // 建議文字
+            let adviceText = i18n.t('Report.DefaultAdvice');
+            if (m3 <= 6) {
+                adviceText = i18n.t('Report.AdviceLow');
+            } else {
+                adviceText = i18n.t('Report.AdviceNormal');
+            }
+
+            // 創建 PDF 專用容器（使用 A4 尺寸優化）
+            const pdfContainer = document.createElement('div');
+            pdfContainer.id = 'pdfContentContainer';
+            pdfContainer.className = 'pdf-content-container';
+            pdfContainer.style.cssText = `
+                position: absolute;
+                left: -9999px;
+                top: 0;
+                width: 180mm; /* 稍微小於 A4 寬度，留出邊距 */
+                background: #ffffff;
+                padding: 12mm;
+                box-sizing: border-box;
+                font-family: Arial, "Microsoft YaHei", "SimHei", sans-serif;
+                font-size: 12px;
+                line-height: 1.5;
+            `;
+
+            // 系統名稱
+            pdfContainer.innerHTML = `
+                <!-- 系統名稱和標題 -->
+                <div class="pdf-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
+                    <h1 style="margin: 0 0 4px 0; font-size: 18px; color: #333; font-weight: 600;">${systemName || 'DocEngine'}</h1>
+                    <h2 style="margin: 0; font-size: 14px; color: #666; font-weight: 500;">${i18n.t('Report.Title')}</h2>
+                </div>
+
+                <!-- 報告信息（緊湊） -->
+                <div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 9px; color: #555; line-height: 1.4;">
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.AssessmentDate')}:</strong> ${formatTimestamp(timestamp)}
+                    </div>
+                    <div>
+                        <strong>${i18n.t('Assessment.MaturityLabel')}</strong>${i18n.t('Assessment.MaturityDesc')}
+                    </div>
+                </div>
+
+                <!-- 雷達圖與風險分數區塊（並排） -->
+                <div class="pdf-block" data-block="radar" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.RadarTitle')}</h3>
+                    <p style="margin: 0 0 12px 0; font-size: 10px; color: #666;">${i18n.t('Report.RadarDesc')}</p>
+                    <div style="display: flex; gap: 16px; align-items: flex-start;">
+                        <!-- 雷達圖（左側） -->
+                        <div style="flex: 1; text-align: center;">
+                            <svg id="pdfRadarChart" viewBox="-20 -20 240 240" style="max-width: 200px; height: auto;">
+                                <!-- Background circles -->
+                                <circle cx="100" cy="100" r="80" fill="none" stroke="#ddd" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="60" fill="none" stroke="#ddd" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="40" fill="none" stroke="#ddd" stroke-width="1"/>
+                                <circle cx="100" cy="100" r="20" fill="none" stroke="#ddd" stroke-width="1"/>
+                                <!-- Axes -->
+                                <line x1="100" y1="100" x2="100" y2="20" stroke="#ccc" stroke-width="1"/>
+                                <line x1="100" y1="100" x2="167" y2="70" stroke="#ccc" stroke-width="1"/>
+                                <line x1="100" y1="100" x2="147" y2="160" stroke="#ccc" stroke-width="1"/>
+                                <line x1="100" y1="100" x2="53" y2="160" stroke="#ccc" stroke-width="1"/>
+                                <line x1="100" y1="100" x2="33" y2="70" stroke="#ccc" stroke-width="1"/>
+                                <!-- Data polygon -->
+                                <polygon id="pdfRadarPolygon" fill="rgba(98, 0, 234, 0.3)" stroke="#6200ea" stroke-width="2"/>
+                                <!-- Labels -->
+                                <text x="100" y="15" text-anchor="middle" font-size="12" fill="#333">${i18n.t('Report.RadarM1')}</text>
+                                <text x="180" y="75" text-anchor="middle" font-size="12" fill="#333">${i18n.t('Report.RadarM2')}</text>
+                                <text x="165" y="170" text-anchor="middle" font-size="12" fill="#333">${i18n.t('Report.RadarM3')}</text>
+                                <text x="35" y="170" text-anchor="middle" font-size="12" fill="#333">${i18n.t('Report.RadarM4')}</text>
+                                <text x="20" y="75" text-anchor="middle" font-size="12" fill="#333">${i18n.t('Report.RadarM5')}</text>
+                            </svg>
+                        </div>
+                        <!-- 風險分數（右側，直式排列） -->
+                        <div style="flex: 0 0 140px; padding: 12px; background: white; border-radius: 4px; border: 1px solid #e0e0e0;">
+                            <h4 style="margin: 0 0 12px 0; font-size: 12px; font-weight: 600; color: #333; text-align: center; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0;">${i18n.t('Report.FingerprintTitle')}</h4>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="font-size: 9px; color: #666; margin-bottom: 4px; text-align: left;">${i18n.t('Report.TotalScore')}</div>
+                                    <div style="font-size: 18px; font-weight: 600; color: #333; text-align: left;">${total.toFixed(1)}</div>
+                                </div>
+                                <div style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="font-size: 9px; color: #666; margin-bottom: 4px; text-align: left;">${i18n.t('Report.RiskLevel')}</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: ${level === '高' ? '#d32f2f' : level === '中' ? '#f57c00' : '#388e3c'}; text-align: left;">
+                                        ${riskLevelText}
+                                    </div>
+                                </div>
+                                <div style="padding: 8px 0;">
+                                    <div style="font-size: 9px; color: #666; margin-bottom: 4px; text-align: left;">${i18n.t('Report.SampleTime')}</div>
+                                    <div style="font-size: 9px; color: #333; line-height: 1.3; text-align: left;">${formatTimestamp(timestamp)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 分數說明表（放在下方） -->
+                    <div style="margin-top: 16px; padding: 12px; background: white; border-radius: 4px; border: 1px solid #e0e0e0;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Score.TableTitle')}</h4>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #ddd; background: #f5f5f5;">
+                                    <th style="padding: 6px 4px; text-align: left; font-weight: 600; color: #555;">${i18n.t('Score.Indicator')}</th>
+                                    <th style="padding: 6px 4px; text-align: center; font-weight: 600; color: #555; width: 50px;">${i18n.t('Score.Value')}</th>
+                                    <th style="padding: 6px 4px; text-align: left; font-weight: 600; color: #555;">${i18n.t('Score.Description')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${generateScoreTableRows(m1, m2, m3, m4, m5)}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 個人化建議區塊 -->
+                <div class="pdf-block" data-block="advice" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.PersonalizedAdvice')}</h3>
+                    <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #444;">${adviceText}</p>
+                </div>
+
+                <!-- 開放式問題區塊 -->
+                ${data.open1 || data.open2 || data.open3 ? `
+                <div class="pdf-block" data-block="open-questions" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.OpenQuestions')}</h3>
+                    <p style="margin: 0 0 12px 0; font-size: 10px; color: #666;">${i18n.t('Report.OpenQuestionsDesc')}</p>
+                    ${data.open1 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                        <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ6')}</h4>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open1}</p>
+                    </div>` : ''}
+                    ${data.open2 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                        <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ7')}</h4>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open2}</p>
+                    </div>` : ''}
+                    ${data.open3 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                        <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ8')}</h4>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open3}</p>
+                    </div>` : ''}
+                </div>
+                ` : ''}
+            `;
+
+            // 更新雷達圖
+            const pdfRadarPolygon = pdfContainer.querySelector('#pdfRadarPolygon');
+            if (pdfRadarPolygon) {
+                const centerX = 100;
+                const centerY = 100;
+                const maxRadius = 80;
+                const values = [m1, m2, m3, m4, m5];
+                const angles = [-90, -18, 54, 126, 198].map(deg => (deg * Math.PI) / 180);
+                const points = values.map((v, i) => {
+                    const ratio = Math.max(0, Math.min(10, v)) / 10;
+                    const r = maxRadius * ratio;
+                    const x = centerX + r * Math.cos(angles[i]);
+                    const y = centerY + r * Math.sin(angles[i]);
+                    return `${x},${y}`;
+                });
+                pdfRadarPolygon.setAttribute('points', points.join(' '));
+            }
+
+            // 添加到 body（但隱藏）
+            document.body.appendChild(pdfContainer);
+
+            return pdfContainer;
+        }
+
+        async function downloadPdf() {
+            try {
+                // 獲取系統名稱用於文件名和頁首
+                const systemName = localStorage.getItem('survey_systemName') || 'DocEngine';
+                const safeFileName = systemName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+                const fileName = `${safeFileName}-Risk-Report.pdf`;
+
+                // 顯示載入提示（根據語言顯示）
+                const btn = document.getElementById('downloadPdfBtn');
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                const currentLang = i18n.currentLang || 'zh-TW';
+                btn.textContent = currentLang === 'zh-TW' ? '生成中...' : 'Generating...';
+
+                // 創建 PDF 專用內容
+                const pdfContainer = createPdfContent();
+                if (!pdfContainer) {
+                    throw new Error(currentLang === 'zh-TW' ? '無法讀取問卷資料' : 'Unable to read survey data');
+                }
+
+                // 等待布局穩定
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // 檢測所有區塊邊界（使用 data-block 標記）
+                const containerRect = pdfContainer.getBoundingClientRect();
+                const allBlocks = Array.from(pdfContainer.querySelectorAll('[data-block]')).filter(el => {
+                    // 只包含可見的元素
+                    const rect = el.getBoundingClientRect();
+                    return rect.height > 0 && rect.width > 0;
+                });
+                
+                // 計算每個區塊在容器中的位置（相對於 pdfContainer）
+                const blockBoundaries = allBlocks.map(el => {
+                    const rect = el.getBoundingClientRect();
+                    const relativeTop = rect.top - containerRect.top;
+                    const relativeBottom = rect.bottom - containerRect.top;
+                    const blockId = el.getAttribute('data-block');
+                    
+                    // 設置優先級：fingerprint 和 advice 最高，其他次之
+                    let priority = 2;
+                    if (blockId === 'fingerprint' || blockId === 'advice') {
+                        priority = 1;
+                    }
+                    
+                    return {
+                        top: relativeTop,
+                        bottom: relativeBottom,
+                        height: rect.height,
+                        element: el,
+                        blockId: blockId,
+                        priority: priority
+                    };
+                }).sort((a, b) => a.top - b.top); // 按位置排序
+                
+                console.log('檢測到的區塊邊界:', blockBoundaries.map(b => ({
+                    block: b.blockId,
+                    top: b.top,
+                    bottom: b.bottom,
+                    height: b.height
+                })));
+
+                // 使用 html2canvas 生成圖片（PDF 專用容器）
+                let canvas;
+                try {
+                    canvas = await html2canvas(pdfContainer, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        allowTaint: false,
+                        width: pdfContainer.scrollWidth,
+                        height: pdfContainer.scrollHeight
+                    });
+                } catch (canvasError) {
+                    console.error('Canvas generation error:', canvasError);
+                    // 清理 PDF 容器
+                    if (pdfContainer && pdfContainer.parentNode) {
+                        pdfContainer.parentNode.removeChild(pdfContainer);
+                    }
+                    throw new Error('無法生成報告圖片，請稍後再試');
+                }
+
+                // 驗證 canvas 是否有效
+                if (!canvas || canvas.width === 0 || canvas.height === 0) {
+                    // 清理 PDF 容器
+                    if (pdfContainer && pdfContainer.parentNode) {
+                        pdfContainer.parentNode.removeChild(pdfContainer);
+                    }
+                    throw new Error('生成的圖片無效，請稍後再試');
+                }
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const margin = 10;
+                const headerFooterHeight = 30; // 頁首頁尾總高度
+
+                const imgWidth = pageWidth - (margin * 2);
+                const availableHeight = pageHeight - (margin * 2) - headerFooterHeight;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                // 添加內容，每頁都有頁首頁尾
+                let yOffset = 0;
+                let actualPageNumber = 0;
+                
+                // 先計算實際需要的頁數（考慮分頁調整）
+                let estimatedPageCount = Math.ceil(imgHeight / availableHeight);
+                
+                while (yOffset < imgHeight) {
+                    // 在創建頁面前先檢查是否真的還有內容
+                    if (yOffset >= imgHeight) {
+                        break;
+                    }
+                    
+                    actualPageNumber++;
+                    
+                    if (actualPageNumber > 1) {
+                        pdf.addPage();
+                    }
+
+                    // 注意：先不添加頁首頁尾，等內容確定後再添加，避免空頁
+
+                    // 計算當前頁要顯示的圖片部分
+                    const scaleFactor = imgHeight / pdfContainer.scrollHeight;
+                    
+                    // 計算默認頁高
+                    let pageImgHeight = Math.min(imgHeight - yOffset, availableHeight);
+                    
+                    // 如果剩餘內容不足，不要創建新頁
+                    if (pageImgHeight < 5) {
+                        // 刪除剛創建的頁面
+                        if (actualPageNumber > 1) {
+                            try {
+                                pdf.deletePage(actualPageNumber);
+                            } catch (e) {
+                                console.warn('無法刪除空頁:', e);
+                            }
+                        }
+                        actualPageNumber--;
+                        break;
+                    }
+                    
+                    const sourceY = (yOffset / imgHeight) * canvas.height;
+                    const currentPageEnd = yOffset + pageImgHeight;
+                    
+                    // 找到當前 yOffset 對應的區塊（如果有的話）
+                    let currentBlock = null;
+                    for (const block of blockBoundaries) {
+                        const blockTop = block.top * scaleFactor;
+                        const blockBottom = block.bottom * scaleFactor;
+                        if (yOffset >= blockTop && yOffset < blockBottom) {
+                            currentBlock = block;
+                            break;
+                        }
+                    }
+                    
+                    // 如果當前在一個區塊內，必須完整顯示這個區塊
+                    if (currentBlock) {
+                        const blockTop = currentBlock.top * scaleFactor;
+                        const blockBottom = currentBlock.bottom * scaleFactor;
+                        const remainingInBlock = blockBottom - yOffset;
+                        
+                        if (remainingInBlock <= availableHeight) {
+                            // 可以完整放在一頁，顯示完整
+                            pageImgHeight = remainingInBlock;
+                            console.log(`頁面 ${actualPageNumber}: 區塊 ${currentBlock.blockId} 在當前頁開始，完整顯示到結束 (${remainingInBlock.toFixed(1)}mm)`);
+                        } else {
+                            // 區塊太大無法放在一頁
+                            // 優先選擇：如果當前頁是這個區塊的第一頁，嘗試顯示一頁
+                            // 否則：強制限制在 availableHeight 內
+                            const isFirstPageOfBlock = Math.abs(yOffset - blockTop) < 5; // 5mm 容差
+                            
+                            if (isFirstPageOfBlock) {
+                                // 這是區塊的第一頁，顯示一頁內容
+                                pageImgHeight = availableHeight;
+                                console.log(`頁面 ${actualPageNumber}: 區塊 ${currentBlock.blockId} 太大，第一頁顯示 ${availableHeight.toFixed(1)}mm (剩餘 ${remainingInBlock.toFixed(1)}mm)，下一頁繼續`);
+                            } else {
+                                // 不是第一頁，顯示剩餘內容（但限制在可用高度內）
+                                pageImgHeight = Math.min(remainingInBlock, availableHeight);
+                                console.log(`頁面 ${actualPageNumber}: 區塊 ${currentBlock.blockId} 繼續顯示，剩餘 ${remainingInBlock.toFixed(1)}mm，當前頁顯示 ${pageImgHeight.toFixed(1)}mm`);
+                            }
+                        }
+                    } else {
+                        // 當前不在任何區塊內，檢查是否會切到下一個區塊
+                        // 按優先級排序檢查（高優先級先檢查）
+                        const sortedBlocks = [...blockBoundaries].sort((a, b) => a.priority - b.priority);
+                        
+                        for (const block of sortedBlocks) {
+                            const blockTop = block.top * scaleFactor;
+                            const blockBottom = block.bottom * scaleFactor;
+                            
+                            // 如果當前頁結束位置會切到區塊中間，提前結束當前頁
+                            if (yOffset < blockTop && currentPageEnd > blockTop && currentPageEnd < blockBottom) {
+                                // 強制結束當前頁，讓區塊從新頁開始
+                                const distanceToBlock = blockTop - yOffset;
+                                
+                                // 確保至少有一點內容（至少 10mm），否則直接跳過到區塊開始
+                                if (distanceToBlock >= 10) {
+                                    pageImgHeight = blockTop - yOffset;
+                                    console.log(`頁面 ${actualPageNumber}: 會切到區塊 ${block.blockId} 中間，提前結束到區塊開始處 (${distanceToBlock.toFixed(1)}mm)`);
+                                    break; // 找到會切到的區塊，停止檢查
+                                } else {
+                                    // 距離太短，直接跳到區塊開始處
+                                    pageImgHeight = Math.max(distanceToBlock, 5); // 至少 5mm
+                                    console.log(`頁面 ${actualPageNumber}: 距離區塊 ${block.blockId} 太短，顯示到區塊開始處 (${pageImgHeight.toFixed(1)}mm)`);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 確保 pageImgHeight 在合理範圍內（這很重要！）
+                    const maxAllowedHeight = Math.min(availableHeight, imgHeight - yOffset);
+                    pageImgHeight = Math.min(pageImgHeight, maxAllowedHeight);
+                    pageImgHeight = Math.max(pageImgHeight, 0);
+                    
+                    // 如果頁高為 0 或太小，使用最小高度
+                    if (pageImgHeight <= 0) {
+                        pageImgHeight = Math.min(availableHeight * 0.1, imgHeight - yOffset, 20); // 至少顯示10%或20mm或剩餘內容
+                    }
+                    
+                    // 最終驗證：如果仍然太小或沒有內容，跳過這一頁
+                    if (pageImgHeight < 5 || yOffset >= imgHeight) {
+                        console.log(`頁面 ${actualPageNumber}: 內容不足，跳過這一頁 (pageImgHeight=${pageImgHeight.toFixed(1)}mm, yOffset=${yOffset.toFixed(1)}mm)`);
+                        // 刪除剛添加的空頁
+                        if (actualPageNumber > 1) {
+                            try {
+                                pdf.deletePage(actualPageNumber);
+                            } catch (e) {
+                                console.warn('無法刪除空頁:', e);
+                            }
+                        }
+                        // 減少頁數計數，因為頁面已被刪除
+                        actualPageNumber--;
+                        break;
+                    }
+                    
+                    let sourceHeight = (pageImgHeight / imgHeight) * canvas.height;
+                    let finalSourceY = sourceY;
+
+                    // 確保 sourceHeight 有效
+                    if (sourceHeight <= 0 || sourceHeight > canvas.height || sourceY < 0 || sourceY >= canvas.height) {
+                        console.warn(`Invalid source dimensions: sourceY=${sourceY}, sourceHeight=${sourceHeight}, canvas.height=${canvas.height}`);
+                        // 調整為有效值
+                        finalSourceY = Math.max(0, Math.min(sourceY, canvas.height - 1));
+                        sourceHeight = Math.min(sourceHeight, canvas.height - finalSourceY);
+                        if (sourceHeight <= 0) {
+                            // 刪除剛創建的頁面
+                            if (actualPageNumber > 1) {
+                                try {
+                                    pdf.deletePage(actualPageNumber);
+                                    actualPageNumber--;
+                                } catch (e) {
+                                    console.warn('無法刪除無效頁:', e);
+                                }
+                            }
+                            break;
+                        }
+                        // 重新計算 pageImgHeight
+                        pageImgHeight = (sourceHeight / canvas.height) * imgHeight;
+                    }
+
+                    // 創建當前頁的圖片
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = Math.max(Math.floor(sourceHeight), 1); // 確保至少為1
+                    
+                    const tempCtx = tempCanvas.getContext('2d');
+                    if (!tempCtx) {
+                        console.error('無法獲取 canvas context');
+                        // 刪除剛創建的頁面
+                        if (actualPageNumber > 1) {
+                            try {
+                                pdf.deletePage(actualPageNumber);
+                                actualPageNumber--;
+                            } catch (e) {
+                                console.warn('無法刪除無context頁:', e);
+                            }
+                        }
+                        break;
+                    }
+                    
+                    try {
+                        // 繪製圖片片段
+                        tempCtx.drawImage(
+                            canvas, 
+                            0, finalSourceY, canvas.width, sourceHeight,  // 源圖片區域
+                            0, 0, canvas.width, sourceHeight              // 目標canvas區域
+                        );
+                        
+                        // 轉換為圖片數據，添加錯誤處理
+                        let pageImgData;
+                        try {
+                            pageImgData = tempCanvas.toDataURL('image/png', 1.0);
+                            if (!pageImgData || pageImgData === 'data:,') {
+                                console.error('圖片數據轉換失敗');
+                                // 刪除剛創建的頁面
+                                if (actualPageNumber > 1) {
+                                    try {
+                                        pdf.deletePage(actualPageNumber);
+                                        actualPageNumber--;
+                                    } catch (e) {
+                                        console.warn('無法刪除失敗頁:', e);
+                                    }
+                                }
+                                break;
+                            }
+                        } catch (imgError) {
+                            console.error('圖片數據轉換錯誤:', imgError);
+                            // 刪除剛創建的頁面
+                            if (actualPageNumber > 1) {
+                                try {
+                                    pdf.deletePage(actualPageNumber);
+                                    actualPageNumber--;
+                                } catch (e) {
+                                    console.warn('無法刪除錯誤頁:', e);
+                                }
+                            }
+                            break;
+                        }
+                        
+                        const actualPageImgHeight = (tempCanvas.height * imgWidth) / tempCanvas.width;
+
+                        // 添加內容圖片（在頁首下方）
+                        const contentY = margin + 15; // 頁首下方
+                        try {
+                            pdf.addImage(pageImgData, 'PNG', margin, contentY, imgWidth, actualPageImgHeight, undefined, 'FAST');
+                            
+                            // 內容添加成功後，再添加頁首頁尾（確保有內容的頁面才有頁首頁尾）
+                            addHeaderFooter(pdf, actualPageNumber, estimatedPageCount, systemName);
+                        } catch (pdfImgError) {
+                            console.error('添加圖片到PDF失敗:', pdfImgError);
+                            try {
+                                // 嘗試使用 SLOW 模式
+                                pdf.addImage(pageImgData, 'PNG', margin, contentY, imgWidth, actualPageImgHeight, undefined, 'SLOW');
+                                
+                                // 內容添加成功後，再添加頁首頁尾
+                                addHeaderFooter(pdf, actualPageNumber, estimatedPageCount, systemName);
+                            } catch (slowError) {
+                                console.error('使用 SLOW 模式也失敗:', slowError);
+                                throw new Error('無法將圖片添加到PDF: ' + slowError.message);
+                            }
+                        }
+                    } catch (drawError) {
+                        console.error('繪製圖片片段失敗:', drawError);
+                        throw new Error('生成PDF圖片失敗: ' + drawError.message);
+                    }
+
+                    yOffset += pageImgHeight;
+                    
+                    // 檢查是否還有內容
+                    if (yOffset >= imgHeight) {
+                        break;
+                    }
+                }
+                
+                // 獲取實際頁數（可能因為刪除空頁而減少）
+                let totalPages = pdf.internal.getNumberOfPages();
+                
+                // 檢查並清理多餘的空頁
+                // 如果 actualPageNumber 和 totalPages 不一致，刪除多餘的頁面
+                console.log(`分頁完成: actualPageNumber=${actualPageNumber}, totalPages=${totalPages}, yOffset=${yOffset.toFixed(1)}, imgHeight=${imgHeight.toFixed(1)}`);
+                
+                if (totalPages > actualPageNumber) {
+                    console.log(`發現多餘頁面: 實際頁數 ${totalPages} > 計數頁數 ${actualPageNumber}，將刪除多餘頁面`);
+                    for (let pageNum = totalPages; pageNum > actualPageNumber; pageNum--) {
+                        try {
+                            pdf.deletePage(pageNum);
+                            console.log(`已刪除頁面 ${pageNum}`);
+                        } catch (e) {
+                            console.warn(`無法刪除多餘頁面 ${pageNum}:`, e);
+                        }
+                    }
+                    // 重新獲取實際頁數
+                    totalPages = pdf.internal.getNumberOfPages();
+                }
+                
+                // 使用實際頁數作為最終頁數
+                const finalTotalPages = totalPages;
+                
+                // 更新所有頁面的頁碼（使用最終實際頁數）
+                if (finalTotalPages > 0) {
+                    for (let pageNum = 1; pageNum <= finalTotalPages; pageNum++) {
+                        pdf.setPage(pageNum);
+                        // 清除舊的頁首頁尾，重新添加（使用最終頁數）
+                        addHeaderFooter(pdf, pageNum, finalTotalPages, systemName);
+                    }
+                }
+
+                pdf.save(fileName);
+                
+                // 清理 PDF 容器
+                if (pdfContainer && pdfContainer.parentNode) {
+                    pdfContainer.parentNode.removeChild(pdfContainer);
+                }
+                
+                // 恢復按鈕狀態
+                btn.disabled = false;
+                btn.textContent = originalText;
+            } catch (error) {
+                console.error('PDF 生成錯誤:', error);
+                
+                // 確保清理 PDF 容器
+                const pdfContainer = document.getElementById('pdfContentContainer');
+                if (pdfContainer && pdfContainer.parentNode) {
+                    pdfContainer.parentNode.removeChild(pdfContainer);
+                }
+                
+                const currentLang = i18n.currentLang || 'zh-TW';
+                const errorMsg = currentLang === 'zh-TW' 
+                    ? 'PDF 生成失敗：' + error.message
+                    : 'PDF generation failed: ' + error.message;
+                alert(errorMsg);
+                
+                // 恢復按鈕狀態
+                const btn = document.getElementById('downloadPdfBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    const btnText = btn.getAttribute('data-i18n') 
+                        ? i18n.t(btn.getAttribute('data-i18n')) 
+                        : (currentLang === 'zh-TW' ? '下載 PDF 報告' : 'Download PDF Report');
+                    btn.textContent = btnText;
+                }
+            }
+        }
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
+        document.getElementById('viewTrackingBtn').addEventListener('click', function () {
+            window.location.href = '@Url.Action("Index", "Home")';
+        });
+        document.getElementById('inviteBtn').addEventListener('click', function () {
+            alert('邀請方案示意：NT$2,490/人（17% 折扣）。此為示範訊息，可接續導向實際購買流程。');
+        });
+
+        // 頁面載入時更新報告（延遲確保所有元素都已渲染和 i18n 已初始化）
+        setTimeout(function() {
+            updateReport();
+        }, 300);
+    </script>
+}

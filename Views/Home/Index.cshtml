@@ -1,0 +1,438 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.svg" alt="智序資訊" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <svg class="logo-svg" style="display:none;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- 如果 logo.svg 不存在，會顯示這個備用 SVG -->
+                        <rect x="20" y="20" width="40" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="60" width="60" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="100" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 20 L140 80 L180 80 L180 60 L160 60 L160 20 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 100 L140 140 L180 140 L180 120 L160 120 L160 100 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M120 140 L120 160 L180 160 L180 140 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="140" y="20" width="40" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h2 class="sidebar-title">DocEngine</h2>
+                    <p class="sidebar-subtitle">智序資訊</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Home")" class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
+            </a>
+            <a href="#" class="nav-item" data-page="projects">
+                <span class="nav-icon">📁</span>
+                <span class="nav-text" data-i18n="Nav.Projects">專案</span>
+            </a>
+            <a href="@Url.Action("Assessment", "Home")" class="nav-item" data-page="assessment">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text" data-i18n="Nav.Assessment">評估</span>
+            </a>
+            <a href="@Url.Action("Report", "Home")" class="nav-item" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text" data-i18n="Nav.Report">報告</span>
+            </a>
+            <a href="#" class="nav-item" data-page="documentation">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
+            </a>
+            <a href="#" class="nav-item" data-page="risks">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-text" data-i18n="Nav.Risks">風險</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header with Hamburger and Language Switcher -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="mobile-title">DocEngine</h1>
+            <div class="mobile-header-actions">
+                <div class="language-switcher-top">
+                    <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                        <span data-i18n="Common.Chinese">繁體中文</span>
+                    </button>
+                    <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                        <span data-i18n="Common.English">English</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <!-- Desktop Header with Language Switcher -->
+            <div class="desktop-header">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title" data-i18n="Dashboard.Title">儀表板</h1>
+                    <p class="dashboard-subtitle" data-i18n="Dashboard.Subtitle">專案總覽與風險分析</p>
+                </div>
+                <div class="header-actions">
+                    <div class="language-switcher-top">
+                        <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                            <span data-i18n="Common.Chinese">繁體中文</span>
+                        </button>
+                        <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                            <span data-i18n="Common.English">English</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon projects-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label" data-i18n="Dashboard.Projects">專案數</div>
+                        <div class="kpi-value">0</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon completion-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label" data-i18n="Dashboard.Completion">文件完成度</div>
+                        <div class="kpi-value">0%</div>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-icon risk-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <div class="kpi-label" data-i18n="Dashboard.RiskLevel">風險等級</div>
+                        <div class="kpi-value risk-low" data-i18n="Dashboard.RiskLow">低</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Fingerprint Radar Chart (M1-M5) -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title" data-i18n="Dashboard.RiskFingerprint">風險指紋</h2>
+                    <p class="section-description" data-i18n="Report.RadarDesc">視覺化顯示五項關鍵風險指標</p>
+                </div>
+                <div class="radar-chart-container">
+                    <div class="radar-chart">
+                        <svg id="dashboardRadar" class="radar-svg" viewBox="-20 -20 240 240" preserveAspectRatio="xMidYMid meet">
+                            <!-- Background circles -->
+                            <circle cx="100" cy="100" r="80" class="radar-circle" />
+                            <circle cx="100" cy="100" r="60" class="radar-circle" />
+                            <circle cx="100" cy="100" r="40" class="radar-circle" />
+                            <circle cx="100" cy="100" r="20" class="radar-circle" />
+                            
+                            <!-- 5 axes (M1-M5) -->
+                            <line x1="100" y1="100" x2="100" y2="20" class="radar-line" />
+                            <line x1="100" y1="100" x2="167" y2="70" class="radar-line" />
+                            <line x1="100" y1="100" x2="147" y2="160" class="radar-line" />
+                            <line x1="100" y1="100" x2="53" y2="160" class="radar-line" />
+                            <line x1="100" y1="100" x2="33" y2="70" class="radar-line" />
+                            
+                            <!-- Dynamic polygon for M1-M5 -->
+                            <polygon id="dashboardRadarPolygon" points="100,100 100,100 100,100 100,100 100,100" class="radar-polygon" />
+                            
+                            <!-- Axis labels -->
+                            <text x="100" y="15" class="radar-label" data-i18n="Report.RadarM1">M1 交接</text>
+                            <text x="180" y="75" class="radar-label" data-i18n="Report.RadarM2">M2 追溯</text>
+                            <text x="165" y="170" class="radar-label" data-i18n="Report.RadarM3">M3 變更</text>
+                            <text x="35" y="170" class="radar-label" data-i18n="Report.RadarM4">M4 驗收</text>
+                            <text x="20" y="75" class="radar-label" data-i18n="Report.RadarM5">M5 溝通</text>
+                        </svg>
+                    </div>
+                    <!-- No Data Message -->
+                    <div id="dashboardNoData" class="dashboard-no-data" style="display: none; text-align: center; padding: 20px; color: #888;">
+                        <p data-i18n="Score.NoData">尚未有評估數據</p>
+                        <a href="@Url.Action("Assessment", "Home")" class="report-button primary" style="display: inline-block; margin-top: 10px;">
+                            <span data-i18n="Report.GoToAssessment">前往評估問卷</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Function Cards -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2 class="section-title" data-i18n="Dashboard.FunctionModules">功能模組</h2>
+                    <p class="section-description" data-i18n="Dashboard.QuickAccess">快速存取主要功能</p>
+                </div>
+                <div class="function-grid">
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.ProjectsTitle">專案</h3>
+                        <p class="function-description" data-i18n="Dashboard.ProjectsDesc">管理專案與文件</p>
+                    </a>
+
+                    <a href="@Url.Action("Assessment", "Home")" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="9" y1="15" x2="15" y2="15"></line>
+                                <line x1="12" y1="12" x2="12" y2="18"></line>
+                                <circle cx="9" cy="10" r="1"></circle>
+                                <circle cx="15" cy="10" r="1"></circle>
+                                <circle cx="12" cy="7" r="1"></circle>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.AssessmentTitle">評估</h3>
+                        <p class="function-description" data-i18n="Dashboard.AssessmentDesc">系統風險評估問卷</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.DocumentationTitle">文件</h3>
+                        <p class="function-description" data-i18n="Dashboard.DocumentationDesc">文件管理與編輯</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.RisksTitle">風險</h3>
+                        <p class="function-description" data-i18n="Dashboard.RisksDesc">風險評估與監控</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.TeamTitle">團隊</h3>
+                        <p class="function-description" data-i18n="Dashboard.TeamDesc">團隊協作管理</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                <line x1="15" y1="3" x2="15" y2="21"></line>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                <line x1="3" y1="15" x2="21" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.AnalyticsTitle">分析</h3>
+                        <p class="function-description" data-i18n="Dashboard.AnalyticsDesc">數據分析報表</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.SecurityTitle">安全</h3>
+                        <p class="function-description" data-i18n="Dashboard.SecurityDesc">安全設定與權限</p>
+                    </a>
+
+                    <a href="#" class="function-card">
+                        <div class="function-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                            </svg>
+                        </div>
+                        <h3 class="function-title" data-i18n="Dashboard.SettingsTitle">設定</h3>
+                        <p class="function-description" data-i18n="Dashboard.SettingsDesc">系統設定與配置</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sidebar toggle functionality
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const overlay = document.getElementById('overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        hamburger?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        // Handle nav item clicks
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+                
+                // Remove active class from all items
+                navItems.forEach(nav => nav.classList.remove('active'));
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Close sidebar on window resize if desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 更新儀表板雷達圖（使用與報告相同的 M1-M5 數據）
+        function updateDashboardRadar() {
+            // 讀取評估數據
+            function parseSurveyData() {
+                const raw = localStorage.getItem('survey_data');
+                if (raw) {
+                    try {
+                        const data = JSON.parse(raw);
+                        if (data && Object.keys(data).length > 0) {
+                            return data;
+                        }
+                    } catch (e) {
+                        console.error('解析 survey_data 失敗:', e);
+                    }
+                }
+                
+                const data = {};
+                const keys = ['M1', 'M2', 'M3', 'M4', 'M5'];
+                keys.forEach(key => {
+                    const value = localStorage.getItem(`survey_${key}`);
+                    if (value !== null && value !== '') {
+                        data[key] = value;
+                    }
+                });
+                
+                return Object.keys(data).length > 0 ? data : null;
+            }
+
+            function toNumber(value) {
+                const n = Number(value);
+                return Number.isFinite(n) ? n : 0;
+            }
+
+            const data = parseSurveyData();
+            const radarSvg = document.getElementById('dashboardRadar');
+            const radarPolygon = document.getElementById('dashboardRadarPolygon');
+            const noDataMsg = document.getElementById('dashboardNoData');
+
+            if (!data || (!data.M1 && !data.M2 && !data.M3 && !data.M4 && !data.M5)) {
+                // 沒有數據，顯示提示訊息
+                if (radarSvg) radarSvg.style.display = 'none';
+                if (noDataMsg) noDataMsg.style.display = 'block';
+                return;
+            }
+
+            // 有數據，顯示雷達圖
+            if (radarSvg) radarSvg.style.display = 'block';
+            if (noDataMsg) noDataMsg.style.display = 'none';
+
+            const m1 = toNumber(data.M1 || data.m1 || 0);
+            const m2 = toNumber(data.M2 || data.m2 || 0);
+            const m3 = toNumber(data.M3 || data.m3 || 0);
+            const m4 = toNumber(data.M4 || data.m4 || 0);
+            const m5 = toNumber(data.M5 || data.m5 || 0);
+
+            if (radarPolygon) {
+                const centerX = 100;
+                const centerY = 100;
+                const maxRadius = 80;
+                const values = [m1, m2, m3, m4, m5];
+                const angles = [-90, -18, 54, 126, 198].map(deg => (deg * Math.PI) / 180);
+
+                const points = values.map((v, i) => {
+                    const ratio = Math.max(0, Math.min(10, v)) / 10;
+                    const r = maxRadius * ratio;
+                    const x = centerX + r * Math.cos(angles[i]);
+                    const y = centerY + r * Math.sin(angles[i]);
+                    return `${x},${y}`;
+                });
+
+                radarPolygon.setAttribute('points', points.join(' '));
+            }
+        }
+
+        // 頁面載入時更新雷達圖
+        setTimeout(function() {
+            updateDashboardRadar();
+        }, 300);
+
+        // 監聽語言變更事件，更新雷達圖標籤
+        window.addEventListener('languageChanged', function() {
+            setTimeout(function() {
+                updateDashboardRadar();
+            }, 100);
+        });
+    </script>
+}

@@ -1,0 +1,623 @@
+@{
+    ViewData["Title"] = "風險評估問卷";
+}
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.svg" alt="智序資訊" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <svg class="logo-svg" style="display:none;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="40" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="60" width="60" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="100" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 20 L140 80 L180 80 L180 60 L160 60 L160 20 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 100 L140 140 L180 140 L180 120 L160 120 L160 100 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M120 140 L120 160 L180 160 L180 140 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="140" y="20" width="40" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h2 class="sidebar-title">DocEngine</h2>
+                    <p class="sidebar-subtitle">智序資訊</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Home")" class="nav-item" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
+            </a>
+            <a href="#" class="nav-item" data-page="projects">
+                <span class="nav-icon">📁</span>
+                <span class="nav-text" data-i18n="Nav.Projects">專案</span>
+            </a>
+            <a href="@Url.Action("Assessment", "Home")" class="nav-item active" data-page="assessment">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text" data-i18n="Nav.Assessment">評估</span>
+            </a>
+            <a href="@Url.Action("Report", "Home")" class="nav-item" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text" data-i18n="Nav.Report">報告</span>
+            </a>
+            <a href="#" class="nav-item" data-page="documentation">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
+            </a>
+            <a href="#" class="nav-item" data-page="risks">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-text" data-i18n="Nav.Risks">風險</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header with Hamburger and Language Switcher -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="mobile-title">DocEngine</h1>
+            <div class="mobile-header-actions">
+                <div class="language-switcher-top">
+                    <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                        <span data-i18n="Common.Chinese">繁體中文</span>
+                    </button>
+                    <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                        <span data-i18n="Common.English">English</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <!-- Desktop Header with Language Switcher -->
+            <div class="desktop-header">
+                <div class="survey-header">
+                    <h1 class="survey-title" data-i18n="Assessment.Title">風險評估問卷</h1>
+                    <p class="survey-subtitle" data-i18n="Assessment.Subtitle">請根據您的專案現況，評估以下各項指標（0-10分）</p>
+                    <div class="maturity-info-box">
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span class="info-text">
+                            <strong data-i18n="Assessment.MaturityLabel">M = 成熟度 (Maturity)</strong>
+                            <span data-i18n="Assessment.MaturityDesc">：評估各項流程與能力的成熟程度，分數越高表示該領域越成熟</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="language-switcher-top">
+                        <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                            <span data-i18n="Common.Chinese">繁體中文</span>
+                        </button>
+                        <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                            <span data-i18n="Common.English">English</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="surveyForm" class="survey-form">
+                <!-- System Name Input -->
+                <div class="survey-section">
+                    <div class="question-card system-name-card">
+                        <label class="question-label" for="systemName" data-i18n="Assessment.SystemNameLabel">系統名稱</label>
+                        <input type="text" 
+                               class="question-input" 
+                               id="systemName" 
+                               name="systemName" 
+                               data-placeholder-i18n="Assessment.SystemNamePlaceholder"
+                               placeholder="請輸入要評估的系統名稱">
+                    </div>
+                </div>
+
+                <!-- Fixed Questions -->
+                <div class="survey-section fixed-questions-grid">
+                    <div class="question-card">
+                        <div class="question-header">
+                            <label class="question-label" data-i18n="Assessment.M1">M1 系統交接</label>
+                        </div>
+                        <p class="question-description" data-i18n="Assessment.M1Desc">新人不需1個月上手？</p>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="M1" name="M1" min="0" max="10" value="5" step="1">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>5</span>
+                                <span>10</span>
+                            </div>
+                            <div class="score-description" id="desc-M1">
+                                <span class="score-value-inline" id="value-M1">5</span>
+                                <span class="score-text">中等：新人需要1-2個月才能上手</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="question-header">
+                            <label class="question-label" data-i18n="Assessment.M2">M2 需求追溯</label>
+                        </div>
+                        <p class="question-description" data-i18n="Assessment.M2Desc">設計決策能找到依據？</p>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="M2" name="M2" min="0" max="10" value="5" step="1">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>5</span>
+                                <span>10</span>
+                            </div>
+                            <div class="score-description" id="desc-M2">
+                                <span class="score-value-inline" id="value-M2">5</span>
+                                <span class="score-text">中等：部分設計決策有依據，但不完整</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-card question-featured">
+                        <div class="question-header">
+                            <label class="question-label" data-i18n="Assessment.M3">M3 變更預測</label>
+                        </div>
+                        <p class="question-description" data-i18n="Assessment.M3Desc">改需求前能預知影響？</p>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="M3" name="M3" min="0" max="10" value="5" step="1">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>5</span>
+                                <span>10</span>
+                            </div>
+                            <div class="score-description" id="desc-M3">
+                                <span class="score-value-inline" id="value-M3">5</span>
+                                <span class="score-text">中等：能預測部分影響，但可能遺漏</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="question-header">
+                            <label class="question-label" data-i18n="Assessment.M4">M4 驗收標準</label>
+                        </div>
+                        <p class="question-description" data-i18n="Assessment.M4Desc">團隊對「完成」理解一致？</p>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="M4" name="M4" min="0" max="10" value="5" step="1">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>5</span>
+                                <span>10</span>
+                            </div>
+                            <div class="score-description" id="desc-M4">
+                                <span class="score-value-inline" id="value-M4">5</span>
+                                <span class="score-text">中等：大部分理解一致，偶有歧義</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-card">
+                        <div class="question-header">
+                            <label class="question-label" data-i18n="Assessment.M5">M5 溝通成本</label>
+                        </div>
+                        <p class="question-description" data-i18n="Assessment.M5Desc">跨角色對齊需幾次會議？</p>
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="M5" name="M5" min="0" max="10" value="5" step="1">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>5</span>
+                                <span>10</span>
+                            </div>
+                            <div class="score-description" id="desc-M5">
+                                <span class="score-value-inline" id="value-M5">5</span>
+                                <span class="score-text">中等：需要2-3次會議才能對齊</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Open Questions -->
+                <div class="survey-section">
+                    <h2 class="section-title" style="margin-bottom: 12px;">開放式問題</h2>
+                    <div class="question-card">
+                        <label class="question-label" for="open1" data-i18n="Assessment.OpenQ6">問題 6. 請描述您的專案面臨的主要挑戰...</label>
+                        <textarea class="question-textarea" id="open1" name="open1" rows="2" data-placeholder-i18n="Assessment.PlaceholderQ6" placeholder="例如：需求變更頻繁、技術債務累積、團隊成員流動率高、跨部門溝通困難、文件維護不及時..."></textarea>
+                    </div>
+
+                    <div class="question-card">
+                        <label class="question-label" for="open2" data-i18n="Assessment.OpenQ7">問題 7. 請說明您期望改善的領域...</label>
+                        <textarea class="question-textarea" id="open2" name="open2" rows="2" data-placeholder-i18n="Assessment.PlaceholderQ7" placeholder="例如：建立更完善的需求追溯機制、提升文件品質與完整性、優化變更管理流程、加強團隊協作效率..."></textarea>
+                    </div>
+
+                    <div class="question-card">
+                        <label class="question-label" for="open3" data-i18n="Assessment.OpenQ8">問題 8. 請提供其他相關資訊...</label>
+                        <textarea class="question-textarea" id="open3" name="open3" rows="2" data-placeholder-i18n="Assessment.PlaceholderQ8" placeholder="例如：專案規模、團隊人數、開發週期、使用的技術棧、特殊業務需求等..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="survey-footer">
+                    <button type="button" onclick="goToPayment()" class="submit-button">
+                        <span class="submit-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14"></path>
+                                <path d="M12 5l7 7-7 7"></path>
+                            </svg>
+                        </span>
+                        <span data-i18n="Common.GenerateReport">生成報告</span> <span data-i18n="Common.Price">NT$2,990</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sidebar toggle functionality
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const overlay = document.getElementById('overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        hamburger?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        // Handle nav item clicks
+        navItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (this.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+                
+                // Remove active class from all items
+                navItems.forEach(nav => nav.classList.remove('active'));
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Close sidebar on mobile after selection
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Close sidebar on window resize if desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Score descriptions for each metric - will be populated from i18n
+        const scoreDescriptions = {
+            'M1': {},
+            'M2': {},
+            'M3': {},
+            'M4': {},
+            'M5': {}
+        };
+
+        // Function to load score descriptions from i18n
+        function loadScoreDescriptions() {
+            const lang = i18n.currentLang;
+            const descriptions = {
+                'zh-TW': {
+                    'M1': {
+                        0: '極差：新人需要3個月以上才能上手',
+                        1: '很差：新人需要2-3個月才能上手',
+                        2: '差：新人需要2個月才能上手',
+                        3: '較差：新人需要1.5-2個月才能上手',
+                        4: '偏低：新人需要1-1.5個月才能上手',
+                        5: '中等：新人需要1-2個月才能上手',
+                        6: '尚可：新人需要0.5-1個月才能上手',
+                        7: '良好：新人需要2-4週才能上手',
+                        8: '很好：新人需要1-2週才能上手',
+                        9: '優秀：新人需要1週內就能上手',
+                        10: '極佳：新人幾乎不需要培訓就能上手'
+                    },
+                    'M2': {
+                        0: '極差：完全找不到設計決策的依據',
+                        1: '很差：幾乎找不到設計決策的依據',
+                        2: '差：大部分設計決策找不到依據',
+                        3: '較差：很多設計決策找不到依據',
+                        4: '偏低：部分設計決策找不到依據',
+                        5: '中等：部分設計決策有依據，但不完整',
+                        6: '尚可：大部分設計決策有依據',
+                        7: '良好：絕大部分設計決策都有依據',
+                        8: '很好：所有設計決策都有清楚依據',
+                        9: '優秀：設計決策與需求完全對應',
+                        10: '極佳：設計決策有完整追溯鏈，可追到原始需求'
+                    },
+                    'M3': {
+                        0: '極差：完全無法預測變更影響',
+                        1: '很差：幾乎無法預測變更影響',
+                        2: '差：只能預測部分明顯影響',
+                        3: '較差：能預測主要影響，但會遺漏細節',
+                        4: '偏低：能預測大部分影響，但可能遺漏',
+                        5: '中等：能預測部分影響，但可能遺漏',
+                        6: '尚可：能預測大部分影響',
+                        7: '良好：能預測絕大部分影響',
+                        8: '很好：能準確預測所有主要影響',
+                        9: '優秀：能準確預測所有影響，包括細節',
+                        10: '極佳：能完整預測變更的所有影響，包括間接影響'
+                    },
+                    'M4': {
+                        0: '極差：團隊對「完成」的理解完全不一致',
+                        1: '很差：團隊對「完成」的理解差異很大',
+                        2: '差：團隊對「完成」的理解經常不一致',
+                        3: '較差：團隊對「完成」的理解時常不一致',
+                        4: '偏低：團隊對「完成」的理解偶爾不一致',
+                        5: '中等：大部分理解一致，偶有歧義',
+                        6: '尚可：團隊對「完成」的理解基本一致',
+                        7: '良好：團隊對「完成」的理解高度一致',
+                        8: '很好：團隊對「完成」的理解幾乎完全一致',
+                        9: '優秀：團隊對「完成」有明確且一致的標準',
+                        10: '極佳：團隊對「完成」有完整且統一的定義，無歧義'
+                    },
+                    'M5': {
+                        0: '極差：需要5次以上會議才能對齊',
+                        1: '很差：需要4-5次會議才能對齊',
+                        2: '差：需要3-4次會議才能對齊',
+                        3: '較差：需要3次會議才能對齊',
+                        4: '偏低：需要2-3次會議才能對齊',
+                        5: '中等：需要2-3次會議才能對齊',
+                        6: '尚可：需要1-2次會議就能對齊',
+                        7: '良好：通常1次會議就能對齊',
+                        8: '很好：大部分情況1次會議就能對齊',
+                        9: '優秀：幾乎不需要會議，溝通順暢',
+                        10: '極佳：完全不需要額外會議，溝通效率極高'
+                    }
+                },
+                'en-US': {
+                    'M1': {
+                        0: 'Very Poor: New team members need more than 3 months to get up to speed',
+                        1: 'Poor: New team members need 2-3 months to get up to speed',
+                        2: 'Below Average: New team members need 2 months to get up to speed',
+                        3: 'Fair: New team members need 1.5-2 months to get up to speed',
+                        4: 'Below Medium: New team members need 1-1.5 months to get up to speed',
+                        5: 'Medium: New team members need 1-2 months to get up to speed',
+                        6: 'Above Average: New team members need 0.5-1 month to get up to speed',
+                        7: 'Good: New team members need 2-4 weeks to get up to speed',
+                        8: 'Very Good: New team members need 1-2 weeks to get up to speed',
+                        9: 'Excellent: New team members can get up to speed within 1 week',
+                        10: 'Outstanding: New team members can get up to speed with almost no training'
+                    },
+                    'M2': {
+                        0: 'Very Poor: Cannot find any basis for design decisions',
+                        1: 'Poor: Almost cannot find any basis for design decisions',
+                        2: 'Below Average: Most design decisions lack basis',
+                        3: 'Fair: Many design decisions lack basis',
+                        4: 'Below Medium: Some design decisions lack basis',
+                        5: 'Medium: Some design decisions have basis, but incomplete',
+                        6: 'Above Average: Most design decisions have basis',
+                        7: 'Good: Vast majority of design decisions have basis',
+                        8: 'Very Good: All design decisions have clear basis',
+                        9: 'Excellent: Design decisions fully correspond to requirements',
+                        10: 'Outstanding: Design decisions have complete traceability chain to original requirements'
+                    },
+                    'M3': {
+                        0: 'Very Poor: Cannot predict change impact at all',
+                        1: 'Poor: Almost cannot predict change impact',
+                        2: 'Below Average: Can only predict some obvious impacts',
+                        3: 'Fair: Can predict main impacts but miss details',
+                        4: 'Below Medium: Can predict most impacts but may miss some',
+                        5: 'Medium: Can predict some impacts but may miss others',
+                        6: 'Above Average: Can predict most impacts',
+                        7: 'Good: Can predict vast majority of impacts',
+                        8: 'Very Good: Can accurately predict all main impacts',
+                        9: 'Excellent: Can accurately predict all impacts including details',
+                        10: 'Outstanding: Can fully predict all impacts of changes including indirect impacts'
+                    },
+                    'M4': {
+                        0: 'Very Poor: Team has completely inconsistent understanding of "done"',
+                        1: 'Poor: Team has very different understanding of "done"',
+                        2: 'Below Average: Team frequently has inconsistent understanding of "done"',
+                        3: 'Fair: Team often has inconsistent understanding of "done"',
+                        4: 'Below Medium: Team occasionally has inconsistent understanding of "done"',
+                        5: 'Medium: Mostly consistent understanding, occasional ambiguity',
+                        6: 'Above Average: Team has basically consistent understanding of "done"',
+                        7: 'Good: Team has highly consistent understanding of "done"',
+                        8: 'Very Good: Team has almost completely consistent understanding of "done"',
+                        9: 'Excellent: Team has clear and consistent standards for "done"',
+                        10: 'Outstanding: Team has complete and unified definition of "done" with no ambiguity'
+                    },
+                    'M5': {
+                        0: 'Very Poor: Need more than 5 meetings to align',
+                        1: 'Poor: Need 4-5 meetings to align',
+                        2: 'Below Average: Need 3-4 meetings to align',
+                        3: 'Fair: Need 3 meetings to align',
+                        4: 'Below Medium: Need 2-3 meetings to align',
+                        5: 'Medium: Need 2-3 meetings to align',
+                        6: 'Above Average: Need 1-2 meetings to align',
+                        7: 'Good: Usually 1 meeting is enough to align',
+                        8: 'Very Good: Most cases need only 1 meeting to align',
+                        9: 'Excellent: Almost no meetings needed, smooth communication',
+                        10: 'Outstanding: No additional meetings needed, extremely efficient communication'
+                    }
+                }
+            };
+            
+            Object.keys(scoreDescriptions).forEach(metric => {
+                scoreDescriptions[metric] = descriptions[lang]?.[metric] || descriptions['zh-TW'][metric];
+            });
+        }
+        
+        function updateScoreDescription(sliderId, value) {
+            const descElement = document.getElementById(`desc-${sliderId}`);
+            if (descElement && scoreDescriptions[sliderId]) {
+                const desc = scoreDescriptions[sliderId][value] || scoreDescriptions[sliderId][5];
+                const scoreTextElement = descElement.querySelector('.score-text');
+                if (scoreTextElement) {
+                    scoreTextElement.textContent = desc;
+                }
+            }
+        }
+
+        // Slider value updates
+        const sliders = document.querySelectorAll('.slider');
+        
+        // Load descriptions on page load and language change
+        loadScoreDescriptions();
+        window.addEventListener('languageChanged', function() {
+            loadScoreDescriptions();
+            // 重新更新所有滑桿的描述
+            sliders.forEach(slider => {
+                const value = parseInt(slider.value);
+                updateScoreDescription(slider.id, value);
+            });
+        });
+        sliders.forEach(slider => {
+            const valueDisplay = document.getElementById(`value-${slider.id}`);
+            
+            // Update on input
+            slider.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                if (valueDisplay) {
+                    valueDisplay.textContent = value;
+                }
+                updateScoreDescription(slider.id, value);
+            });
+
+            // Load saved value
+            const savedValue = localStorage.getItem(`survey_${slider.id}`);
+            if (savedValue !== null) {
+                slider.value = savedValue;
+                const value = parseInt(savedValue);
+                if (valueDisplay) {
+                    valueDisplay.textContent = value;
+                }
+                updateScoreDescription(slider.id, value);
+            } else {
+                // Initialize with default value
+                updateScoreDescription(slider.id, parseInt(slider.value));
+            }
+        });
+
+        // Load system name
+        const systemNameInput = document.getElementById('systemName');
+        if (systemNameInput) {
+            const savedSystemName = localStorage.getItem('survey_systemName');
+            if (savedSystemName !== null) {
+                systemNameInput.value = savedSystemName;
+            }
+        }
+
+        // Load saved textarea values
+        const textareas = document.querySelectorAll('.question-textarea');
+        textareas.forEach(textarea => {
+            const savedValue = localStorage.getItem(`survey_${textarea.id}`);
+            if (savedValue !== null) {
+                textarea.value = savedValue;
+            }
+        });
+
+        // Save to localStorage on change
+        function saveToLocalStorage() {
+            // 保存系統名稱
+            const systemNameInput = document.getElementById('systemName');
+            if (systemNameInput) {
+                const systemName = systemNameInput.value;
+                localStorage.setItem('survey_systemName', systemName);
+            }
+            
+            // 保存個別欄位（用於恢復表單）
+            sliders.forEach(slider => {
+                localStorage.setItem(`survey_${slider.id}`, slider.value);
+            });
+            textareas.forEach(textarea => {
+                localStorage.setItem(`survey_${textarea.id}`, textarea.value);
+            });
+            
+            // 保存完整的問卷資料（用於 Report 頁面）
+            const data = {};
+            if (systemNameInput) {
+                data.systemName = systemNameInput.value;
+            }
+            sliders.forEach(slider => {
+                data[slider.name] = slider.value;
+            });
+            textareas.forEach(textarea => {
+                data[textarea.name] = textarea.value;
+            });
+            localStorage.setItem('survey_data', JSON.stringify(data));
+            localStorage.setItem('survey_timestamp', new Date().toISOString());
+        }
+
+        async function goToPayment() {
+            // 先儲存問卷資料
+            saveToLocalStorage();
+            
+            try {
+                // 從服務端獲取綠界表單資料
+                const response = await fetch('/Home/GetEcpayFormData', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('獲取支付資料失敗');
+                }
+                
+                const formData = await response.json();
+                
+                // 建立表單並直接提交到綠界
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5';
+                form.target = '_blank';
+                
+                // 添加所有表單欄位
+                for (const [key, value] of Object.entries(formData)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            } catch (error) {
+                console.error('支付流程錯誤:', error);
+                alert('啟動支付流程失敗，請稍後再試');
+            }
+        }
+
+        // Auto-save on change
+        sliders.forEach(slider => {
+            slider.addEventListener('input', saveToLocalStorage);
+        });
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', saveToLocalStorage);
+        });
+
+        // Add event listener for system name input
+        if (systemNameInput) {
+            systemNameInput.addEventListener('input', saveToLocalStorage);
+        }
+    </script>
+}
