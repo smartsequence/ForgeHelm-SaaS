@@ -236,6 +236,9 @@
                             <p class="advice-text" id="adviceText" data-i18n="Report.DefaultAdvice">
                                 將根據您的問卷結果產生具體建議。
                             </p>
+                            <div class="ai-refresh-hint" id="adviceRefreshHint" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(98, 0, 234, 0.1); border-left: 3px solid #6200ea; border-radius: 4px; font-size: 12px; color: #b0b0b0; line-height: 1.5;">
+                                <span data-i18n="Report.AIRefreshHint">💡 提示：可以重新整理頁面（F5）獲取不同版本的 AI 建議</span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -497,7 +500,7 @@
             return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
         }
 
-        async function updateReport() {
+        async function updateReport(forceRegenerate = false) {
             try {
                 const data = await parseSurveyData();
             
@@ -628,13 +631,18 @@
             // 風險改善建議改為 AI 生成
             const adviceEl = document.getElementById('adviceText');
             if (adviceEl) {
+                // 如果強制重新生成，清除已生成的內容
+                if (forceRegenerate) {
+                    adviceEl.setAttribute('data-i18n', 'Report.DefaultAdvice');
+                    adviceEl.textContent = i18n.t('Report.DefaultAdvice');
+                }
                 // 只有在沒有已生成的內容時才設置預設值
                 // 如果元素沒有 data-i18n 屬性，說明已經有生成的內容，不要覆蓋
                 if (adviceEl.hasAttribute('data-i18n')) {
                     adviceEl.textContent = i18n.t('Report.DefaultAdvice');
                 }
                 // 異步獲取 AI 建議（會更新內容並移除 data-i18n 屬性）
-                generatePersonalizedAdvice(m1, m2, m3, m4, m5);
+                generatePersonalizedAdvice(m1, m2, m3, m4, m5, forceRegenerate);
             }
 
             updateRadarChart(m1, m2, m3, m4, m5);
@@ -759,7 +767,7 @@
         }
 
         // AI Insights 函數
-        async function getAIInsights() {
+        async function getAIInsights(forceRegenerate = false) {
             try {
                 const aiSection = document.getElementById('aiInsightsSection');
                 const insightsLoading = document.getElementById('insights-loading');
@@ -807,6 +815,7 @@
                 // 構建請求數據（包含 M1-M5 分數和 M6-M8 補充說明）
                 const m678Data = {
                     lang: currentLang,
+                    forceRegenerate: forceRegenerate ? 'true' : 'false',
                     m1: String(m1),
                     m2: String(m2),
                     m3: String(m3),
@@ -928,8 +937,44 @@
             }
         }
 
+        // 格式化風險改善建議文本（將條列式內容轉換為分段排版）
+        function formatAdviceText(text) {
+            if (!text) return '';
+            
+            // 將文本按行分割
+            const lines = text.split('\n').filter(line => line.trim());
+            let html = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // 檢查是否為條列式開頭（數字、•、-、* 等）
+                const isListItem = /^(\d+[\.\)]|[\u2022\u2023\u25E6\u2043\u2219•\-\*])\s/.test(line) || 
+                                   /^【/.test(line) || 
+                                   /^[A-Z][a-z]+ \d+:/.test(line); // 匹配 "Recommendation 1:" 格式
+                
+                if (isListItem) {
+                    // 條列式項目，使用段落並添加適當的樣式
+                    html += `<p style="margin: 8px 0; padding-left: 16px; line-height: 1.6;">${escapeHtml(line)}</p>`;
+                } else {
+                    // 普通段落
+                    html += `<p style="margin: 8px 0; line-height: 1.6;">${escapeHtml(line)}</p>`;
+                }
+            }
+            
+            return html || escapeHtml(text);
+        }
+        
+        // HTML 轉義函數
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // 風險改善建議 AI 生成函數
-        async function generatePersonalizedAdvice(m1, m2, m3, m4, m5) {
+        async function generatePersonalizedAdvice(m1, m2, m3, m4, m5, forceRegenerate = false) {
             try {
                 const adviceEl = document.getElementById('adviceText');
                 if (!adviceEl) return;
@@ -939,6 +984,7 @@
 
                 const adviceData = {
                     lang: currentLang,
+                    forceRegenerate: forceRegenerate ? 'true' : 'false',
                     m1: String(m1),
                     m2: String(m2),
                     m3: String(m3),
@@ -960,7 +1006,15 @@
                 if (data.advice) {
                     // 移除 data-i18n 屬性，避免 i18n.updatePage() 覆蓋內容
                     adviceEl.removeAttribute('data-i18n');
-                    adviceEl.textContent = data.advice;
+                    // 將條列式內容轉換為分段排版（將數字開頭的行和條列符號轉換為段落）
+                    const formattedAdvice = formatAdviceText(data.advice);
+                    adviceEl.innerHTML = formattedAdvice;
+                    
+                    // 顯示 F5 提示
+                    const refreshHint = document.getElementById('adviceRefreshHint');
+                    if (refreshHint) {
+                        refreshHint.style.display = 'block';
+                    }
                 } else {
                     // 移除 data-i18n 屬性，避免被覆蓋
                     adviceEl.removeAttribute('data-i18n');
@@ -991,6 +1045,9 @@
                 return;
             }
             
+            // 記錄添加頁首頁尾前的頁數，確保不會創建新頁面
+            const pagesBefore = pdf.internal.getNumberOfPages();
+            
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = 10;
@@ -1000,8 +1057,14 @@
             // 保存當前狀態
             pdf.saveGraphicsState();
             
-            // 確保設置到正確的頁面
-            pdf.setPage(pageNumber);
+            // 確保設置到正確的頁面（不創建新頁面）
+            try {
+                pdf.setPage(pageNumber);
+            } catch (e) {
+                console.warn(`無法設置到頁面 ${pageNumber}:`, e);
+                pdf.restoreGraphicsState();
+                return;
+            }
             
             // 頁首
             pdf.setDrawColor(200, 200, 200);
@@ -1141,6 +1204,20 @@
             
             // 恢復狀態
             pdf.restoreGraphicsState();
+            
+            // 檢查是否意外創建了新頁面
+            const pagesAfter = pdf.internal.getNumberOfPages();
+            if (pagesAfter > pagesBefore) {
+                console.warn(`添加頁首頁尾後頁數增加 (${pagesAfter} > ${pagesBefore})，刪除多餘頁面`);
+                for (let extraPage = pagesAfter; extraPage > pagesBefore; extraPage--) {
+                    try {
+                        pdf.deletePage(extraPage);
+                        console.log(`已刪除意外創建的頁面 ${extraPage}`);
+                    } catch (e) {
+                        console.warn(`無法刪除意外創建的頁面 ${extraPage}:`, e);
+                    }
+                }
+            }
             
             return headerHeight + footerHeight;
         }
@@ -1336,7 +1413,7 @@
                 <!-- 風險改善建議區塊 -->
                 <div class="pdf-block" data-block="advice" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
                     <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.ImprovementAdvice')}</h3>
-                    <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #444;">${adviceText}</p>
+                    <div style="margin: 0; font-size: 12px; line-height: 1.6; color: #444;">${formatAdviceText(adviceText)}</div>
                 </div>
 
                 <!-- 補充說明區塊（調整順序，放在風險洞察之前） -->
@@ -1916,6 +1993,13 @@ Does not replace:<br/>
                         }
                         finalTotalPages = pdf.internal.getNumberOfPages();
                     }
+                    
+                    // 最終驗證：確保頁數正確（中文版特別檢查）
+                    const finalCheckPages = pdf.internal.getNumberOfPages();
+                    if (finalCheckPages !== finalTotalPages) {
+                        console.warn(`最終驗證：頁數不一致 (${finalCheckPages} !== ${finalTotalPages})，使用實際頁數`);
+                        finalTotalPages = finalCheckPages;
+                    }
                 }
 
                 pdf.save(fileName);
@@ -1957,13 +2041,16 @@ Does not replace:<br/>
 
         document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
 
+        // 檢查是否為頁面刷新（F5）
+        const isPageRefresh = performance.navigation.type === 1 || performance.getEntriesByType('navigation')[0]?.type === 'reload';
+        
         // 頁面載入時更新報告（延遲確保所有元素都已渲染和 i18n 已初始化）
         setTimeout(async function() {
             try {
                 // 1. 先更新問卷雷達圖等DOM
-                await updateReport();
-                // 2. 再執行AI分析（依賴DOM資料）
-                await getAIInsights();
+                await updateReport(isPageRefresh);
+                // 2. 再執行AI分析（依賴DOM資料，如果是刷新則強制重新生成）
+                await getAIInsights(isPageRefresh);
             } catch (error) {
                 console.error('頁面初始化錯誤:', error);
                 // 確保至少顯示引導頁面

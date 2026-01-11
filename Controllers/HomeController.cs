@@ -179,6 +179,7 @@ public class HomeController : Controller
         try
         {
             var lang = data?.GetValueOrDefault("lang") ?? "zh-TW";
+            var forceRegenerate = data?.GetValueOrDefault("forceRegenerate") == "true";
             var m1 = data?.GetValueOrDefault("m1") ?? data?.GetValueOrDefault("M1") ?? "0";
             var m2 = data?.GetValueOrDefault("m2") ?? data?.GetValueOrDefault("M2") ?? "0";
             var m3 = data?.GetValueOrDefault("m3") ?? data?.GetValueOrDefault("M3") ?? "0";
@@ -187,28 +188,36 @@ public class HomeController : Controller
 
             var isEnglish = lang == "en-US";
             
+            // 如果強制重新生成，清除Session中的緩存（包括舊的中文版本，確保使用先英後中的邏輯）
+            if (forceRegenerate)
+            {
+                HttpContext.Session.Remove("PersonalizedAdvice_en-US");
+                HttpContext.Session.Remove("PersonalizedAdvice_zh-TW");
+                _logger.LogInformation("強制重新生成，已清除Session緩存");
+            }
+            
             // 優先生成英文版本作為基礎（避免大陸用語問題），確保內容一致性
             // 檢查 Session 中是否已有英文版本
-            var englishAdvice = HttpContext.Session.GetString("PersonalizedAdvice_en-US");
-            if (!string.IsNullOrEmpty(englishAdvice))
+            var cachedEnglishAdvice = HttpContext.Session.GetString("PersonalizedAdvice_en-US");
+            if (!string.IsNullOrEmpty(cachedEnglishAdvice) && !forceRegenerate)
             {
                 _logger.LogInformation("發現已存在的英文版本風險改善建議");
                 if (isEnglish)
                 {
                     // 直接返回英文版本
-                    return Json(new { advice = englishAdvice });
+                    return Json(new { advice = cachedEnglishAdvice });
                 }
                 else
                 {
                     // 翻譯英文版本為繁體中文
                     _logger.LogInformation("將英文版本翻譯為繁體中文");
-                    var translatedAdvice = await TranslateEnglishToTraditionalChinese(englishAdvice);
+                    var translatedAdvice = await TranslateEnglishToTraditionalChinese(cachedEnglishAdvice);
                     return Json(new { advice = translatedAdvice });
                 }
             }
             
-            // 如果沒有英文版本，檢查是否有中文版本（向後兼容）
-            if (isEnglish)
+            // 如果沒有英文版本，檢查是否有中文版本（向後兼容，但不強制重新生成時才使用）
+            if (isEnglish && !forceRegenerate)
             {
                 var chineseAdvice = HttpContext.Session.GetString("PersonalizedAdvice_zh-TW");
                 if (!string.IsNullOrEmpty(chineseAdvice))
@@ -357,7 +366,7 @@ Translate the following text:";
                     new { role = "user", content = englishAdvice }
                 },
                 temperature = 0.3,  // 較低溫度，確保翻譯一致性和用詞準確性
-                max_tokens = 300
+                max_tokens = 500  // 增加token數量，避免截斷
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody);
@@ -456,6 +465,7 @@ Translate the following text:";
         try
         {
             var lang = m678?.GetValueOrDefault("lang") ?? "zh-TW";
+            var forceRegenerate = m678?.GetValueOrDefault("forceRegenerate") == "true";
             // 從請求體中提取 M1-M5 分數和 M6-M8 開放式問題
             var m1 = m678?.GetValueOrDefault("m1") ?? m678?.GetValueOrDefault("M1") ?? "0";
             var m2 = m678?.GetValueOrDefault("m2") ?? m678?.GetValueOrDefault("M2") ?? "0";
@@ -477,28 +487,36 @@ Translate the following text:";
                 return Json(new { insights = noDataMsg });
             }
 
+            // 如果強制重新生成，清除Session中的緩存
+            if (forceRegenerate)
+            {
+                HttpContext.Session.Remove("AIInsights_en-US");
+                HttpContext.Session.Remove("AIInsights_zh-TW");
+                _logger.LogInformation("強制重新生成，已清除Session緩存");
+            }
+
             // 優先生成英文版本作為基礎（避免大陸用語問題），確保內容一致性
             // 檢查 Session 中是否已有英文版本
-            var englishInsights = HttpContext.Session.GetString("AIInsights_en-US");
-            if (!string.IsNullOrEmpty(englishInsights))
+            var cachedEnglishInsights = HttpContext.Session.GetString("AIInsights_en-US");
+            if (!string.IsNullOrEmpty(cachedEnglishInsights) && !forceRegenerate)
             {
                 _logger.LogInformation("發現已存在的英文版本 AI 洞察");
                 if (isEnglish)
                 {
                     // 直接返回英文版本
-                    return Json(new { insights = englishInsights });
+                    return Json(new { insights = cachedEnglishInsights });
                 }
                 else
                 {
                     // 翻譯英文版本為繁體中文
                     _logger.LogInformation("將英文版本翻譯為繁體中文");
-                    var translatedInsights = await TranslateEnglishToTraditionalChineseForInsights(englishInsights);
+                    var translatedInsights = await TranslateEnglishToTraditionalChineseForInsights(cachedEnglishInsights);
                     return Json(new { insights = translatedInsights });
                 }
             }
             
-            // 如果沒有英文版本，檢查是否有中文版本（向後兼容）
-            if (isEnglish)
+            // 如果沒有英文版本，檢查是否有中文版本（向後兼容，但不強制重新生成時才使用）
+            if (isEnglish && !forceRegenerate)
             {
                 var chineseInsights = HttpContext.Session.GetString("AIInsights_zh-TW");
                 if (!string.IsNullOrEmpty(chineseInsights))
