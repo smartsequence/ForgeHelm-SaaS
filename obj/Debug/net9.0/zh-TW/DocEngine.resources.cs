@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DocEngine")]
 [assembly: System.Reflection.AssemblyCopyrightAttribute(" ")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d704d47464850c695b1ca4e6fa82c8317d2f99cf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f15188cf53edb38ea6a08192e6f145c06b59e9cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("DocEngine")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DocEngine")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -200,6 +200,7 @@
                             <div class="metric-item">
                                 <span class="metric-label" data-i18n="Report.RiskLevel">風險等級</span>
                                 <span class="metric-badge" id="riskLevel">-</span>
+                                <span class="metric-action" id="riskAction" style="display: block; margin-top: 8px; font-size: 11px; color: #b0b0b0; font-weight: normal; line-height: 1.4;">-</span>
                             </div>
                             <div class="metric-item">
                                 <span class="metric-label" data-i18n="Report.SampleTime">樣本時間</span>
@@ -282,16 +283,28 @@
                     </div>
                 </section>
 
+                <!-- Disclaimer Section -->
+                <section class="report-disclaimer" data-section="disclaimer">
+                    <div class="report-card" data-block="disclaimer" style="margin-top: 32px; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border-left: 3px solid #6200ea;">
+                        <div class="section-header">
+                            <h3 class="section-title" style="font-size: 14px; margin-bottom: 12px; color: #e0e0e0;" data-i18n="Report.DisclaimerTitle">本報告適用於</h3>
+                        </div>
+                        <div class="disclaimer-content" style="font-size: 12px; line-height: 1.8; color: #b0b0b0;">
+                            <div data-i18n="Report.DisclaimerContent" style="white-space: pre-line;">本報告適用於：
+‧ 軟體專案風險盤點
+‧ 系統交接與治理檢視
+不取代：
+‧ 稽核
+‧ 法規認證
+‧ 程式碼安全掃描</div>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Actions -->
                 <section class="report-actions">
                     <button id="downloadPdfBtn" class="report-button primary" data-i18n="Report.DownloadPDF">
                         下載 PDF 報告
-                    </button>
-                    <button id="viewTrackingBtn" class="report-button secondary" data-i18n="Report.ViewTracking">
-                        查看 3 個月追蹤
-                    </button>
-                    <button id="inviteBtn" class="report-button accent" data-i18n="Report.InviteColleague">
-                        邀請同事 NT$2,490/人（17% 折扣）
                     </button>
                 </section>
             </div>
@@ -580,6 +593,25 @@
                 if (level === '低') levelEl.classList.add('low');
                 else if (level === '中') levelEl.classList.add('medium');
                 else levelEl.classList.add('high');
+            }
+
+            // 更新建議行動
+            const actionEl = document.getElementById('riskAction');
+            if (actionEl) {
+                const actionMap = {
+                    'zh-TW': {
+                        '高': '建議於 1–2 個月內啟動改善',
+                        '中': '建議納入季度檢視',
+                        '低': '建議半年複查'
+                    },
+                    'en-US': {
+                        '高': 'Recommend initiating improvements within 1–2 months',
+                        '中': 'Recommend quarterly review',
+                        '低': 'Recommend semi-annual review'
+                    }
+                };
+                const currentLang = i18n.currentLang || 'zh-TW';
+                actionEl.textContent = actionMap[currentLang]?.[level] || '';
             }
 
             const ts = window.surveyTimestamp || localStorage.getItem('survey_timestamp');
@@ -952,6 +984,13 @@
 
         // 添加頁首頁尾的輔助函數
         function addHeaderFooter(pdf, pageNumber, totalPages, systemName) {
+            // 確保頁面存在，如果不存在則不添加頁首頁尾
+            const currentTotalPages = pdf.internal.getNumberOfPages();
+            if (pageNumber > currentTotalPages) {
+                console.warn(`頁面 ${pageNumber} 不存在，跳過添加頁首頁尾`);
+                return;
+            }
+            
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             const margin = 10;
@@ -960,6 +999,9 @@
             
             // 保存當前狀態
             pdf.saveGraphicsState();
+            
+            // 確保設置到正確的頁面
+            pdf.setPage(pageNumber);
             
             // 頁首
             pdf.setDrawColor(200, 200, 200);
@@ -1260,6 +1302,11 @@
                                     <div style="font-size: 14px; font-weight: 600; color: ${level === '高' ? '#d32f2f' : level === '中' ? '#f57c00' : '#388e3c'}; text-align: left;">
                                         ${riskLevelText}
                                     </div>
+                                    <div style="font-size: 9px; color: #666; margin-top: 4px; text-align: left; line-height: 1.3;">
+                                        ${currentLang === 'zh-TW' 
+                                            ? (level === '高' ? '建議於 1–2 個月內啟動改善' : level === '中' ? '建議納入季度檢視' : '建議半年複查')
+                                            : (level === '高' ? 'Recommend initiating improvements within 1–2 months' : level === '中' ? 'Recommend quarterly review' : 'Recommend semi-annual review')}
+                                    </div>
                                 </div>
                                 <div style="padding: 8px 0;">
                                     <div style="font-size: 9px; color: #666; margin-bottom: 4px; text-align: left;">${i18n.t('Report.SampleTime')}</div>
@@ -1322,6 +1369,28 @@
                     </div>
                 </div>
                 ` : ''}
+
+                <!-- 免責聲明區塊 -->
+                <div class="pdf-block" data-block="disclaimer" style="margin-top: 24px; margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; border-left: 3px solid #6200ea; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 13px; color: #333; font-weight: 600;">${currentLang === 'zh-TW' ? '本報告適用於' : 'This report is applicable for:'}</h3>
+                    <div style="font-size: 10px; line-height: 1.8; color: #555;">
+                        ${currentLang === 'zh-TW' 
+                            ? `本報告適用於：<br/>
+‧ 軟體專案風險盤點<br/>
+‧ 系統交接與治理檢視<br/>
+不取代：<br/>
+‧ 稽核<br/>
+‧ 法規認證<br/>
+‧ 程式碼安全掃描`
+                            : `This report is applicable for:<br/>
+‧ Software project risk assessment<br/>
+‧ System handover and governance review<br/>
+Does not replace:<br/>
+‧ Audit<br/>
+‧ Regulatory certification<br/>
+‧ Code security scanning`}
+                    </div>
+                </div>
             `;
 
             // 更新雷達圖
@@ -1887,12 +1956,6 @@
         }
 
         document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
-        document.getElementById('viewTrackingBtn').addEventListener('click', function () {
-            window.location.href = '@Url.Action("Index", "Home")';
-        });
-        document.getElementById('inviteBtn').addEventListener('click', function () {
-            alert('邀請方案示意：NT$2,490/人（17% 折扣）。此為示範訊息，可接續導向實際購買流程。');
-        });
 
         // 頁面載入時更新報告（延遲確保所有元素都已渲染和 i18n 已初始化）
         setTimeout(async function() {

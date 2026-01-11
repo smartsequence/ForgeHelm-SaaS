@@ -114,6 +114,8 @@ const i18n = {
             'Report.AIInsightsDesc': '針對 M6、M7、M8 補充說明的深度分析',
             'Report.Analyzing': '分析中...',
             'Report.AIRefreshHint': '💡 提示：可以重新整理頁面（F5）獲取不同版本的 AI 建議',
+            'Report.DisclaimerTitle': '本報告適用於',
+            'Report.DisclaimerContent': '本報告適用於：\n‧ 軟體專案風險盤點\n‧ 系統交接與治理檢視\n不取代：\n‧ 稽核\n‧ 法規認證\n‧ 程式碼安全掃描',
             
             // Score Descriptions - M1
             'Score.M1.0': '極差：新人需要3個月以上才能上手',
@@ -258,6 +260,8 @@ const i18n = {
             'Report.AIInsightsDesc': 'In-depth analysis based on M6, M7, M8 additional notes',
             'Report.Analyzing': 'Analyzing...',
             'Report.AIRefreshHint': '💡 Tip: You can refresh the page (F5) to get different versions of AI suggestions',
+            'Report.DisclaimerTitle': 'This report is applicable for:',
+            'Report.DisclaimerContent': 'This report is applicable for:\n‧ Software project risk assessment\n‧ System handover and governance review\nDoes not replace:\n‧ Audit\n‧ Regulatory certification\n‧ Code security scanning',
             
             // Score Descriptions - M1
             'Score.M1.0': 'Very Poor: New team members need more than 3 months to get up to speed',
