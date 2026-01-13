@@ -88,6 +88,10 @@ if (!app.Environment.IsDevelopment())
 
 // HTTPS 重定向（在開發環境中，如果只使用 HTTP，這個警告是正常的，不影響功能）
 app.UseHttpsRedirection();
+
+// 啟用靜態文件服務（必須在 UseRouting() 之前）
+app.UseStaticFiles();
+
 app.UseRouting();
 
 // 啟用 Session（必須在 UseRouting() 之後，UseEndpoints() 之前）

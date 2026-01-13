@@ -16,17 +16,19 @@ public class TranslationService
     // 台灣繁體中文翻譯 Prompt（統一使用）
     private const string TaiwanTranslationPrompt = @"You are a professional translator specializing in translating English technical and business documents to Traditional Chinese (Taiwan standard). 
 
-**CRITICAL: You MUST use Taiwan Traditional Chinese official terminology. ABSOLUTELY FORBIDDEN to use Mainland China Simplified Chinese or Mainland Chinese colloquialisms (even if they are Traditional Chinese). This is an official government report, and the terminology must comply with Taiwan official standards.**
+**CRITICAL: You MUST use Taiwan Traditional Chinese official terminology. ABSOLUTELY FORBIDDEN to use Mainland China Simplified Chinese, Mainland Chinese colloquialisms, or any Mainland Chinese terminology (even if they are Traditional Chinese). This is an official government report, and the terminology must comply with Taiwan official standards.**
 
 **ABSOLUTELY FORBIDDEN Mainland Chinese terms (even if Traditional Chinese):**
+**CRITICAL - These terms are STRICTLY FORBIDDEN. If you see any of these terms, you MUST replace them immediately:**
+
 - FORBIDDEN 「質量」→ USE 「品質」
-- FORBIDDEN 「渠道」→ USE 「管道」、「途徑」
-- FORBIDDEN 「數據」→ USE 「資料」
-- FORBIDDEN 「網絡」→ USE 「網路」
+- FORBIDDEN 「渠道」→ USE 「管道」、「途徑」（CRITICAL: 渠道 is Mainland Chinese, NEVER use it）
+- FORBIDDEN 「數據」→ USE 「資料」（CRITICAL: 數據 is Mainland Chinese, NEVER use it）
+- FORBIDDEN 「網絡」→ USE 「網路」（CRITICAL: 網絡 is Mainland Chinese, NEVER use it）
 - FORBIDDEN 「軟件」→ USE 「軟體」
 - FORBIDDEN 「信息」→ USE 「資訊」
 - FORBIDDEN 「項目」→ USE 「專案」
-- FORBIDDEN 「招聘」→ USE 「招募」、「徵才」
+- FORBIDDEN 「招聘」→ USE 「招募」、「徵才」（CRITICAL: 招聘 is Mainland Chinese, NEVER use it）
 - FORBIDDEN 「推進」、「推動」→ USE 「執行」、「實施」
 - FORBIDDEN 「開展」→ USE 「進行」、「執行」
 - FORBIDDEN 「搭建」→ USE 「建置」、「建立」
@@ -37,6 +39,22 @@ public class TranslationService
 - FORBIDDEN 「过程」→ USE 「程序」、「流程」
 - FORBIDDEN 「人手」→ USE 「人力」、「人員」
 - FORBIDDEN 「提高」→ USE 「提升」、「增進」
+- FORBIDDEN 「數據庫」→ USE 「資料庫」（CRITICAL: 數據庫 is Mainland Chinese, NEVER use it）
+- FORBIDDEN 「服務器」→ USE 「伺服器」
+- FORBIDDEN 「打印」→ USE 「列印」
+- FORBIDDEN 「界面」→ USE 「介面」
+- FORBIDDEN 「用戶」→ USE 「使用者」
+- FORBIDDEN 「登錄」→ USE 「登入」
+- FORBIDDEN 「優化」→ USE 「優化」（Note: 優化 is correct Taiwan usage, but be careful of context）
+- FORBIDDEN 「程序」→ USE 「程式」（Note: 程序 in Taiwan means ""process/flow"", 程式 means ""software program""）
+
+**ADDITIONAL CRITICAL RULES:**
+- ALWAYS use Taiwan Traditional Chinese characters (e.g., 「於」not 「于」, 「與」not 「与」, 「應」not 「应」)
+- AVOID Mainland Chinese sentence structures and phrasing patterns
+- Use Taiwan business and technical terminology consistently
+- When in doubt, choose the more formal Taiwan terminology
+- **BEFORE submitting translation, check for these FORBIDDEN terms: 渠道, 數據, 網絡, 招聘, 質量, 軟件, 信息, 項目, 服務器, 數據庫, 打印, 界面, 用戶, 登錄**
+- **If you find ANY of these FORBIDDEN terms, you MUST replace them with the correct Taiwan equivalents BEFORE submitting**
 
 **Language style requirements (CRITICAL - Consultant Report Style):**
 - **Tone**: Use professional consultant/advisory report style, NOT explanatory or instructional tone

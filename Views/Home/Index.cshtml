@@ -316,31 +316,25 @@
         });
 
         // 更新儀表板雷達圖（使用與報告相同的 M1-M5 數據）
-        function updateDashboardRadar() {
-            // 讀取評估數據
-            function parseSurveyData() {
-                const raw = localStorage.getItem('survey_data');
-                if (raw) {
-                    try {
-                        const data = JSON.parse(raw);
-                        if (data && Object.keys(data).length > 0) {
-                            return data;
+        async function updateDashboardRadar() {
+            // 從服務器端 Session 讀取評估數據（與 Report.cshtml 一致）
+            async function parseSurveyData() {
+                try {
+                    const response = await fetch('/Home/GetSurveyData', {
+                        method: 'GET',
+                        credentials: 'same-origin'
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.data) {
+                            return result.data;
                         }
-                    } catch (e) {
-                        console.error('解析 survey_data 失敗:', e);
                     }
+                } catch (error) {
+                    console.error('無法從服務端 Session 讀取數據:', error);
                 }
-                
-                const data = {};
-                const keys = ['M1', 'M2', 'M3', 'M4', 'M5'];
-                keys.forEach(key => {
-                    const value = localStorage.getItem(`survey_${key}`);
-                    if (value !== null && value !== '') {
-                        data[key] = value;
-                    }
-                });
-                
-                return Object.keys(data).length > 0 ? data : null;
+                return null;
             }
 
             function toNumber(value) {
@@ -357,14 +351,15 @@
                 return '高';
             }
 
-            const data = parseSurveyData();
+            const data = await parseSurveyData();
             const radarSvg = document.getElementById('dashboardRadar');
             const radarPolygon = document.getElementById('dashboardRadarPolygon');
             const noDataMsg = document.getElementById('dashboardNoData');
             const riskLevelContainer = document.getElementById('dashboardRiskLevel');
             const riskLevelValue = document.getElementById('dashboardRiskLevelValue');
 
-            if (!data || (!data.M1 && !data.M2 && !data.M3 && !data.M4 && !data.M5)) {
+            if (!data || (!data.M1 && !data.M2 && !data.M3 && !data.M4 && !data.M5 && 
+                !data.m1 && !data.m2 && !data.m3 && !data.m4 && !data.m5)) {
                 // 沒有數據，顯示提示訊息
                 if (radarSvg) radarSvg.style.display = 'none';
                 if (riskLevelContainer) riskLevelContainer.style.display = 'none';
@@ -375,7 +370,7 @@
             // 有數據，顯示雷達圖和風險等級
             if (radarSvg) radarSvg.style.display = 'block';
             if (noDataMsg) noDataMsg.style.display = 'none';
-            if (riskLevelContainer) riskLevelContainer.style.display = 'block';
+            if (riskLevelContainer) riskLevelContainer.style.display = 'flex';
 
             const m1 = toNumber(data.M1 || data.m1 || 0);
             const m2 = toNumber(data.M2 || data.m2 || 0);
@@ -431,15 +426,11 @@
         }
 
         // 頁面載入時更新雷達圖
-        setTimeout(function() {
-            updateDashboardRadar();
-        }, 300);
+        updateDashboardRadar();
 
         // 監聽語言變更事件，更新雷達圖標籤和風險等級
         window.addEventListener('languageChanged', function() {
-            setTimeout(function() {
-                updateDashboardRadar();
-            }, 100);
+            updateDashboardRadar();
         });
     </script>
 }
