@@ -1,5 +1,7 @@
 @{
     ViewData["Title"] = "風險評估報告";
+    var isDevelopment = ViewData["IsDevelopment"] as bool? ?? false;
+    var environment = ViewData["Environment"] as string ?? "Production";
 }
 
 <div class="app-container">
@@ -34,7 +36,7 @@
                 <span class="nav-icon">📊</span>
                 <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
             </a>
-            <a href="#" class="nav-item" data-page="projects">
+            <a href="@Url.Action("Projects", "Home")" class="nav-item" data-page="projects">
                 <span class="nav-icon">📁</span>
                 <span class="nav-text" data-i18n="Nav.Projects">專案</span>
             </a>
@@ -46,11 +48,11 @@
                 <span class="nav-icon">📋</span>
                 <span class="nav-text" data-i18n="Nav.Report">報告</span>
             </a>
-            <a href="#" class="nav-item" data-page="documentation">
+            <a href="@Url.Action("Documentation", "Home")" class="nav-item" data-page="documentation">
                 <span class="nav-icon">📄</span>
                 <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
             </a>
-            <a href="#" class="nav-item" data-page="risks">
+            <a href="@Url.Action("Risks", "Home")" class="nav-item" data-page="risks">
                 <span class="nav-icon">⚠️</span>
                 <span class="nav-text" data-i18n="Nav.Risks">風險</span>
             </a>
@@ -88,16 +90,6 @@
                         <p class="report-subtitle" data-i18n="Report.Subtitle">根據您的問卷結果自動生成的風險指紋分析</p>
                     </div>
                     <div class="report-header-right">
-                        <div class="report-header-meta">
-                            <div class="report-meta-item">
-                                <span class="report-meta-label" data-i18n="Report.SystemName">系統名稱</span>
-                                <span class="report-meta-value" id="systemNameDisplay">-</span>
-                            </div>
-                            <div class="report-meta-item">
-                                <span class="report-meta-label" data-i18n="Report.AssessmentDate">評估日期</span>
-                                <span class="report-meta-value" id="assessmentDate">-</span>
-                            </div>
-                        </div>
                         <div class="header-actions">
                             <div class="language-switcher-top">
                                 <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
@@ -110,6 +102,35 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- 專案資訊條：改為橫向卡片置於標題下方，避免擠在右側 -->
+                <div class="report-meta-bar">
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.ProjectName">專案名稱</span>
+                        <span class="report-meta-value" id="projectNameDisplay">-</span>
+                    </div>
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.SystemName">系統名稱</span>
+                        <span class="report-meta-value" id="systemNameDisplay">-</span>
+                    </div>
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.SystemCode">系統代號</span>
+                        <span class="report-meta-value" id="systemCodeDisplay">-</span>
+                    </div>
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.EvaluatorRole">評估人角色</span>
+                        <span class="report-meta-value" id="evaluatorRoleDisplay">-</span>
+                    </div>
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.ReportId">報告編號</span>
+                        <span class="report-meta-value" id="reportIdDisplay">-</span>
+                    </div>
+                    <div class="report-meta-item">
+                        <span class="report-meta-label" data-i18n="Report.AssessmentTime">評估時間</span>
+                        <span class="report-meta-value" id="assessmentTime">-</span>
+                    </div>
+                </div>
+
                 <div class="maturity-info-box">
                     <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -197,10 +218,15 @@
                                 <span class="metric-label" data-i18n="Report.TotalScore">總分</span>
                                 <span class="metric-value" id="totalScore">0</span>
                             </div>
-                            <div class="metric-item">
+                            <div class="metric-item risk-level-item">
                                 <span class="metric-label" data-i18n="Report.RiskLevel">風險等級</span>
-                                <span class="metric-badge" id="riskLevel">-</span>
-                                <span class="metric-action" id="riskAction" style="display: block; margin-top: 8px; font-size: 11px; color: #b0b0b0; font-weight: normal; line-height: 1.4;">-</span>
+                                <div class="risk-level-content">
+                                    <div class="risk-level-row">
+                                        <span class="metric-badge" id="riskLevel">-</span>
+                                        <span class="metric-action" id="riskAction" style="display: inline-block; font-size: 11px; color: #b0b0b0; font-weight: normal; line-height: 1.4; margin-left: 12px;">-</span>
+                                    </div>
+                                    <span class="metric-threshold" id="riskThreshold" style="display: block; font-size: 10px; color: #888; font-weight: normal; line-height: 1.3; margin-top: 6px;">-</span>
+                                </div>
                             </div>
                             <div class="metric-item">
                                 <span class="metric-label" data-i18n="Report.SampleTime">樣本時間</span>
@@ -236,8 +262,21 @@
                             <p class="advice-text" id="adviceText" data-i18n="Report.DefaultAdvice">
                                 將根據您的問卷結果產生具體建議。
                             </p>
+                            
+                            <!-- 最小交付物建議區塊 -->
+                            <div class="deliverables-block" id="deliverablesBlock" style="display: none; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                                <h3 class="deliverables-title" style="font-size: 14px; font-weight: 600; color: #e0e0e0; margin-bottom: 12px;" data-i18n="Report.DeliverablesTitle">本次評估建議之最小交付物：</h3>
+                                <p class="deliverables-intro" id="deliverablesIntro" style="font-size: 12px; color: #b0b0b0; margin-bottom: 16px; line-height: 1.5;"></p>
+                                <div class="deliverables-list" id="deliverablesList" style="font-size: 12px; color: #d0d0d0; line-height: 1.8;"></div>
+                            </div>
+                            
                             <div class="ai-refresh-hint" id="adviceRefreshHint" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(98, 0, 234, 0.1); border-left: 3px solid #6200ea; border-radius: 4px; font-size: 12px; color: #b0b0b0; line-height: 1.5;">
-                                <span data-i18n="Report.AIRefreshHint">💡 提示：可以重新整理頁面（F5）獲取不同版本的 AI 建議</span>
+                                <svg class="lightbulb-icon" style="width: 16px; height: 16px; flex-shrink: 0; color: #ffc107;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21h6"></path>
+                                    <path d="M12 3a6 6 0 0 0-6 6c0 2.5 1.5 4.5 3 6a3 3 0 0 1 0 3h6a3 3 0 0 1 0-3c1.5-1.5 3-3.5 3-6a6 6 0 0 0-6-6z"></path>
+                                    <line x1="9" y1="18" x2="15" y2="18"></line>
+                                </svg>
+                                <span><span data-i18n="Report.TipLabel">提示</span>：<span data-i18n="Report.RefreshHint">可以重新整理頁面(F5)</span><span data-i18n="Report.AIRefreshHint">產生替代建議（用於腦力激盪）</span></span>
                             </div>
                         </div>
                     </div>
@@ -280,8 +319,29 @@
                         <div class="ai-section" id="ai-insights">
                             <div id="insights-loading" data-i18n="Report.Analyzing">分析中...</div>
                             <div class="ai-refresh-hint" id="aiRefreshHint" style="display: none; margin-top: 12px; padding: 8px 12px; background: rgba(98, 0, 234, 0.1); border-left: 3px solid #6200ea; border-radius: 4px; font-size: 12px; color: #b0b0b0; line-height: 1.5;">
-                                <span data-i18n="Report.AIRefreshHint">💡 提示：可以重新整理頁面（F5）獲取不同版本的 AI 建議</span>
+                                <svg class="lightbulb-icon" style="width: 16px; height: 16px; flex-shrink: 0; color: #ffc107;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21h6"></path>
+                                    <path d="M12 3a6 6 0 0 0-6 6c0 2.5 1.5 4.5 3 6a3 3 0 0 1 0 3h6a3 3 0 0 1 0-3c1.5-1.5 3-3.5 3-6a6 6 0 0 0-6-6z"></path>
+                                    <line x1="9" y1="18" x2="15" y2="18"></line>
+                                </svg>
+                                <span><span data-i18n="Report.TipLabel">提示</span>：<span data-i18n="Report.RefreshHint">可以重新整理頁面(F5)</span><span data-i18n="Report.AIRefreshHint">產生替代建議（用於腦力激盪）</span></span>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 30 天行動清單 Section -->
+                <section class="report-action-plan" id="actionPlanSection" data-section="action-plan" style="display: none;">
+                    <div class="report-card" data-block="action-plan">
+                        <div class="section-header">
+                            <h2 class="section-title" data-i18n="Report.ActionPlanTitle">30 天行動清單</h2>
+                            <p class="section-description" data-i18n="Report.ActionPlanDesc">本次評估的下一步行動建議</p>
+                        </div>
+                        <div class="action-plan-content" id="actionPlanContent">
+                            <!-- 動態生成內容 -->
+                        </div>
+                        <div class="risk-controlled-message" id="riskControlledMessage" style="display: none; padding: 16px; background: rgba(56, 142, 60, 0.1); border-radius: 8px; border-left: 3px solid #388e3c; font-size: 12px; line-height: 1.6; color: #b0b0b0;">
+                            <p id="riskControlledText"></p>
                         </div>
                     </div>
                 </section>
@@ -289,11 +349,10 @@
                 <!-- Disclaimer Section -->
                 <section class="report-disclaimer" data-section="disclaimer">
                     <div class="report-card" data-block="disclaimer" style="margin-top: 32px; padding: 20px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; border-left: 3px solid #6200ea;">
-                        <div class="section-header">
-                            <h3 class="section-title" style="font-size: 14px; margin-bottom: 12px; color: #e0e0e0;" data-i18n="Report.DisclaimerTitle">本報告適用於</h3>
-                        </div>
                         <div class="disclaimer-content" style="font-size: 12px; line-height: 1.8; color: #b0b0b0;">
-                            <div data-i18n="Report.DisclaimerContent" style="white-space: pre-line;">本報告適用於：
+                            <div data-i18n="Report.DisclaimerContent" style="white-space: pre-line;">本報告依使用者自填資料產出
+
+本報告適用於：
 ‧ 軟體專案風險盤點
 ‧ 系統交接與治理檢視
 不取代：
@@ -362,15 +421,30 @@
             }
         });
 
-        // 從服務端 Session 或 localStorage 讀取問卷數據（優先使用 Session）
+        // 從服務端 Session 讀取問卷數據（完全移除 localStorage）
         async function parseSurveyData() {
-            // 優先嘗試從服務端 Session 讀取（更安全）
+            // 從服務端 Session 讀取（完全移除 localStorage）
             try {
-                const response = await fetch('/Home/GetSurveyData');
+                // 移除詳細日誌（安全考量）
+                const response = await fetch('/Home/GetSurveyData', {
+                    method: 'GET',
+                    credentials: 'same-origin' // 確保發送 Cookie
+                });
+                
                 if (response.ok) {
                     const result = await response.json();
+                    
                     if (result.success && result.data) {
-                        console.log('✓ 從服務端 Session 讀取到數據:', result.data);
+                        // 檢查是否有 M1-M5 分數（僅在開發環境顯示警告）
+                        const hasMValues = result.data.M1 || result.data.M2 || result.data.M3 || 
+                                         result.data.M4 || result.data.M5 || 
+                                         result.data.m1 || result.data.m2 || 
+                                         result.data.m3 || result.data.m4 || result.data.m5;
+                        
+                        if (!hasMValues && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+                            console.warn('⚠️ 警告：數據中沒有 M1-M5 分數！這可能導致報告無法顯示。');
+                        }
+                        
                         // 同時保存時間戳到變數中
                         if (result.timestamp) {
                             window.surveyTimestamp = result.timestamp;
@@ -379,39 +453,11 @@
                     }
                 }
             } catch (error) {
-                console.warn('無法從服務端 Session 讀取數據，嘗試使用 localStorage:', error);
-            }
-            
-            // 如果 Session 沒有數據，嘗試從 localStorage 讀取（向後兼容）
-            const raw = localStorage.getItem('survey_data');
-            if (raw) {
-                try {
-                    const data = JSON.parse(raw);
-                    if (data && Object.keys(data).length > 0) {
-                        console.log('✓ 從 localStorage survey_data 讀取到數據:', data);
-                        return data;
-                    }
-                } catch (e) {
-                    console.error('✗ 解析 survey_data 失敗:', e);
+                // 僅在開發環境顯示錯誤詳情
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.error('無法從服務端 Session 讀取數據:', error);
                 }
             }
-            
-            // 如果 survey_data 不存在或為空，從個別 localStorage 項目讀取
-            const data = {};
-            const keys = ['M1', 'M2', 'M3', 'M4', 'M5', 'open1', 'open2', 'open3', 'systemName'];
-            keys.forEach(key => {
-                const value = localStorage.getItem(`survey_${key}`);
-                if (value !== null && value !== '') {
-                    data[key] = value;
-                }
-            });
-            
-            if (Object.keys(data).length > 0) {
-                console.log('✓ 從個別 localStorage 項目讀取到數據:', data);
-                return data;
-            }
-            
-            console.warn('⚠ 未找到任何問卷數據');
             return null;
         }
 
@@ -420,10 +466,11 @@
             return Number.isFinite(n) ? n : 0;
         }
 
-        function computeRiskLevel(avg) {
-            // 始終返回中文，在顯示時再翻譯
-            if (avg >= 7) return '低';
-            if (avg >= 4) return '中';
+        function computeRiskLevel(total) {
+            // 根據總分（0-50）計算風險等級，始終返回中文，在顯示時再翻譯
+            // 0-20：高、21-35：中、36-50：低
+            if (total >= 36) return '低';
+            if (total >= 21) return '中';
             return '高';
         }
         
@@ -443,11 +490,11 @@
                     const n = Number(value);
                     return Number.isFinite(n) ? n : 0;
                 };
-                const m1 = toNumber((surveyData && (surveyData.M1 || surveyData.m1)) || localStorage.getItem('survey_M1') || 0);
-                const m2 = toNumber((surveyData && (surveyData.M2 || surveyData.m2)) || localStorage.getItem('survey_M2') || 0);
-                const m3 = toNumber((surveyData && (surveyData.M3 || surveyData.m3)) || localStorage.getItem('survey_M3') || 0);
-                const m4 = toNumber((surveyData && (surveyData.M4 || surveyData.m4)) || localStorage.getItem('survey_M4') || 0);
-                const m5 = toNumber((surveyData && (surveyData.M5 || surveyData.m5)) || localStorage.getItem('survey_M5') || 0);
+                const m1 = toNumber((surveyData && (surveyData.M1 || surveyData.m1)) || 0);
+                const m2 = toNumber((surveyData && (surveyData.M2 || surveyData.m2)) || 0);
+                const m3 = toNumber((surveyData && (surveyData.M3 || surveyData.m3)) || 0);
+                const m4 = toNumber((surveyData && (surveyData.M4 || surveyData.m4)) || 0);
+                const m5 = toNumber((surveyData && (surveyData.M5 || surveyData.m5)) || 0);
                 
                 // 重新生成風險改善建議和 AI 洞察（使用新語言）
                 generatePersonalizedAdvice(m1, m2, m3, m4, m5);
@@ -459,6 +506,8 @@
                 if (hasOpenAnswers && aiSection) {
                     aiSection.style.display = 'block';
                 }
+                // 重新更新開放式問題（會自動根據語言翻譯）
+                await updateOpenQuestions(surveyData);
                 await getAIInsights();
             }
         });
@@ -504,13 +553,29 @@
             try {
                 const data = await parseSurveyData();
             
-            // 更新系統名稱
+            // 更新專案資訊（專案名稱、系統名稱、系統代號、評估人角色）
+            const projectNameEl = document.getElementById('projectNameDisplay');
             const systemNameEl = document.getElementById('systemNameDisplay');
+            const systemCodeEl = document.getElementById('systemCodeDisplay');
+            const evaluatorRoleEl = document.getElementById('evaluatorRoleDisplay');
             const pdfSystemNameEl = document.getElementById('pdfSystemNameText');
-            const systemName = (data && data.systemName) || localStorage.getItem('survey_systemName') || '-';
             
+            const projectName = (data && data.projectName) || '-';
+            const systemName = (data && data.systemName) || '-';
+            const systemCode = (data && data.systemCode) || '-';
+            const evaluatorRole = (data && data.evaluatorRole) || '-';
+            
+            if (projectNameEl) {
+                projectNameEl.textContent = projectName;
+            }
             if (systemNameEl) {
                 systemNameEl.textContent = systemName;
+            }
+            if (systemCodeEl) {
+                systemCodeEl.textContent = systemCode;
+            }
+            if (evaluatorRoleEl) {
+                evaluatorRoleEl.textContent = evaluatorRole;
             }
             
             // 更新PDF專用的系統名稱顯示（只在需要生成PDF時顯示）
@@ -518,12 +583,79 @@
                 pdfSystemNameEl.textContent = systemName;
             }
             
-            // 更新評估日期（無論是否有數據都顯示）
-            const assessmentDateEl = document.getElementById('assessmentDate');
-            if (assessmentDateEl) {
-                // 優先使用從 Session 讀取的時間戳
-                const ts = window.surveyTimestamp || localStorage.getItem('survey_timestamp');
-                assessmentDateEl.textContent = formatTimestamp(ts) || '-';
+            // 生成並顯示報告編號
+            const reportIdEl = document.getElementById('reportIdDisplay');
+            if (reportIdEl && systemCode && systemCode !== '-') {
+                try {
+                    const response = await fetch('/Home/GenerateReportId', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ systemCode: systemCode })
+                    });
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.reportId) {
+                            reportIdEl.textContent = result.reportId;
+                            // 保存報告編號到 Session
+                            try {
+                                await fetch('/Home/SaveReportId', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ reportId: result.reportId })
+                                });
+                            } catch (err) {
+                                console.warn('保存報告編號到 Session 失敗:', err);
+                            }
+                        } else {
+                            // 嘗試從 Session 讀取已保存的報告編號
+                            try {
+                                const savedResponse = await fetch('/Home/GetReportId');
+                                if (savedResponse.ok) {
+                                    const savedResult = await savedResponse.json();
+                                    if (savedResult.success && savedResult.reportId && savedResult.reportId !== '-') {
+                                        reportIdEl.textContent = savedResult.reportId;
+                                    } else {
+                                        reportIdEl.textContent = '-';
+                                    }
+                                } else {
+                                    reportIdEl.textContent = '-';
+                                }
+                            } catch (err) {
+                                reportIdEl.textContent = '-';
+                            }
+                        }
+                    } else {
+                        // 嘗試從 Session 讀取已保存的報告編號
+                        try {
+                            const savedResponse = await fetch('/Home/GetReportId');
+                            if (savedResponse.ok) {
+                                const savedResult = await savedResponse.json();
+                                if (savedResult.success && savedResult.reportId && savedResult.reportId !== '-') {
+                                    reportIdEl.textContent = savedResult.reportId;
+                                } else {
+                                    reportIdEl.textContent = '-';
+                                }
+                            } else {
+                                reportIdEl.textContent = '-';
+                            }
+                        } catch (err) {
+                            reportIdEl.textContent = '-';
+                        }
+                    }
+                } catch (error) {
+                    console.warn('生成報告編號失敗:', error);
+                    reportIdEl.textContent = '-';
+                }
+            } else if (reportIdEl) {
+                reportIdEl.textContent = '-';
+            }
+            
+            // 更新評估時間（無論是否有數據都顯示）
+            const assessmentTimeEl = document.getElementById('assessmentTime');
+            if (assessmentTimeEl) {
+                // 使用從 Session 讀取的時間戳
+                const ts = window.surveyTimestamp;
+                assessmentTimeEl.textContent = formatTimestamp(ts) || '-';
             }
             
             // 檢查是否有有效的問卷數據（至少有一個 M 分數）
@@ -531,6 +663,11 @@
                                           data.m1 || data.m2 || data.m3 || data.m4 || data.m5);
             
             if (!hasValidData) {
+                // 僅在開發環境顯示詳細錯誤
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.error('✗ 沒有有效的問卷數據！顯示引導頁面。');
+                }
+                
                 // 沒有問卷數據，顯示引導頁面，隱藏報告內容
                 const reportContent = document.getElementById('reportContent');
                 const noReportGuide = document.getElementById('noReportGuide');
@@ -547,6 +684,8 @@
                 }
                 return;
             }
+            
+            console.log('✓ 有有效的問卷數據，繼續生成報告...');
             
             // 有數據，顯示報告內容，隱藏引導頁面
             const reportContent = document.getElementById('reportContent');
@@ -572,12 +711,10 @@
             const m4 = toNumber(data.M4 || data.m4 || 0);
             const m5 = toNumber(data.M5 || data.m5 || 0);
             
-            console.log('M1-M5 分數:', { m1, m2, m3, m4, m5 });
-            console.log('原始數據:', data);
+            // 移除詳細日誌（安全考量）
 
             const total = m1 + m2 + m3 + m4 + m5;
-            const avg = total / 5;
-            const level = computeRiskLevel(avg);
+            const level = computeRiskLevel(total);
 
             const totalScoreEl = document.getElementById('totalScore');
             if (totalScoreEl) {
@@ -585,6 +722,7 @@
             }
             
             const levelEl = document.getElementById('riskLevel');
+            const thresholdEl = document.getElementById('riskThreshold');
             if (levelEl) {
                 // 風險等級翻譯
                 const levelMap = {
@@ -597,9 +735,36 @@
                 else if (level === '中') levelEl.classList.add('medium');
                 else levelEl.classList.add('high');
             }
+            
+            // 顯示風險等級門檻說明
+            if (thresholdEl) {
+                const currentLang = i18n.currentLang || 'zh-TW';
+                const thresholdText = currentLang === 'zh-TW' 
+                    ? '0–20 高、21–35 中、36–50 低'
+                    : '0–20 High, 21–35 Medium, 36–50 Low';
+                thresholdEl.textContent = thresholdText;
+            }
 
-            // 更新建議行動
+            // 更新建議行動並調整英文版排版
             const actionEl = document.getElementById('riskAction');
+            if (actionEl && thresholdEl) {
+                const currentLang = i18n.currentLang || 'zh-TW';
+                if (currentLang === 'en-US') {
+                    // 英文版：建議和門檻說明都從風險等級徽章下方開始，左對齊
+                    actionEl.style.marginLeft = '0';
+                    actionEl.style.display = 'block';
+                    actionEl.style.marginTop = '6px';
+                    thresholdEl.style.marginLeft = '0';
+                    thresholdEl.style.marginTop = '4px';
+                } else {
+                    // 中文版：保持原有排版（建議在右邊，門檻說明在下方）
+                    actionEl.style.marginLeft = '12px';
+                    actionEl.style.display = 'inline-block';
+                    actionEl.style.marginTop = '0';
+                    thresholdEl.style.marginLeft = '0';
+                    thresholdEl.style.marginTop = '6px';
+                }
+            }
             if (actionEl) {
                 const actionMap = {
                     'zh-TW': {
@@ -617,15 +782,17 @@
                 actionEl.textContent = actionMap[currentLang]?.[level] || '';
             }
 
-            const ts = window.surveyTimestamp || localStorage.getItem('survey_timestamp');
+            const ts = window.surveyTimestamp;
             const surveyTimeEl = document.getElementById('surveyTime');
             if (surveyTimeEl) {
                 surveyTimeEl.textContent = formatTimestamp(ts);
             }
             
             // 更新評估日期
-            if (assessmentDateEl) {
-                assessmentDateEl.textContent = formatTimestamp(ts);
+            // 修復：使用正確的變數名 assessmentTimeEl（不是 assessmentDateEl）
+            const assessmentTimeElForUpdate = document.getElementById('assessmentTime');
+            if (assessmentTimeElForUpdate) {
+                assessmentTimeElForUpdate.textContent = formatTimestamp(ts) || '-';
             }
 
             // 風險改善建議改為 AI 生成
@@ -643,7 +810,13 @@
                 }
                 // 異步獲取 AI 建議（會更新內容並移除 data-i18n 屬性）
                 generatePersonalizedAdvice(m1, m2, m3, m4, m5, forceRegenerate);
+            } else {
+                // 如果建議已經生成，只更新交付物
+                updateDeliverables(m1, m2, m3, m4, m5);
             }
+
+            // 生成 30 天行動清單
+            generateActionPlan(m1, m2, m3, m4, m5, total);
 
             updateRadarChart(m1, m2, m3, m4, m5);
 
@@ -708,17 +881,51 @@
             scoreTable.style.display = 'block';
         }
 
-        function updateOpenQuestions(data) {
+        async function updateOpenQuestions(data) {
             const openQuestionsSection = document.getElementById('openQuestionsSection');
             const noOpenAnswers = document.getElementById('noOpenAnswers');
             let hasAnswers = false;
 
+            // 如果語言是英文，先翻譯內容
+            let displayData = { ...data };
+            const currentLang = i18n.currentLang || 'zh-TW';
+            if (currentLang === 'en-US' && (data.open1 || data.open2 || data.open3)) {
+                try {
+                    const translateResponse = await fetch('/Home/TranslateOpenQuestions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            lang: currentLang,
+                            open1: data.open1 || '',
+                            open2: data.open2 || '',
+                            open3: data.open3 || ''
+                        })
+                    });
+                    
+                    if (translateResponse.ok) {
+                        const translateResult = await translateResponse.json();
+                        if (translateResult.success) {
+                            displayData = {
+                                ...data,
+                                open1: translateResult.open1 || data.open1,
+                                open2: translateResult.open2 || data.open2,
+                                open3: translateResult.open3 || data.open3
+                            };
+                        }
+                    }
+                } catch (error) {
+                    console.warn('翻譯開放式問題失敗，使用原始內容:', error);
+                }
+            }
+
             // Check and display open1
-            if (data.open1 && data.open1.trim()) {
+            if (displayData.open1 && displayData.open1.trim()) {
                 const answerEl = document.getElementById('answer-open1');
                 const questionEl = document.getElementById('openQ1');
                 if (answerEl && questionEl) {
-                    answerEl.textContent = data.open1;
+                    answerEl.textContent = displayData.open1;
                     questionEl.style.display = 'block';
                     hasAnswers = true;
                 }
@@ -728,11 +935,11 @@
             }
 
             // Check and display open2
-            if (data.open2 && data.open2.trim()) {
+            if (displayData.open2 && displayData.open2.trim()) {
                 const answerEl = document.getElementById('answer-open2');
                 const questionEl = document.getElementById('openQ2');
                 if (answerEl && questionEl) {
-                    answerEl.textContent = data.open2;
+                    answerEl.textContent = displayData.open2;
                     questionEl.style.display = 'block';
                     hasAnswers = true;
                 }
@@ -742,11 +949,11 @@
             }
 
             // Check and display open3
-            if (data.open3 && data.open3.trim()) {
+            if (displayData.open3 && displayData.open3.trim()) {
                 const answerEl = document.getElementById('answer-open3');
                 const questionEl = document.getElementById('openQ3');
                 if (answerEl && questionEl) {
-                    answerEl.textContent = data.open3;
+                    answerEl.textContent = displayData.open3;
                     questionEl.style.display = 'block';
                     hasAnswers = true;
                 }
@@ -781,9 +988,9 @@
                 const surveyData = await parseSurveyData();
                 
                 // 提取補充說明
-                const m6 = (surveyData && surveyData.open1) || localStorage.getItem('survey_open1') || '';
-                const m7 = (surveyData && surveyData.open2) || localStorage.getItem('survey_open2') || '';
-                const m8 = (surveyData && surveyData.open3) || localStorage.getItem('survey_open3') || '';
+                const m6 = (surveyData && surveyData.open1) || '';
+                const m7 = (surveyData && surveyData.open2) || '';
+                const m8 = (surveyData && surveyData.open3) || '';
                 
                 // 檢查是否有任何補充說明
                 const hasOpenAnswers = (m6 && m6.trim()) || (m7 && m7.trim()) || (m8 && m8.trim());
@@ -800,14 +1007,14 @@
                     return Number.isFinite(n) ? n : 0;
                 };
                 
-                const m1 = toNumber((surveyData && (surveyData.M1 || surveyData.m1)) || localStorage.getItem('survey_M1') || 0);
-                const m2 = toNumber((surveyData && (surveyData.M2 || surveyData.m2)) || localStorage.getItem('survey_M2') || 0);
-                const m3 = toNumber((surveyData && (surveyData.M3 || surveyData.m3)) || localStorage.getItem('survey_M3') || 0);
-                const m4 = toNumber((surveyData && (surveyData.M4 || surveyData.m4)) || localStorage.getItem('survey_M4') || 0);
-                const m5 = toNumber((surveyData && (surveyData.M5 || surveyData.m5)) || localStorage.getItem('survey_M5') || 0);
+                const m1 = toNumber((surveyData && (surveyData.M1 || surveyData.m1)) || 0);
+                const m2 = toNumber((surveyData && (surveyData.M2 || surveyData.m2)) || 0);
+                const m3 = toNumber((surveyData && (surveyData.M3 || surveyData.m3)) || 0);
+                const m4 = toNumber((surveyData && (surveyData.M4 || surveyData.m4)) || 0);
+                const m5 = toNumber((surveyData && (surveyData.M5 || surveyData.m5)) || 0);
                 
                 // 顯示區塊並開始載入
-                console.log('找到補充說明，開始 AI 分析...', { m1, m2, m3, m4, m5, m6, m7, m8 });
+                // 移除敏感數據的 console.log（安全考量）
                 aiSection.style.display = 'block';
                 const currentLang = i18n.currentLang || 'zh-TW';
                 insightsLoading.textContent = currentLang === 'zh-TW' ? '分析中...' : 'Analyzing...';
@@ -826,7 +1033,7 @@
                     m8: m8 || ''
                 };
                 
-                console.log('發送 AI 請求數據:', m678Data);
+                // 移除敏感數據的 console.log（安全考量）
                 
                 // 創建 AbortController 用於超時控制
                 const controller = new AbortController();
@@ -849,8 +1056,7 @@
                     }
                     
                     const data = await response.json();
-                    console.log('AI 分析結果:', data);
-                    console.log('AI 洞察內容:', data.insights);
+                    // 移除 AI 生成內容的 console.log（安全考量：避免敏感資訊洩露）
                     
                     // 使用 requestAnimationFrame 確保 DOM 已更新
                     await new Promise(resolve => requestAnimationFrame(resolve));
@@ -874,7 +1080,7 @@
                     
                     if (data.insights && data.insights.trim()) {
                         // 顯示 AI 洞察內容，保留換行和格式
-                        console.log('更新 AI 洞察內容到元素');
+                        // 移除 console.log（安全考量）
                         
                         // 移除 data-i18n 屬性，避免 i18n.updatePage() 覆蓋內容
                         currentInsightsLoading.removeAttribute('data-i18n');
@@ -888,12 +1094,12 @@
                         // 顯示後，顯示刷新提示（如果存在）
                         const refreshHint = document.getElementById('aiRefreshHint');
                         if (refreshHint) {
-                            refreshHint.style.display = 'block';
+                            refreshHint.style.display = 'flex';
                             // 確保提示文字也更新語言（但不會影響已更新的 AI 內容）
                             i18n.updatePage();
                         }
                         
-                        console.log('✓ AI 洞察內容已成功更新');
+                        // 移除 console.log（安全考量）
                     } else {
                         console.warn('AI 洞察內容為空');
                         const currentLang = i18n.currentLang || 'zh-TW';
@@ -1013,8 +1219,11 @@
                     // 顯示 F5 提示
                     const refreshHint = document.getElementById('adviceRefreshHint');
                     if (refreshHint) {
-                        refreshHint.style.display = 'block';
+                        refreshHint.style.display = 'flex';
                     }
+                    
+                    // 更新最小交付物建議
+                    updateDeliverables(m1, m2, m3, m4, m5);
                 } else {
                     // 移除 data-i18n 屬性，避免被覆蓋
                     adviceEl.removeAttribute('data-i18n');
@@ -1034,6 +1243,380 @@
                         : 'Failed to load risk improvement recommendations, please try again later';
                 }
             }
+        }
+
+        // 最小交付物對應表（中文）
+        const deliverablesMapZh = {
+            'M1': ['交接清單', '文件目錄規範', '交接會議模板'],
+            'M2': ['需求追溯矩陣（RTM）', '變更紀錄表'],
+            'M3': ['變更影響評估表', '變更決策紀錄'],
+            'M4': ['驗收條件清單', 'Definition of Done 範本'],
+            'M5': ['角色責任表（RACI）', '會議節奏表']
+        };
+        
+        // 最小交付物對應表（英文）
+        const deliverablesMapEn = {
+            'M1': ['Handover Checklist', 'Documentation Structure', 'Handover Meeting Template'],
+            'M2': ['Requirements Traceability Matrix (RTM)', 'Change Log'],
+            'M3': ['Impact Analysis', 'Decision Record'],
+            'M4': ['Acceptance Criteria', 'Definition of Done Template'],
+            'M5': ['RACI Chart', 'Meeting Cadence']
+        };
+        
+        // 根據語言選擇對應的交付物表
+        function getDeliverablesMap() {
+            const currentLang = i18n.currentLang || 'zh-TW';
+            return currentLang === 'en-US' ? deliverablesMapEn : deliverablesMapZh;
+        }
+
+        // 決定要顯示哪些M的交付物（規則A、B、C）
+        function determineDeliverables(m1, m2, m3, m4, m5) {
+            const scores = [
+                { key: 'M1', value: m1, label: 'M1' },
+                { key: 'M2', value: m2, label: 'M2' },
+                { key: 'M3', value: m3, label: 'M3' },
+                { key: 'M4', value: m4, label: 'M4' },
+                { key: 'M5', value: m5, label: 'M5' }
+            ];
+
+            // 規則A：找出所有 M ≤ 6 的項目
+            const lowScores = scores.filter(item => item.value <= 6).sort((a, b) => a.value - b.value);
+
+            // 規則B：最多選前2個風險最高的M（分數最低的2個）
+            let selectedMs = [];
+            let isPreventive = false;
+
+            if (lowScores.length > 0) {
+                // 有M ≤ 6的情況
+                selectedMs = lowScores.slice(0, 2); // 最多2個
+            } else {
+                // 規則C：全部 > 6分，選分數最低的那一個作為預防性建議
+                const allSorted = scores.sort((a, b) => a.value - b.value);
+                selectedMs = [allSorted[0]]; // 選分數最低的
+                isPreventive = true;
+            }
+
+            return {
+                selectedMs: selectedMs,
+                isPreventive: isPreventive
+            };
+        }
+
+        // 生成最小交付物建議HTML
+        function generateDeliverablesHTML(m1, m2, m3, m4, m5) {
+            const result = determineDeliverables(m1, m2, m3, m4, m5);
+            const currentLang = i18n.currentLang || 'zh-TW';
+            
+            if (result.selectedMs.length === 0) {
+                return null;
+            }
+
+            let html = '';
+            
+            // 生成介紹文字
+            let introText = '';
+            if (result.isPreventive) {
+                introText = currentLang === 'zh-TW'
+                    ? '作為預防性強化，建議建立以下最小交付物，以降低未來交接與變更風險。'
+                    : 'As a preventive measure, it is recommended to establish the following minimum deliverables to reduce future handover and change risks.';
+            } else {
+                introText = currentLang === 'zh-TW'
+                    ? '針對評估中發現的風險項目，建議優先建立以下最小交付物：'
+                    : 'For the risk items identified in the assessment, it is recommended to prioritize establishing the following minimum deliverables:';
+            }
+
+            // 生成交付物列表
+            const deliverablesMap = getDeliverablesMap();
+            const separator = currentLang === 'zh-TW' ? '、' : ', ';
+            result.selectedMs.forEach((item, index) => {
+                const deliverables = deliverablesMap[item.key];
+                if (deliverables && deliverables.length > 0) {
+                    const deliverablesText = deliverables.join(separator);
+                    html += `<div style="margin-bottom: ${index < result.selectedMs.length - 1 ? '8px' : '0'};"><strong>${item.label}：</strong>${deliverablesText}</div>`;
+                }
+            });
+
+            return {
+                intro: introText,
+                list: html
+            };
+        }
+
+        // 更新最小交付物顯示
+        function updateDeliverables(m1, m2, m3, m4, m5) {
+            const deliverablesBlock = document.getElementById('deliverablesBlock');
+            const deliverablesIntro = document.getElementById('deliverablesIntro');
+            const deliverablesList = document.getElementById('deliverablesList');
+
+            if (!deliverablesBlock || !deliverablesIntro || !deliverablesList) {
+                return;
+            }
+
+            const content = generateDeliverablesHTML(m1, m2, m3, m4, m5);
+            
+            if (content) {
+                deliverablesIntro.textContent = content.intro;
+                deliverablesList.innerHTML = content.list;
+                deliverablesBlock.style.display = 'block';
+            } else {
+                deliverablesBlock.style.display = 'none';
+            }
+        }
+
+        // 判斷是否需要顯示 30 天行動清單
+        function shouldShowActionPlan(m1, m2, m3, m4, m5, total) {
+            // 條件 A：是否存在任一 M ≤ 6？
+            const hasLowM = m1 <= 6 || m2 <= 6 || m3 <= 6 || m4 <= 6 || m5 <= 6;
+            
+            // 條件 B：整體 Risk Level 是否為 High？（total ≤ 20）
+            const isHighRisk = total <= 20;
+            
+            // 若（條件 A 為真）或（條件 B 為真）→ 顯示
+            return hasLowM || isHighRisk;
+        }
+
+        // 選擇風險最高的 1 個 M（分數最低者）
+        function selectHighestRiskM(m1, m2, m3, m4, m5) {
+            const currentLang = i18n.currentLang || 'zh-TW';
+            const nameMap = {
+                'zh-TW': {
+                    'M1': '系統交接',
+                    'M2': '需求追溯',
+                    'M3': '變更預測',
+                    'M4': '驗收標準',
+                    'M5': '溝通成本'
+                },
+                'en-US': {
+                    'M1': 'System Handover',
+                    'M2': 'Requirements Traceability',
+                    'M3': 'Change Prediction',
+                    'M4': 'Acceptance Criteria',
+                    'M5': 'Communication Cost'
+                }
+            };
+            
+            const scores = [
+                { key: 'M1', value: m1, label: 'M1', name: nameMap[currentLang]['M1'] },
+                { key: 'M2', value: m2, label: 'M2', name: nameMap[currentLang]['M2'] },
+                { key: 'M3', value: m3, label: 'M3', name: nameMap[currentLang]['M3'] },
+                { key: 'M4', value: m4, label: 'M4', name: nameMap[currentLang]['M4'] },
+                { key: 'M5', value: m5, label: 'M5', name: nameMap[currentLang]['M5'] }
+            ];
+            
+            // 按分數由低到高排序，取第一個（分數最低的）
+            const sorted = scores.sort((a, b) => a.value - b.value);
+            return sorted[0];
+        }
+
+        // 取得最基礎/最快完成的交付物（7 天內）
+        function getBasicDeliverable(mKey) {
+            const deliverablesMap = getDeliverablesMap();
+            const deliverables = deliverablesMap[mKey];
+            if (!deliverables || deliverables.length === 0) return null;
+            // 返回第一個（最基礎的）
+            return deliverables[0];
+        }
+
+        // 生成 30 天行動清單
+        async function generateActionPlan(m1, m2, m3, m4, m5, total) {
+            const actionPlanSection = document.getElementById('actionPlanSection');
+            const actionPlanContent = document.getElementById('actionPlanContent');
+            const riskControlledMessage = document.getElementById('riskControlledMessage');
+            const riskControlledText = document.getElementById('riskControlledText');
+            
+            if (!actionPlanSection || !actionPlanContent) {
+                return;
+            }
+
+            const shouldShow = shouldShowActionPlan(m1, m2, m3, m4, m5, total);
+            const currentLang = i18n.currentLang || 'zh-TW';
+
+            if (!shouldShow) {
+                // 不顯示行動清單，顯示風險可控說明
+                actionPlanSection.style.display = 'block';
+                actionPlanContent.style.display = 'none';
+                riskControlledMessage.style.display = 'block';
+                
+                const controlledText = currentLang === 'zh-TW'
+                    ? '根據本次評估結果，您的專案風險處於可控範圍內。建議持續關注各項指標的變化，並定期進行複評以確保風險管理機制有效運作。'
+                    : 'Based on this assessment, your project risks are within a controllable range. It is recommended to continue monitoring changes in each indicator and conduct regular reviews to ensure risk management mechanisms are operating effectively.';
+                
+                riskControlledText.textContent = controlledText;
+                return;
+            }
+
+            // 顯示行動清單
+            actionPlanSection.style.display = 'block';
+            actionPlanContent.style.display = 'block';
+            riskControlledMessage.style.display = 'none';
+
+            // 選擇風險最高的 M
+            const selectedM = selectHighestRiskM(m1, m2, m3, m4, m5);
+            const basicDeliverable = getBasicDeliverable(selectedM.key);
+            
+            if (!basicDeliverable) {
+                actionPlanContent.innerHTML = currentLang === 'zh-TW' 
+                    ? '<p>無法生成行動清單</p>'
+                    : '<p>Unable to generate action plan</p>';
+                return;
+            }
+
+            // 顯示載入中
+            actionPlanContent.innerHTML = currentLang === 'zh-TW' 
+                ? '<p>生成中...</p>'
+                : '<p>Generating...</p>';
+
+            try {
+                // 調用 AI 生成行動清單
+                const deliverables = getDeliverablesMap()[selectedM.key] || [];
+                // 移除敏感數據的 console.log（安全考量）
+                
+                const response = await fetch('/Home/GenerateActionPlan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lang: currentLang,
+                        mKey: selectedM.key,
+                        mValue: String(selectedM.value),
+                        mName: selectedM.name,
+                        basicDeliverable: basicDeliverable,
+                        allDeliverables: JSON.stringify(deliverables)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`無法獲取行動清單 (${response.status})`);
+                }
+
+                const data = await response.json();
+                if (data.success && data.actionPlan) {
+                    // 格式化並顯示行動清單
+                    const formattedPlan = formatActionPlan(data.actionPlan, currentLang);
+                    actionPlanContent.innerHTML = formattedPlan;
+                } else {
+                    const errorMsg = data.message || (currentLang === 'zh-TW' ? '無法生成行動清單' : 'Unable to generate action plan');
+                    console.error('行動清單生成失敗:', data);
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error('行動清單載入錯誤:', error);
+                const errorMessage = error.message || (currentLang === 'zh-TW' ? '未知錯誤' : 'Unknown error');
+                actionPlanContent.innerHTML = currentLang === 'zh-TW'
+                    ? `<p style="color: #ff6b6b;">行動清單載入失敗：${errorMessage}<br>請檢查瀏覽器控制台以獲取詳細資訊。</p>`
+                    : `<p style="color: #ff6b6b;">Failed to load action plan: ${errorMessage}<br>Please check the browser console for details.</p>`;
+            }
+        }
+
+        // 格式化行動清單 HTML
+        function formatActionPlan(actionPlan, lang) {
+            const title = lang === 'zh-TW' 
+                ? '本次評估的下一步行動清單（30 天）'
+                : 'Next Steps Action Plan (30 Days) for This Assessment';
+            
+            let html = `<h3 style="font-size: 14px; font-weight: 600; color: #e0e0e0; margin-bottom: 16px;">${title}</h3>`;
+            
+            if (actionPlan.day7) {
+                const day7Title = lang === 'zh-TW' ? '7 天內｜建立基礎' : 'Within 7 Days | Establish Foundation';
+                html += `<div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #d0d0d0; margin-bottom: 8px;">${day7Title}</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #b0b0b0; line-height: 1.8;">
+                        <li>${actionPlan.day7}</li>
+                    </ul>
+                </div>`;
+            }
+            
+            if (actionPlan.day14) {
+                const day14Title = lang === 'zh-TW' ? '14 天內｜形成機制' : 'Within 14 Days | Form Mechanism';
+                html += `<div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #d0d0d0; margin-bottom: 8px;">${day14Title}</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #b0b0b0; line-height: 1.8;">
+                        <li>${actionPlan.day14}</li>
+                    </ul>
+                </div>`;
+            }
+            
+            if (actionPlan.day30) {
+                const day30Title = lang === 'zh-TW' ? '30 天內｜演練與驗證' : 'Within 30 Days | Practice and Verify';
+                html += `<div style="margin-bottom: 0;">
+                    <h4 style="font-size: 13px; font-weight: 600; color: #d0d0d0; margin-bottom: 8px;">${day30Title}</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #b0b0b0; line-height: 1.8;">
+                        <li>${actionPlan.day30}</li>
+                    </ul>
+                </div>`;
+            }
+            
+            return html;
+        }
+
+        // 格式化行動清單 HTML（用於 PDF）
+        function formatActionPlanForPDF(actionPlan, lang) {
+            const title = lang === 'zh-TW' 
+                ? '本次評估的下一步行動清單（30 天）'
+                : 'Next Steps Action Plan (30 Days) for This Assessment';
+            
+            let html = `<h4 style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 12px;">${title}</h4>`;
+            
+            if (actionPlan.day7) {
+                const day7Title = lang === 'zh-TW' ? '7 天內｜建立基礎' : 'Within 7 Days | Establish Foundation';
+                html += `<div style="margin-bottom: 12px;">
+                    <h5 style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px;">${day7Title}</h5>
+                    <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.6; padding-left: 12px;">${actionPlan.day7}</p>
+                </div>`;
+            }
+            
+            if (actionPlan.day14) {
+                const day14Title = lang === 'zh-TW' ? '14 天內｜形成機制' : 'Within 14 Days | Form Mechanism';
+                html += `<div style="margin-bottom: 12px;">
+                    <h5 style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px;">${day14Title}</h5>
+                    <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.6; padding-left: 12px;">${actionPlan.day14}</p>
+                </div>`;
+            }
+            
+            if (actionPlan.day30) {
+                const day30Title = lang === 'zh-TW' ? '30 天內｜演練與驗證' : 'Within 30 Days | Practice and Verify';
+                html += `<div style="margin-bottom: 0;">
+                    <h5 style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px;">${day30Title}</h5>
+                    <p style="margin: 0; font-size: 11px; color: #666; line-height: 1.6; padding-left: 12px;">${actionPlan.day30}</p>
+                </div>`;
+            }
+            
+            return html;
+        }
+        
+        // 從 HTML 內容轉換為 PDF 格式（用於確保 PDF 和頁面一致）
+        function formatActionPlanForPDFFromHTML(htmlContent, lang) {
+            // 創建臨時元素來解析 HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            // 提取文本內容並格式化
+            const text = tempDiv.textContent || tempDiv.innerText || '';
+            return formatActionPlanForPDFFromText(text, lang);
+        }
+        
+        // 從純文本內容轉換為 PDF 格式
+        function formatActionPlanForPDFFromText(text, lang) {
+            // 簡單的文本格式化，保持原有的段落結構
+            const lines = text.split('\n').filter(line => line.trim());
+            let formatted = '';
+            
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed) {
+                    // 檢查是否是標題（包含天數）
+                    if (trimmed.includes('7') && (trimmed.includes('天') || trimmed.includes('day'))) {
+                        formatted += `<h4 style="margin: 12px 0 6px 0; font-size: 13px; font-weight: 600; color: #333;">${trimmed}</h4>`;
+                    } else if (trimmed.includes('14') && (trimmed.includes('天') || trimmed.includes('day'))) {
+                        formatted += `<h4 style="margin: 12px 0 6px 0; font-size: 13px; font-weight: 600; color: #333;">${trimmed}</h4>`;
+                    } else if (trimmed.includes('30') && (trimmed.includes('天') || trimmed.includes('day'))) {
+                        formatted += `<h4 style="margin: 12px 0 6px 0; font-size: 13px; font-weight: 600; color: #333;">${trimmed}</h4>`;
+                    } else {
+                        formatted += `<p style="margin: 0 0 8px 0; font-size: 11px; line-height: 1.6; color: #555;">${trimmed}</p>`;
+                    }
+                }
+            });
+            
+            return formatted || text;
         }
 
         // 添加頁首頁尾的輔助函數
@@ -1249,17 +1832,68 @@
             const data = await parseSurveyData();
             if (!data) return null;
 
-            const systemName = (data && data.systemName) || localStorage.getItem('survey_systemName') || '-';
-            const timestamp = window.surveyTimestamp || localStorage.getItem('survey_timestamp');
+            // 專案資訊
+            const projectName = (data && data.projectName) || '-';
+            const systemName = (data && data.systemName) || '-';
+            const systemCode = (data && data.systemCode) || '-';
+            const evaluatorRole = (data && data.evaluatorRole) || '-';
+            
+            // 從 Session 獲取報告編號
+            let reportId = '-';
+            try {
+                const reportIdResponse = await fetch('/Home/GetReportId');
+                if (reportIdResponse.ok) {
+                    const reportIdResult = await reportIdResponse.json();
+                    if (reportIdResult.success && reportIdResult.reportId) {
+                        reportId = reportIdResult.reportId;
+                    }
+                }
+            } catch (error) {
+                console.warn('獲取報告編號失敗:', error);
+            }
+            
+            const timestamp = window.surveyTimestamp;
+            const assessmentTime = formatTimestamp(timestamp) || '-';
             const m1 = toNumber(data.M1 || 0);
             const m2 = toNumber(data.M2 || 0);
             const m3 = toNumber(data.M3 || 0);
             const m4 = toNumber(data.M4 || 0);
             const m5 = toNumber(data.M5 || 0);
             const total = m1 + m2 + m3 + m4 + m5;
-            const avg = total / 5;
-            const level = computeRiskLevel(avg);
+            const level = computeRiskLevel(total);
             const currentLang = i18n.currentLang || 'zh-TW';
+            
+            // 如果語言是英文，翻譯 M6-M8 內容
+            let open1 = data.open1 || '';
+            let open2 = data.open2 || '';
+            let open3 = data.open3 || '';
+            if (currentLang === 'en-US' && (open1 || open2 || open3)) {
+                try {
+                    const translateResponse = await fetch('/Home/TranslateOpenQuestions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            lang: currentLang,
+                            open1: open1,
+                            open2: open2,
+                            open3: open3
+                        })
+                    });
+                    
+                    if (translateResponse.ok) {
+                        const translateResult = await translateResponse.json();
+                        if (translateResult.success) {
+                            open1 = translateResult.open1 || open1;
+                            open2 = translateResult.open2 || open2;
+                            open3 = translateResult.open3 || open3;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('PDF 翻譯開放式問題失敗，使用原始內容:', error);
+                }
+            }
             
             // 風險等級翻譯
             const levelMap = {
@@ -1269,37 +1903,113 @@
             const riskLevelText = levelMap[currentLang]?.[level] || level;
             
             // 獲取 AI 生成的風險改善建議
+            // 優先使用頁面上已顯示的建議內容，確保 PDF 和頁面一致
             let adviceText = i18n.t('Report.DefaultAdvice');
             try {
-                const adviceData = {
-                    lang: currentLang,
-                    m1: String(m1),
-                    m2: String(m2),
-                    m3: String(m3),
-                    m4: String(m4),
-                    m5: String(m5)
-                };
-                
-                const adviceResponse = await fetch('/Home/GeneratePersonalizedAdvice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(adviceData)
-                });
-                
-                if (adviceResponse.ok) {
-                    const adviceResult = await adviceResponse.json();
-                    if (adviceResult.advice) {
-                        adviceText = adviceResult.advice;
+                // 先檢查頁面上是否已有 AI 生成的建議內容
+                const pageAdviceEl = document.getElementById('adviceText');
+                if (pageAdviceEl && pageAdviceEl.textContent && 
+                    !pageAdviceEl.textContent.includes('將根據您的問卷結果') &&
+                    !pageAdviceEl.textContent.includes('will be generated') &&
+                    !pageAdviceEl.textContent.includes('分析中') &&
+                    !pageAdviceEl.textContent.includes('Analyzing')) {
+                    // 使用頁面上的內容
+                    adviceText = pageAdviceEl.textContent.trim();
+                } else {
+                    // 如果頁面沒有內容，則重新調用 API
+                    const adviceData = {
+                        lang: currentLang,
+                        m1: String(m1),
+                        m2: String(m2),
+                        m3: String(m3),
+                        m4: String(m4),
+                        m5: String(m5)
+                    };
+                    
+                    const adviceResponse = await fetch('/Home/GeneratePersonalizedAdvice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(adviceData)
+                    });
+                    
+                    if (adviceResponse.ok) {
+                        const adviceResult = await adviceResponse.json();
+                        if (adviceResult.advice) {
+                            adviceText = adviceResult.advice;
+                        }
                     }
                 }
             } catch (error) {
-                console.error('PDF 風險改善建議載入失敗:', error);
+                // 移除 console.error（安全考量）
                 // 如果失敗，使用預設建議
                 if (m3 <= 6) {
                     adviceText = i18n.t('Report.AdviceLow');
                 } else {
                     adviceText = i18n.t('Report.AdviceNormal');
                 }
+            }
+
+            // 獲取 30 天行動清單
+            // 優先使用頁面上已顯示的行動清單內容，確保 PDF 和頁面一致
+            let actionPlanContent = '';
+            const shouldShowPlan = shouldShowActionPlan(m1, m2, m3, m4, m5, total);
+            if (shouldShowPlan) {
+                try {
+                    // 先檢查頁面上是否已有行動清單內容
+                    const pageActionPlanEl = document.getElementById('actionPlanContent');
+                    if (pageActionPlanEl && pageActionPlanEl.innerHTML && 
+                        !pageActionPlanEl.textContent.includes('生成中') &&
+                        !pageActionPlanEl.textContent.includes('Generating') &&
+                        !pageActionPlanEl.textContent.includes('無法生成') &&
+                        !pageActionPlanEl.textContent.includes('Unable to')) {
+                        // 使用頁面上的內容
+                        actionPlanContent = formatActionPlanForPDFFromHTML(pageActionPlanEl.innerHTML, currentLang);
+                    } else {
+                        // 如果頁面沒有內容，則重新調用 API
+                        const selectedM = selectHighestRiskM(m1, m2, m3, m4, m5);
+                        const basicDeliverable = getBasicDeliverable(selectedM.key);
+                        
+                        if (basicDeliverable) {
+                            const actionPlanData = {
+                                lang: currentLang,
+                                mKey: selectedM.key,
+                                mValue: String(selectedM.value),
+                                mName: selectedM.name,
+                                basicDeliverable: basicDeliverable,
+                                allDeliverables: JSON.stringify(getDeliverablesMap()[selectedM.key] || [])
+                            };
+                            
+                            const actionPlanResponse = await fetch('/Home/GenerateActionPlan', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(actionPlanData)
+                            });
+                            
+                            if (actionPlanResponse.ok) {
+                                const actionPlanResult = await actionPlanResponse.json();
+                                if (actionPlanResult.success && actionPlanResult.actionPlan) {
+                                    actionPlanContent = formatActionPlanForPDF(actionPlanResult.actionPlan, currentLang);
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    // 移除 console.error（安全考量）
+                }
+            } else {
+                // 風險可控說明
+                const controlledText = currentLang === 'zh-TW'
+                    ? '根據本次評估結果，您的專案風險處於可控範圍內。建議持續關注各項指標的變化，並定期進行複評以確保風險管理機制有效運作。'
+                    : 'Based on this assessment, your project risks are within a controllable range. It is recommended to continue monitoring changes in each indicator and conduct regular reviews to ensure risk management mechanisms are operating effectively.';
+                actionPlanContent = `<p style="margin: 0; font-size: 12px; line-height: 1.6; color: #666; padding: 12px; background: rgba(56, 142, 60, 0.1); border-radius: 4px; border-left: 3px solid #388e3c;">${controlledText}</p>`;
+            }
+            
+            // 確保 actionPlanContent 有內容（即使失敗也要顯示區塊）
+            if (!actionPlanContent) {
+                const errorText = currentLang === 'zh-TW'
+                    ? '行動清單生成中...'
+                    : 'Generating action plan...';
+                actionPlanContent = `<p style="margin: 0; font-size: 12px; line-height: 1.6; color: #666;">${errorText}</p>`;
             }
 
             // 創建 PDF 專用容器（使用 A4 尺寸優化）
@@ -1319,9 +2029,9 @@
                 line-height: 1.5;
             `;
 
-            // 系統名稱
+            // 專案資訊和標題
             pdfContainer.innerHTML = `
-                <!-- 系統名稱和標題 -->
+                <!-- 專案資訊和標題 -->
                 <div class="pdf-header" style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ddd;">
                     <h1 style="margin: 0 0 4px 0; font-size: 18px; color: #333; font-weight: 600;">${systemName || 'DocEngine'}</h1>
                     <h2 style="margin: 0; font-size: 14px; color: #666; font-weight: 500;">${i18n.t('Report.Title')}</h2>
@@ -1330,17 +2040,32 @@
                 <!-- 報告信息（緊湊） -->
                 <div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; border-radius: 4px; font-size: 9px; color: #555; line-height: 1.4;">
                     <div style="margin-bottom: 3px;">
-                        <strong>${i18n.t('Report.AssessmentDate')}:</strong> ${formatTimestamp(timestamp)}
+                        <strong>${i18n.t('Report.ProjectName')}:</strong> ${projectName}
                     </div>
-                    <div>
-                        <strong>${i18n.t('Assessment.MaturityLabel')}</strong>${i18n.t('Assessment.MaturityDesc')}
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.SystemName')}:</strong> ${systemName}
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.SystemCode')}:</strong> ${systemCode}
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.EvaluatorRole')}:</strong> ${evaluatorRole}
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.ReportId')}:</strong> ${reportId}
+                    </div>
+                    <div style="margin-bottom: 3px;">
+                        <strong>${i18n.t('Report.AssessmentTime')}:</strong> ${assessmentTime}
                     </div>
                 </div>
 
                 <!-- 雷達圖與風險分數區塊（並排） -->
                 <div class="pdf-block" data-block="radar" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
                     <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.RadarTitle')}</h3>
-                    <p style="margin: 0 0 12px 0; font-size: 10px; color: #666;">${i18n.t('Report.RadarDesc')}</p>
+                    <p style="margin: 0 0 8px 0; font-size: 10px; color: #666;">${i18n.t('Report.RadarDesc')}</p>
+                    <p style="margin: 0 0 12px 0; font-size: 9px; color: #777; line-height: 1.4;">
+                        <strong>${i18n.t('Assessment.MaturityLabel')}</strong>${i18n.t('Assessment.MaturityDesc')}
+                    </p>
                     <div style="display: flex; gap: 16px; align-items: flex-start;">
                         <!-- 雷達圖（左側） -->
                         <div style="flex: 1; text-align: center;">
@@ -1384,6 +2109,9 @@
                                             ? (level === '高' ? '建議於 1–2 個月內啟動改善' : level === '中' ? '建議納入季度檢視' : '建議半年複查')
                                             : (level === '高' ? 'Recommend initiating improvements within 1–2 months' : level === '中' ? 'Recommend quarterly review' : 'Recommend semi-annual review')}
                                     </div>
+                                    <div style="font-size: 8px; color: #999; margin-top: 4px; text-align: left; line-height: 1.2;">
+                                        ${currentLang === 'zh-TW' ? '0–20 高、21–35 中、36–50 低' : '0–20 High, 21–35 Medium, 36–50 Low'}
+                                    </div>
                                 </div>
                                 <div style="padding: 8px 0;">
                                     <div style="font-size: 9px; color: #666; margin-bottom: 4px; text-align: left;">${i18n.t('Report.SampleTime')}</div>
@@ -1413,31 +2141,45 @@
                 <!-- 風險改善建議區塊 -->
                 <div class="pdf-block" data-block="advice" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
                     <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.ImprovementAdvice')}</h3>
-                    <div style="margin: 0; font-size: 12px; line-height: 1.6; color: #444;">${formatAdviceText(adviceText)}</div>
+                    <div style="margin: 0 0 20px 0; font-size: 12px; line-height: 1.6; color: #444;">${formatAdviceText(adviceText)}</div>
+                    
+                    ${(() => {
+                        const deliverablesContent = generateDeliverablesHTML(m1, m2, m3, m4, m5);
+                        if (deliverablesContent) {
+                            return `
+                                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                                    <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: #333;">${currentLang === 'zh-TW' ? '本次評估建議之最小交付物：' : 'Recommended Minimum Deliverables for This Assessment:'}</h4>
+                                    <p style="margin: 0 0 12px 0; font-size: 11px; color: #666; line-height: 1.5;">${deliverablesContent.intro}</p>
+                                    <div style="font-size: 11px; color: #555; line-height: 1.8;">${deliverablesContent.list}</div>
+                                </div>
+                            `;
+                        }
+                        return '';
+                    })()}
                 </div>
 
                 <!-- 補充說明區塊（調整順序，放在風險洞察之前） -->
-                ${data.open1 || data.open2 || data.open3 ? `
+                ${open1 || open2 || open3 ? `
                 <div class="pdf-block" data-block="open-questions" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
                     <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.OpenQuestions')}</h3>
                     <p style="margin: 0 0 12px 0; font-size: 10px; color: #666;">${i18n.t('Report.OpenQuestionsDesc')}</p>
-                    ${data.open1 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                    ${open1 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
                         <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ6')}</h4>
-                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open1}</p>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${open1}</p>
                     </div>` : ''}
-                    ${data.open2 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                    ${open2 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
                         <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ7')}</h4>
-                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open2}</p>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${open2}</p>
                     </div>` : ''}
-                    ${data.open3 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
+                    ${open3 ? `<div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 4px;">
                         <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #333;">${i18n.t('Assessment.OpenQ8')}</h4>
-                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${data.open3}</p>
+                        <p style="margin: 0; font-size: 11px; line-height: 1.4; color: #555; white-space: pre-wrap;">${open3}</p>
                     </div>` : ''}
                 </div>
                 ` : ''}
 
                 <!-- 風險洞察區塊（調整順序，放在補充說明之後） -->
-                ${(data.open1 || data.open2 || data.open3) ? `
+                ${(open1 || open2 || open3) ? `
                 <div class="pdf-block" data-block="ai-insights" style="margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
                     <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.AIInsights')}</h3>
                     <p style="margin: 0 0 12px 0; font-size: 10px; color: #666;">${i18n.t('Report.AIInsightsDesc')}</p>
@@ -1447,19 +2189,30 @@
                 </div>
                 ` : ''}
 
+                <!-- 30 天行動清單區塊 -->
+                ${actionPlanContent ? `
+                <div class="pdf-block" data-block="action-plan" style="margin-top: 24px; margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; page-break-inside: avoid;">
+                    <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #333; font-weight: 600;">${i18n.t('Report.ActionPlanTitle')}</h3>
+                    <div style="font-size: 12px; line-height: 1.6; color: #555;">
+                        ${actionPlanContent}
+                    </div>
+                </div>
+                ` : ''}
+
                 <!-- 免責聲明區塊 -->
                 <div class="pdf-block" data-block="disclaimer" style="margin-top: 24px; margin-bottom: 16px; padding: 14px; background: #f8f8f8; border-radius: 6px; border-left: 3px solid #6200ea; page-break-inside: avoid;">
-                    <h3 style="margin: 0 0 8px 0; font-size: 13px; color: #333; font-weight: 600;">${currentLang === 'zh-TW' ? '本報告適用於' : 'This report is applicable for:'}</h3>
                     <div style="font-size: 10px; line-height: 1.8; color: #555;">
                         ${currentLang === 'zh-TW' 
-                            ? `本報告適用於：<br/>
+                            ? `本報告依使用者自填資料產出<br/><br/>
+本報告適用於：<br/>
 ‧ 軟體專案風險盤點<br/>
 ‧ 系統交接與治理檢視<br/>
 不取代：<br/>
 ‧ 稽核<br/>
 ‧ 法規認證<br/>
 ‧ 程式碼安全掃描`
-                            : `This report is applicable for:<br/>
+                            : `This report is generated based on user-provided data.<br/><br/>
+This report is applicable for:<br/>
 ‧ Software project risk assessment<br/>
 ‧ System handover and governance review<br/>
 Does not replace:<br/>
@@ -1491,7 +2244,7 @@ Does not replace:<br/>
             // 獲取並填充 AI 洞察內容（如果有補充說明）
             // 優先使用頁面上已顯示的 AI 洞察內容，確保 PDF 和頁面一致
             const pdfAiInsights = pdfContainer.querySelector('#pdf-ai-insights');
-            if (pdfAiInsights && (data.open1 || data.open2 || data.open3)) {
+            if (pdfAiInsights && (open1 || open2 || open3)) {
                 try {
                     // 先檢查頁面上是否已有 AI 洞察內容
                     const pageInsightsEl = document.getElementById('insights-loading');
@@ -1506,7 +2259,7 @@ Does not replace:<br/>
                         !pageInsightsEl.textContent.includes('Failed to')) {
                         // 使用頁面上的內容（去除 HTML 標籤後重新格式化）
                         aiContent = pageInsightsEl.innerHTML;
-                        console.log('使用頁面上已顯示的 AI 洞察內容');
+                        // 移除 console.log（安全考量）
                     }
                     
                     if (aiContent) {
@@ -1514,9 +2267,9 @@ Does not replace:<br/>
                         pdfAiInsights.innerHTML = aiContent;
                     } else {
                         // 如果頁面沒有內容，則重新調用 API
-                        const m6 = data.open1 || '';
-                        const m7 = data.open2 || '';
-                        const m8 = data.open3 || '';
+                        const m6 = open1 || '';
+                        const m7 = open2 || '';
+                        const m8 = open3 || '';
                         
                         const m678Data = {
                             lang: currentLang,
@@ -1570,7 +2323,8 @@ Does not replace:<br/>
         async function downloadPdf() {
             try {
                 // 獲取系統名稱用於文件名和頁首
-                const systemName = localStorage.getItem('survey_systemName') || 'DocEngine';
+                const data = await parseSurveyData();
+                const systemName = (data && data.systemName) || 'DocEngine';
                 const safeFileName = systemName.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
                 const fileName = `${safeFileName}-Risk-Report.pdf`;
 

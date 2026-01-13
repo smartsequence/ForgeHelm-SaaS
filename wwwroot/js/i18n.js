@@ -1,6 +1,21 @@
 // 簡化的多語言支援系統
+// Cookie 輔助函數
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+function setCookie(name, value, days = 365) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    // 使用 SameSite=Lax 以確保跨頁面導航時 Cookie 可用
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
 const i18n = {
-    currentLang: localStorage.getItem('lang') || 'zh-TW',
+    currentLang: getCookie('lang') || 'zh-TW',
     
     translations: {
         'zh-TW': {
@@ -60,10 +75,16 @@ const i18n = {
             'Assessment.Subtitle': '請根據您的專案現況，評估以下各項指標（0-10分）',
             'Assessment.MaturityLabel': 'M = 成熟度 (Maturity)',
             'Assessment.MaturityDesc': '：評估各項流程與能力的成熟程度，分數越高表示該領域越成熟',
+            'Assessment.ProjectNameLabel': '專案名稱',
+            'Assessment.ProjectNamePlaceholder': '請輸入專案名稱',
             'Assessment.SystemNameLabel': '系統名稱',
             'Assessment.SystemNamePlaceholder': '請輸入要評估的系統名稱',
+            'Assessment.SystemCodeLabel': '系統代號',
+            'Assessment.SystemCodePlaceholder': '請輸入系統代號（如：ADM）',
+            'Assessment.EvaluatorRoleLabel': '評估人角色',
+            'Assessment.EvaluatorRolePlaceholder': '請輸入或選擇評估人角色（如：PM、SA、PG等）',
             'Assessment.M1': 'M1 系統交接',
-            'Assessment.M1Desc': '新人不需1個月上手？',
+            'Assessment.M1Desc': '新人能在1個月內上手嗎？（分數越高代表上手時間越短）',
             'Assessment.M2': 'M2 需求追溯',
             'Assessment.M2Desc': '設計決策能找到依據？',
             'Assessment.M3': 'M3 變更預測',
@@ -71,7 +92,7 @@ const i18n = {
             'Assessment.M4': 'M4 驗收標準',
             'Assessment.M4Desc': '團隊對「完成」理解一致？',
             'Assessment.M5': 'M5 溝通成本',
-            'Assessment.M5Desc': '跨角色對齊需幾次會議？',
+            'Assessment.M5Desc': '跨角色對齊的溝通效率如何？（分數越高代表溝通越順暢，需要會議次數越少）',
             'Assessment.OpenQ6': '問題 6. 請描述您的專案面臨的主要挑戰',
             'Assessment.OpenQ7': '問題 7. 請說明您期望改善的領域',
             'Assessment.OpenQ8': '問題 8. 請提供其他相關資訊',
@@ -91,13 +112,19 @@ const i18n = {
             'Report.RadarM5': 'M5 溝通',
             'Report.FingerprintTitle': '風險指紋總結',
             'Report.FingerprintDesc': '整體風險輪廓與建議',
+            'Report.ProjectName': '專案名稱',
             'Report.SystemName': '系統名稱',
-            'Report.AssessmentDate': '評估日期',
+            'Report.SystemCode': '系統代號',
+            'Report.EvaluatorRole': '評估人角色',
+            'Report.ReportId': '報告編號',
+            'Report.AssessmentTime': '評估時間',
+            'Report.RiskLevelThreshold': '0–20 高、21–35 中、36–50 低',
             'Report.TotalScore': '總分',
             'Report.RiskLevel': '風險等級',
             'Report.SampleTime': '樣本時間',
             'Report.ImprovementAdvice': '風險改善建議',
             'Report.DefaultAdvice': '將根據您的問卷結果產生具體建議。',
+            'Report.DeliverablesTitle': '本次評估建議之最小交付物：',
             'Report.NoData': '尚未找到問卷資料，請先完成評估問卷。',
             'Report.NoReportTitle': '尚未生成報告',
             'Report.NoReportDesc': '完成風險評估問卷並付款後，即可查看您的專屬風險評估報告。',
@@ -113,9 +140,89 @@ const i18n = {
             'Report.AIInsights': '風險洞察',
             'Report.AIInsightsDesc': '針對 M6、M7、M8 補充說明的深度分析',
             'Report.Analyzing': '分析中...',
-            'Report.AIRefreshHint': '💡 提示：可以重新整理頁面（F5）獲取不同版本的 AI 建議',
-            'Report.DisclaimerTitle': '本報告適用於',
-            'Report.DisclaimerContent': '本報告適用於：\n‧ 軟體專案風險盤點\n‧ 系統交接與治理檢視\n不取代：\n‧ 稽核\n‧ 法規認證\n‧ 程式碼安全掃描',
+            'Report.TipLabel': '提示',
+            'Report.RefreshHint': '可以重新整理頁面(F5)',
+            'Report.AIRefreshHint': '產生替代建議（用於腦力激盪）',
+            'Report.ActionPlanTitle': '30 天行動清單',
+            'Report.ActionPlanDesc': '本次評估的下一步行動建議',
+            'Report.DisclaimerContent': '本報告依使用者自填資料產出\n\n本報告適用於：\n‧ 軟體專案風險盤點\n‧ 系統交接與治理檢視\n不取代：\n‧ 稽核\n‧ 法規認證\n‧ 程式碼安全掃描',
+            
+            // Projects
+            'Projects.Title': '專案管理',
+            'Projects.Subtitle': '管理您的專案與文件',
+            'Projects.ComingSoonTitle': '專案管理功能開發中',
+            'Projects.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的專案管理、文件版本控制、以及團隊協作功能。',
+            'Projects.PlannedFeatures': '規劃中的功能',
+            'Projects.Feature1': '專案建立與管理',
+            'Projects.Feature2': '文件版本控制與歷史記錄',
+            'Projects.Feature3': '團隊協作與權限管理',
+            'Projects.Feature4': '自動化文件生成與更新',
+            
+            // Documentation
+            'Documentation.Title': '文件管理',
+            'Documentation.Subtitle': '自動生成與版本控制',
+            'Documentation.ComingSoonTitle': '文件管理功能開發中',
+            'Documentation.ComingSoonDesc': '此功能正在規劃與開發中，將提供 AI 驅動的文件自動生成、版本控制、以及文件模板管理功能。',
+            'Documentation.PlannedFeatures': '規劃中的功能',
+            'Documentation.Feature1': 'AI 自動生成技術文件',
+            'Documentation.Feature2': '文件版本控制與歷史記錄',
+            'Documentation.Feature3': '文件模板庫與自訂範本',
+            'Documentation.Feature4': '程式碼與資料庫分析整合',
+            
+            // Risks
+            'Risks.Title': '風險管理',
+            'Risks.Subtitle': '風險監控與分析',
+            'Risks.ComingSoonTitle': '風險管理功能開發中',
+            'Risks.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的風險監控、趨勢分析、以及風險預警功能。',
+            'Risks.PlannedFeatures': '規劃中的功能',
+            'Risks.Feature1': '風險指標即時監控',
+            'Risks.Feature2': '風險趨勢分析與預測',
+            'Risks.Feature3': '風險預警與通知機制',
+            'Risks.Feature4': '風險改善追蹤與報告',
+            
+            // Team
+            'Team.Title': '團隊管理',
+            'Team.Subtitle': '團隊協作與權限管理',
+            'Team.ComingSoonTitle': '團隊管理功能開發中',
+            'Team.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的團隊協作、成員管理、以及權限控制功能。',
+            'Team.PlannedFeatures': '規劃中的功能',
+            'Team.Feature1': '團隊成員管理與邀請',
+            'Team.Feature2': '角色與權限管理',
+            'Team.Feature3': '協作工作區與專案分配',
+            'Team.Feature4': '團隊活動記錄與通知',
+            
+            // Analytics
+            'Analytics.Title': '數據分析',
+            'Analytics.Subtitle': '數據分析與報表',
+            'Analytics.ComingSoonTitle': '數據分析功能開發中',
+            'Analytics.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的數據分析、趨勢圖表、以及自訂報表功能。',
+            'Analytics.PlannedFeatures': '規劃中的功能',
+            'Analytics.Feature1': '風險指標趨勢分析',
+            'Analytics.Feature2': '專案健康度儀表板',
+            'Analytics.Feature3': '自訂報表生成與匯出',
+            'Analytics.Feature4': '數據視覺化圖表',
+            
+            // Security
+            'Security.Title': '安全設定',
+            'Security.Subtitle': '安全設定與權限管理',
+            'Security.ComingSoonTitle': '安全設定功能開發中',
+            'Security.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的安全設定、權限管理、以及存取控制功能。',
+            'Security.PlannedFeatures': '規劃中的功能',
+            'Security.Feature1': '使用者認證與授權',
+            'Security.Feature2': '角色與權限管理',
+            'Security.Feature3': 'API 金鑰與存取控制',
+            'Security.Feature4': '安全日誌與審計追蹤',
+            
+            // Settings
+            'Settings.Title': '系統設定',
+            'Settings.Subtitle': '系統設定與配置',
+            'Settings.ComingSoonTitle': '系統設定功能開發中',
+            'Settings.ComingSoonDesc': '此功能正在規劃與開發中，將提供完整的系統設定、配置管理、以及個人偏好設定功能。',
+            'Settings.PlannedFeatures': '規劃中的功能',
+            'Settings.Feature1': '系統基本設定',
+            'Settings.Feature2': '通知與提醒設定',
+            'Settings.Feature3': '個人偏好與主題設定',
+            'Settings.Feature4': 'API 與整合設定',
             
             // Score Descriptions - M1
             'Score.M1.0': '極差：新人需要3個月以上才能上手',
@@ -129,8 +236,8 @@ const i18n = {
             
             // Score Descriptions - M3
             'Score.M3.0': '極差：完全無法預測變更影響',
-            'Score.M3.5': '中等：能預測部分影響，但可能遺漏',
-            'Score.M3.10': '極佳：能完整預測變更的所有影響，包括間接影響',
+            'Score.M3.5': '中等：能預測主要影響和大部分次要影響',
+            'Score.M3.10': '極佳：能完整預測變更的所有影響，包括直接、間接和潛在影響',
             
             // Score Descriptions - M4
             'Score.M4.0': '極差：團隊對「完成」的理解完全不一致',
@@ -139,7 +246,7 @@ const i18n = {
             
             // Score Descriptions - M5
             'Score.M5.0': '極差：需要5次以上會議才能對齊',
-            'Score.M5.5': '中等：需要2-3次會議才能對齊',
+            'Score.M5.5': '中等：通常需要2次會議才能對齊',
             'Score.M5.10': '極佳：完全不需要額外會議，溝通效率極高',
             
             // Score Table Labels
@@ -206,10 +313,16 @@ const i18n = {
             'Assessment.Subtitle': 'Please evaluate the following indicators based on your project status (0-10 points)',
             'Assessment.MaturityLabel': 'M = Maturity',
             'Assessment.MaturityDesc': ': Evaluate the maturity level of each process and capability. Higher scores indicate greater maturity in that area.',
+            'Assessment.ProjectNameLabel': 'Project Name',
+            'Assessment.ProjectNamePlaceholder': 'Enter project name',
             'Assessment.SystemNameLabel': 'System Name',
             'Assessment.SystemNamePlaceholder': 'Enter the system name to assess',
+            'Assessment.SystemCodeLabel': 'System Code',
+            'Assessment.SystemCodePlaceholder': 'Enter system code (e.g., ADM)',
+            'Assessment.EvaluatorRoleLabel': 'Evaluator Role',
+            'Assessment.EvaluatorRolePlaceholder': 'Enter or select evaluator role (e.g., PM, SA, PG)',
             'Assessment.M1': 'M1 System Handover',
-            'Assessment.M1Desc': 'Can new team members get up to speed within 1 month?',
+            'Assessment.M1Desc': 'Can new team members get up to speed within 1 month? (Higher score = faster onboarding)',
             'Assessment.M2': 'M2 Requirements Traceability',
             'Assessment.M2Desc': 'Can design decisions be traced to their basis?',
             'Assessment.M3': 'M3 Change Prediction',
@@ -217,7 +330,7 @@ const i18n = {
             'Assessment.M4': 'M4 Acceptance Criteria',
             'Assessment.M4Desc': 'Does the team have a consistent understanding of "done"?',
             'Assessment.M5': 'M5 Communication Cost',
-            'Assessment.M5Desc': 'How many meetings are needed to align across roles?',
+            'Assessment.M5Desc': 'How efficient is cross-role alignment? (Higher score = more efficient, fewer meetings needed)',
             'Assessment.OpenQ6': 'Question 6. Please describe the main challenges your project faces',
             'Assessment.OpenQ7': 'Question 7. Please specify areas you would like to improve',
             'Assessment.OpenQ8': 'Question 8. Please provide other relevant information',
@@ -237,13 +350,19 @@ const i18n = {
             'Report.RadarM5': 'M5 Communication',
             'Report.FingerprintTitle': 'Risk Fingerprint Summary',
             'Report.FingerprintDesc': 'Overall Risk Profile and Recommendations',
+            'Report.ProjectName': 'Project Name',
             'Report.SystemName': 'System Name',
-            'Report.AssessmentDate': 'Assessment Date',
+            'Report.SystemCode': 'System Code',
+            'Report.EvaluatorRole': 'Evaluator Role',
+            'Report.ReportId': 'REPORT ID',
+            'Report.AssessmentTime': 'Assessment Time',
+            'Report.RiskLevelThreshold': '0–20 High, 21–35 Medium, 36–50 Low',
             'Report.TotalScore': 'Total Score',
             'Report.RiskLevel': 'Risk Level',
             'Report.SampleTime': 'Sample Time',
             'Report.ImprovementAdvice': 'Risk Improvement Recommendations',
             'Report.DefaultAdvice': 'Specific recommendations will be generated based on your survey results.',
+            'Report.DeliverablesTitle': 'Recommended Minimum Deliverables for This Assessment:',
             'Report.NoData': 'No survey data found. Please complete the assessment first.',
             'Report.NoReportTitle': 'No Report Generated',
             'Report.NoReportDesc': 'Complete the risk assessment questionnaire and make payment to view your risk assessment report.',
@@ -259,9 +378,89 @@ const i18n = {
             'Report.AIInsights': 'Risk Insights',
             'Report.AIInsightsDesc': 'In-depth analysis based on M6, M7, M8 additional notes',
             'Report.Analyzing': 'Analyzing...',
-            'Report.AIRefreshHint': '💡 Tip: You can refresh the page (F5) to get different versions of AI suggestions',
-            'Report.DisclaimerTitle': 'This report is applicable for:',
-            'Report.DisclaimerContent': 'This report is applicable for:\n‧ Software project risk assessment\n‧ System handover and governance review\nDoes not replace:\n‧ Audit\n‧ Regulatory certification\n‧ Code security scanning',
+            'Report.TipLabel': 'Tip',
+            'Report.RefreshHint': 'You can refresh the page (F5)',
+            'Report.AIRefreshHint': 'to generate alternative suggestions (for brainstorming)',
+            'Report.ActionPlanTitle': '30-Day Action Plan',
+            'Report.ActionPlanDesc': 'Next Steps Action Recommendations for This Assessment',
+            'Report.DisclaimerContent': 'This report is generated based on user-provided data.\n\nThis report is applicable for:\n‧ Software project risk assessment\n‧ System handover and governance review\nDoes not replace:\n‧ Audit\n‧ Regulatory certification\n‧ Code security scanning',
+            
+            // Projects
+            'Projects.Title': 'Project Management',
+            'Projects.Subtitle': 'Manage your projects and documents',
+            'Projects.ComingSoonTitle': 'Project Management Feature Under Development',
+            'Projects.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive project management, document version control, and team collaboration capabilities.',
+            'Projects.PlannedFeatures': 'Planned Features',
+            'Projects.Feature1': 'Project creation and management',
+            'Projects.Feature2': 'Document version control and history',
+            'Projects.Feature3': 'Team collaboration and permission management',
+            'Projects.Feature4': 'Automated document generation and updates',
+            
+            // Documentation
+            'Documentation.Title': 'Documentation Management',
+            'Documentation.Subtitle': 'Auto-generation and version control',
+            'Documentation.ComingSoonTitle': 'Documentation Management Feature Under Development',
+            'Documentation.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide AI-driven document auto-generation, version control, and document template management capabilities.',
+            'Documentation.PlannedFeatures': 'Planned Features',
+            'Documentation.Feature1': 'AI-powered technical document generation',
+            'Documentation.Feature2': 'Document version control and history',
+            'Documentation.Feature3': 'Document template library and custom templates',
+            'Documentation.Feature4': 'Code and database analysis integration',
+            
+            // Risks
+            'Risks.Title': 'Risk Management',
+            'Risks.Subtitle': 'Risk monitoring and analysis',
+            'Risks.ComingSoonTitle': 'Risk Management Feature Under Development',
+            'Risks.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive risk monitoring, trend analysis, and risk alert capabilities.',
+            'Risks.PlannedFeatures': 'Planned Features',
+            'Risks.Feature1': 'Real-time risk indicator monitoring',
+            'Risks.Feature2': 'Risk trend analysis and prediction',
+            'Risks.Feature3': 'Risk alerts and notification mechanisms',
+            'Risks.Feature4': 'Risk improvement tracking and reporting',
+            
+            // Team
+            'Team.Title': 'Team Management',
+            'Team.Subtitle': 'Team collaboration and permission management',
+            'Team.ComingSoonTitle': 'Team Management Feature Under Development',
+            'Team.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive team collaboration, member management, and permission control capabilities.',
+            'Team.PlannedFeatures': 'Planned Features',
+            'Team.Feature1': 'Team member management and invitations',
+            'Team.Feature2': 'Role and permission management',
+            'Team.Feature3': 'Collaborative workspace and project assignment',
+            'Team.Feature4': 'Team activity logs and notifications',
+            
+            // Analytics
+            'Analytics.Title': 'Data Analytics',
+            'Analytics.Subtitle': 'Data analysis and reporting',
+            'Analytics.ComingSoonTitle': 'Data Analytics Feature Under Development',
+            'Analytics.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive data analysis, trend charts, and custom reporting capabilities.',
+            'Analytics.PlannedFeatures': 'Planned Features',
+            'Analytics.Feature1': 'Risk indicator trend analysis',
+            'Analytics.Feature2': 'Project health dashboard',
+            'Analytics.Feature3': 'Custom report generation and export',
+            'Analytics.Feature4': 'Data visualization charts',
+            
+            // Security
+            'Security.Title': 'Security Settings',
+            'Security.Subtitle': 'Security settings and permission management',
+            'Security.ComingSoonTitle': 'Security Settings Feature Under Development',
+            'Security.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive security settings, permission management, and access control capabilities.',
+            'Security.PlannedFeatures': 'Planned Features',
+            'Security.Feature1': 'User authentication and authorization',
+            'Security.Feature2': 'Role and permission management',
+            'Security.Feature3': 'API keys and access control',
+            'Security.Feature4': 'Security logs and audit trails',
+            
+            // Settings
+            'Settings.Title': 'System Settings',
+            'Settings.Subtitle': 'System settings and configuration',
+            'Settings.ComingSoonTitle': 'System Settings Feature Under Development',
+            'Settings.ComingSoonDesc': 'This feature is currently being planned and developed. It will provide comprehensive system settings, configuration management, and personal preference settings.',
+            'Settings.PlannedFeatures': 'Planned Features',
+            'Settings.Feature1': 'Basic system settings',
+            'Settings.Feature2': 'Notification and reminder settings',
+            'Settings.Feature3': 'Personal preferences and theme settings',
+            'Settings.Feature4': 'API and integration settings',
             
             // Score Descriptions - M1
             'Score.M1.0': 'Very Poor: New team members need more than 3 months to get up to speed',
@@ -275,8 +474,8 @@ const i18n = {
             
             // Score Descriptions - M3
             'Score.M3.0': 'Very Poor: Cannot predict change impact at all',
-            'Score.M3.5': 'Medium: Can predict some impacts, but may miss others',
-            'Score.M3.10': 'Excellent: Can fully predict all impacts of changes, including indirect impacts',
+            'Score.M3.5': 'Medium: Can predict main impacts and most secondary impacts',
+            'Score.M3.10': 'Excellent: Can fully predict all impacts of changes including direct, indirect, and potential impacts',
             
             // Score Descriptions - M4
             'Score.M4.0': 'Very Poor: Team has completely inconsistent understanding of "done"',
@@ -285,7 +484,7 @@ const i18n = {
             
             // Score Descriptions - M5
             'Score.M5.0': 'Very Poor: Need more than 5 meetings to align',
-            'Score.M5.5': 'Medium: Need 2-3 meetings to align',
+            'Score.M5.5': 'Medium: Usually need 2 meetings to align',
             'Score.M5.10': 'Excellent: No additional meetings needed, extremely efficient communication',
             
             // Score Table Labels
@@ -325,8 +524,21 @@ const i18n = {
     },
     
     setLang(lang) {
+        console.log('[i18n] 設置語言:', lang);
         this.currentLang = lang;
-        localStorage.setItem('lang', lang);
+        // 使用 Cookie 保存語言偏好（HttpOnly 由後端設置，這裡設置客戶端 Cookie 作為備份）
+        setCookie('lang', lang, 365);
+        console.log('[i18n] Cookie 已設置，驗證:', getCookie('lang'));
+        // 同時通知後端保存到 HttpOnly Cookie
+        fetch('/Home/SetLanguage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lang: lang }),
+            credentials: 'same-origin' // 確保發送 Cookie
+        }).then(() => {
+            console.log('[i18n] 後端 Cookie 已設置');
+        }).catch(err => console.warn('[i18n] 設置語言 Cookie 失敗:', err));
+        
         this.updatePage();
         // 觸發自定義事件，讓其他腳本知道語言已變更
         window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
@@ -381,12 +593,28 @@ const i18n = {
     },
     
     init() {
-        // 從 URL 參數讀取語言
+        // 優先從 Cookie 讀取語言設定（用戶最近選擇的語言）
+        const cookieLang = getCookie('lang');
+        console.log('[i18n] 初始化：從 Cookie 讀取語言:', cookieLang);
+        
+        if (cookieLang && (cookieLang === 'zh-TW' || cookieLang === 'en-US')) {
+            this.currentLang = cookieLang;
+            console.log('[i18n] 使用 Cookie 中的語言:', this.currentLang);
+        } else {
+            // 如果 Cookie 中沒有語言設定，使用預設值
+            this.currentLang = this.currentLang || 'zh-TW';
+            console.log('[i18n] 使用預設語言:', this.currentLang);
+        }
+        
+        // 如果 URL 參數中有 culture，且與 Cookie 不同，則使用 URL 參數（但這通常不會發生）
         const urlParams = new URLSearchParams(window.location.search);
         const langParam = urlParams.get('culture');
-        if (langParam && (langParam === 'zh-TW' || langParam === 'en-US')) {
+        if (langParam && (langParam === 'zh-TW' || langParam === 'en-US') && langParam !== this.currentLang) {
+            console.log('[i18n] URL 參數中的語言與 Cookie 不同，使用 URL 參數:', langParam);
             this.setLang(langParam);
         } else {
+            // 更新頁面顯示，並同步 URL 參數
+            console.log('[i18n] 更新頁面顯示，當前語言:', this.currentLang);
             this.updatePage();
         }
     }

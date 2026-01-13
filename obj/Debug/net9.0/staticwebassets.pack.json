@@ -17,6 +17,10 @@
       "PackagePath": "staticwebassets\\images\\README.txt"
     },
     {
+      "Id": "C:\\charleen\\DocEngine\\wwwroot\\js\\check-cookies.js",
+      "PackagePath": "staticwebassets\\js\\check-cookies.js"
+    },
+    {
       "Id": "C:\\charleen\\DocEngine\\wwwroot\\js\\i18n.js",
       "PackagePath": "staticwebassets\\js\\i18n.js"
     },

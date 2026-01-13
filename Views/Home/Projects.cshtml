@@ -1,0 +1,184 @@
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.svg" alt="智序資訊" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <svg class="logo-svg" style="display:none;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="40" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="60" width="60" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="100" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 20 L140 80 L180 80 L180 60 L160 60 L160 20 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 100 L140 140 L180 140 L180 120 L160 120 L160 100 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M120 140 L120 160 L180 160 L180 140 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="140" y="20" width="40" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h2 class="sidebar-title">DocEngine</h2>
+                    <p class="sidebar-subtitle">智序資訊</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Home")" class="nav-item" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
+            </a>
+            <a href="@Url.Action("Projects", "Home")" class="nav-item active" data-page="projects">
+                <span class="nav-icon">📁</span>
+                <span class="nav-text" data-i18n="Nav.Projects">專案</span>
+            </a>
+            <a href="@Url.Action("Assessment", "Home")" class="nav-item" data-page="assessment">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text" data-i18n="Nav.Assessment">評估</span>
+            </a>
+            <a href="@Url.Action("Report", "Home")" class="nav-item" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text" data-i18n="Nav.Report">報告</span>
+            </a>
+            <a href="@Url.Action("Documentation", "Home")" class="nav-item" data-page="documentation">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
+            </a>
+            <a href="@Url.Action("Risks", "Home")" class="nav-item" data-page="risks">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-text" data-i18n="Nav.Risks">風險</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="mobile-title">DocEngine</h1>
+            <div class="mobile-header-actions">
+                <div class="language-switcher-top">
+                    <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                        <span data-i18n="Common.Chinese">繁體中文</span>
+                    </button>
+                    <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                        <span data-i18n="Common.English">English</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <div class="desktop-header">
+                <div class="page-header">
+                    <h1 class="page-title" data-i18n="Projects.Title">專案管理</h1>
+                    <p class="page-subtitle" data-i18n="Projects.Subtitle">管理您的專案與文件</p>
+                </div>
+                <div class="header-actions">
+                    <div class="language-switcher-top">
+                        <button class="lang-btn-top" onclick="i18n.setLang('zh-TW')" data-lang="zh-TW">
+                            <span data-i18n="Common.Chinese">繁體中文</span>
+                        </button>
+                        <button class="lang-btn-top" onclick="i18n.setLang('en-US')" data-lang="en-US">
+                            <span data-i18n="Common.English">English</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coming Soon Section -->
+            <div class="coming-soon-container" style="max-width: 800px; margin: 60px auto; padding: 40px; text-align: center;">
+                <div class="coming-soon-icon" style="font-size: 80px; margin-bottom: 24px;">📁</div>
+                <h2 class="coming-soon-title" style="font-size: 28px; font-weight: 600; color: #e0e0e0; margin-bottom: 16px;" data-i18n="Projects.ComingSoonTitle">專案管理功能開發中</h2>
+                <p class="coming-soon-description" style="font-size: 16px; line-height: 1.8; color: #b0b0b0; margin-bottom: 32px;" data-i18n="Projects.ComingSoonDesc">
+                    此功能正在規劃與開發中，將提供完整的專案管理、文件版本控制、以及團隊協作功能。
+                </p>
+                <div class="coming-soon-features" style="text-align: left; max-width: 600px; margin: 0 auto; padding: 24px; background: rgba(255, 255, 255, 0.03); border-radius: 8px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #e0e0e0; margin-bottom: 16px;" data-i18n="Projects.PlannedFeatures">規劃中的功能</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 8px 0; color: #b0b0b0; font-size: 14px; line-height: 1.6;">
+                            <span style="color: #6200ea; margin-right: 8px;">▸</span>
+                            <span data-i18n="Projects.Feature1">專案建立與管理</span>
+                        </li>
+                        <li style="padding: 8px 0; color: #b0b0b0; font-size: 14px; line-height: 1.6;">
+                            <span style="color: #6200ea; margin-right: 8px;">▸</span>
+                            <span data-i18n="Projects.Feature2">文件版本控制與歷史記錄</span>
+                        </li>
+                        <li style="padding: 8px 0; color: #b0b0b0; font-size: 14px; line-height: 1.6;">
+                            <span style="color: #6200ea; margin-right: 8px;">▸</span>
+                            <span data-i18n="Projects.Feature3">團隊協作與權限管理</span>
+                        </li>
+                        <li style="padding: 8px 0; color: #b0b0b0; font-size: 14px; line-height: 1.6;">
+                            <span style="color: #6200ea; margin-right: 8px;">▸</span>
+                            <span data-i18n="Projects.Feature4">自動化文件生成與更新</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sidebar toggle functionality
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const overlay = document.getElementById('overlay');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        hamburger?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function (e) {
+                if (this.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+
+                navItems.forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 初始化 i18n
+        if (typeof i18n !== 'undefined') {
+            i18n.init();
+        }
+    </script>
+}

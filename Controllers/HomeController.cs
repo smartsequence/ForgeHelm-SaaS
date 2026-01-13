@@ -7,8 +7,11 @@ using System.Text;
 using System.Linq;
 using System.Text.Json;
 using System.Net.Http.Headers;
-using Microsoft.Extensions.Configuration;  // ✅ appsettings
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Text.RegularExpressions;
+using DocEngine.Services;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DocEngine.Controllers;
 
@@ -17,23 +20,38 @@ public class HomeController : Controller
     private const int PORT = 5163; //定義Port號
     private readonly ILogger<HomeController> _logger;
     private readonly IConfiguration _configuration;
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient; // 保留用於向後兼容，逐步遷移到服務
+    private readonly AIContentService _aiContentService;
+    private readonly TranslationService _translationService;
+    private readonly ReportIdService _reportIdService;
+    private readonly IWebHostEnvironment _environment;
 
-    public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+    public HomeController(
+        ILogger<HomeController> logger,
+        IConfiguration configuration,
+        IHttpClientFactory httpClientFactory,
+        AIContentService aiContentService,
+        TranslationService translationService,
+        ReportIdService reportIdService,
+        IWebHostEnvironment environment)
     {
         _logger = logger;
         _configuration = configuration;
+        _aiContentService = aiContentService;
+        _translationService = translationService;
+        _reportIdService = reportIdService;
+        _environment = environment;
+
+        // 配置 OpenAI HttpClient（保留用於向後兼容）
         _httpClient = httpClientFactory.CreateClient();
-        _httpClient.Timeout = TimeSpan.FromSeconds(60); // 設置 60 秒超時
-        // ASP.NET Core 配置系統會自動從環境變數讀取（優先順序：環境變數 > appsettings.json）
-        // 環境變數名稱：OpenAI__ApiKey（雙底線 __ 會被轉換為配置鍵的冒號 :）
+        _httpClient.Timeout = TimeSpan.FromSeconds(60);
         var apiKey = _configuration["OpenAI:ApiKey"]?.Trim();
         
         if (!string.IsNullOrEmpty(apiKey))
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             var keyPreview = apiKey.Length > 10 ? $"{apiKey.Substring(0, 7)}...{apiKey.Substring(apiKey.Length - 4)}" : "***";
-            _logger.LogInformation("API Key 已設置到 HttpClient（長度: {Length}, 預覽: {Preview}）", apiKey.Length, keyPreview);
+            _logger.LogInformation("API Key 已設置（長度: {Length}, 預覽: {Preview}）", apiKey.Length, keyPreview);
         }
         else
         {
@@ -44,16 +62,71 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
         return View();
     }
 
     public IActionResult Privacy()
     {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
         return View();
     }
 
     public IActionResult Assessment()
     {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Projects()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Documentation()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Risks()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Team()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Analytics()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Security()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        return View();
+    }
+
+    public IActionResult Settings()
+    {
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
         return View();
     }
 
@@ -68,9 +141,13 @@ public class HomeController : Controller
             // 同時存儲時間戳
             HttpContext.Session.SetString("SurveyTimestamp", DateTime.Now.ToString("O"));
             
-            _logger.LogInformation("Survey data saved to session: {SessionId}", HttpContext.Session.Id);
+            // 強制保存 Session（確保數據已寫入）
+            HttpContext.Session.CommitAsync().Wait();
             
-            return Json(new { success = true, message = "Survey submitted successfully" });
+            _logger.LogInformation("Survey data saved to session: {SessionId}, Data keys: {Keys}", 
+                HttpContext.Session.Id, string.Join(", ", data.Keys));
+            
+            return Json(new { success = true, message = "Survey submitted successfully", sessionId = HttpContext.Session.Id });
         }
         catch (Exception ex)
         {
@@ -85,21 +162,49 @@ public class HomeController : Controller
     {
         try
         {
+            var sessionId = HttpContext.Session.Id;
             var surveyDataJson = HttpContext.Session.GetString("SurveyData");
             var timestamp = HttpContext.Session.GetString("SurveyTimestamp");
             
+            _logger.LogInformation("GetSurveyData 請求，SessionId: {SessionId}, 是否有數據: {HasData}", 
+                sessionId, !string.IsNullOrEmpty(surveyDataJson));
+            
             if (string.IsNullOrEmpty(surveyDataJson))
             {
-                return Json(new { success = false, message = "No survey data found" });
+                _logger.LogWarning("Session 中沒有問卷數據，SessionId: {SessionId}", sessionId);
+                return Json(new { success = false, message = "No survey data found", sessionId = sessionId });
             }
             
             var surveyData = JsonSerializer.Deserialize<Dictionary<string, string>>(surveyDataJson);
+            
+            // 檢查 deserialize 是否成功
+            if (surveyData == null)
+            {
+                _logger.LogWarning("Session 中的問卷數據無法反序列化，SessionId: {SessionId}, 數據內容: {Data}", 
+                    sessionId, surveyDataJson?.Substring(0, Math.Min(200, surveyDataJson?.Length ?? 0)));
+                return Json(new { success = false, message = "Failed to deserialize survey data", sessionId = sessionId });
+            }
+            
+            // 檢查是否有 M1-M5 分數
+            var hasMValues = surveyData.ContainsKey("M1") || surveyData.ContainsKey("M2") || 
+                           surveyData.ContainsKey("M3") || surveyData.ContainsKey("M4") || 
+                           surveyData.ContainsKey("M5");
+            
+            _logger.LogInformation("Session 中有問卷數據，SessionId: {SessionId}, 數據大小: {Size}, 有M值: {HasM}", 
+                sessionId, surveyDataJson.Length, hasMValues);
+            
+            if (!hasMValues)
+            {
+                _logger.LogWarning("Session 中有數據但沒有 M1-M5 分數，SessionId: {SessionId}, 數據鍵: {Keys}", 
+                    sessionId, string.Join(", ", surveyData.Keys));
+            }
             
             return Json(new 
             { 
                 success = true, 
                 data = surveyData,
-                timestamp = timestamp
+                timestamp = timestamp,
+                sessionId = sessionId
             });
         }
         catch (Exception ex)
@@ -119,31 +224,43 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult GetEcpayFormData()
     {
-        var baseUrl = $"http://localhost:{PORT}";  // ✅ 組成基礎網址
-        
-        var formData = new Dictionary<string, string>
+        try
         {
-            ["MerchantID"] = "2000132",
-            ["MerchantTradeNo"] = "DOC" + DateTime.Now.ToString("yyyyMMddHHmmss"),
-            ["MerchantTradeDate"] = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"),
-            ["PaymentType"] = "aio",
-            ["TotalAmount"] = "2990",
-            ["TradeDesc"] = "Doc Engine Report",
-            ["ItemName"] = "Risk Assessment Report",
-            ["ReturnURL"] = $"{baseUrl}/Home/EcpayReturn",  // ✅ 使用變數
-            ["ChoosePayment"] = "Credit",
-            ["EncryptType"] = "1",
-            ["ClientBackURL"] = $"{baseUrl}/Home/Report",  // ✅ 使用變數
-            ["OrderResultURL"] = $"{baseUrl}/Home/EcpayReturn",  // ✅ 使用變數
-            ["NeedExtraPaidInfo"] = "N"
-        };
+            // 動態獲取當前請求的基礎網址
+            var scheme = Request.Scheme; // http 或 https
+            var host = Request.Host.Value; // localhost:5163 或實際域名
+            var baseUrl = $"{scheme}://{host}";
+            
+            var formData = new Dictionary<string, string>
+            {
+                ["MerchantID"] = "2000132",
+                ["MerchantTradeNo"] = "DOC" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                ["MerchantTradeDate"] = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"),
+                ["PaymentType"] = "aio",
+                ["TotalAmount"] = "2990",
+                ["TradeDesc"] = "Doc Engine Report",
+                ["ItemName"] = "Risk Assessment Report",
+                ["ReturnURL"] = $"{baseUrl}/Home/EcpayReturn",
+                ["ChoosePayment"] = "Credit",
+                ["EncryptType"] = "1",
+                ["ClientBackURL"] = $"{baseUrl}/Home/Report",
+                ["OrderResultURL"] = $"{baseUrl}/Home/EcpayReturn",
+                ["NeedExtraPaidInfo"] = "N"
+            };
 
-        string hashKey = "5294y06JbISpM5x9";
-        string hashIV = "v77hoKGq4kWxNNIS";
-        
-        formData["CheckMacValue"] = GenCheckMacValue(formData, hashKey, hashIV);
-        
-        return Json(formData);
+            string hashKey = "5294y06JbISpM5x9";
+            string hashIV = "v77hoKGq4kWxNNIS";
+            
+            formData["CheckMacValue"] = GenCheckMacValue(formData, hashKey, hashIV);
+            
+            _logger.LogInformation("支付表單資料已生成，BaseUrl: {BaseUrl}", baseUrl);
+            return Json(formData);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "生成支付表單資料失敗");
+            return Json(new { success = false, message = "生成支付表單資料失敗: " + ex.Message });
+        }
     }
 
     private string GenCheckMacValue(Dictionary<string, string> parameters, string hashKey, string hashIV)
@@ -166,10 +283,60 @@ public class HomeController : Controller
         return BitConverter.ToString(bytes).Replace("-", "").ToUpper();
     }
 
+    [HttpPost]
+    [HttpGet]
     public IActionResult EcpayReturn()
     {
-        // 綠界跳回成功頁
-        return View("Report");
+        try
+        {
+            // 綠界支付完成後會 POST 或 GET 回傳結果
+            // 檢查 Session 中是否有問卷數據
+            var surveyDataJson = HttpContext.Session.GetString("SurveyData");
+            var sessionId = HttpContext.Session.Id;
+            
+            // 記錄所有 Cookie（用於診斷）
+            var cookies = Request.Cookies;
+            var cookieKeys = cookies.Keys.ToList();
+            var sessionCookie = cookies[".DocEngine.Session"];
+            var cookieInfo = $"共有 {cookieKeys.Count} 個 Cookie: {string.Join(", ", cookieKeys)}";
+            if (sessionCookie != null)
+            {
+                cookieInfo += $", Session Cookie 存在 (長度: {sessionCookie.Length})";
+            }
+            else
+            {
+                cookieInfo += ", Session Cookie 不存在";
+            }
+            _logger.LogInformation("支付回調收到請求，Method: {Method}, SessionId: {SessionId}, 是否有數據: {HasData}, {CookieInfo}", 
+                Request.Method, sessionId, !string.IsNullOrEmpty(surveyDataJson), cookieInfo);
+            
+            if (string.IsNullOrEmpty(surveyDataJson))
+            {
+                _logger.LogWarning("支付完成但 Session 中沒有問卷數據，SessionId: {SessionId}。可能是 Cookie SameSite 問題或 Session 過期。{CookieInfo}", 
+                    sessionId, cookieInfo);
+                
+                // 嘗試從 Query String 或 Form Data 中獲取 Session ID（如果有的話）
+                // 但這不是標準做法，主要還是依賴 Cookie
+                
+                // 即使沒有數據，也跳轉到 Report 頁面，讓前端處理
+            }
+            else
+            {
+                // 標記為已付款
+                HttpContext.Session.SetString("PaymentCompleted", "true");
+                HttpContext.Session.CommitAsync().Wait(); // 強制保存
+                _logger.LogInformation("支付完成，Session 中有問卷數據，SessionId: {SessionId}，數據大小: {Size} bytes", 
+                    sessionId, surveyDataJson.Length);
+            }
+            
+            // 跳轉到 Report 頁面
+            return RedirectToAction("Report");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "處理支付回調失敗");
+            return RedirectToAction("Report");
+        }
     }
 
     // 風險改善建議 API（基於 M1-M5 分數）
@@ -186,52 +353,6 @@ public class HomeController : Controller
             var m4 = data?.GetValueOrDefault("m4") ?? data?.GetValueOrDefault("M4") ?? "0";
             var m5 = data?.GetValueOrDefault("m5") ?? data?.GetValueOrDefault("M5") ?? "0";
 
-            var isEnglish = lang == "en-US";
-            
-            // 如果強制重新生成，清除Session中的緩存（包括舊的中文版本，確保使用先英後中的邏輯）
-            if (forceRegenerate)
-            {
-                HttpContext.Session.Remove("PersonalizedAdvice_en-US");
-                HttpContext.Session.Remove("PersonalizedAdvice_zh-TW");
-                _logger.LogInformation("強制重新生成，已清除Session緩存");
-            }
-            
-            // 優先生成英文版本作為基礎（避免大陸用語問題），確保內容一致性
-            // 檢查 Session 中是否已有英文版本
-            var cachedEnglishAdvice = HttpContext.Session.GetString("PersonalizedAdvice_en-US");
-            if (!string.IsNullOrEmpty(cachedEnglishAdvice) && !forceRegenerate)
-            {
-                _logger.LogInformation("發現已存在的英文版本風險改善建議");
-                if (isEnglish)
-                {
-                    // 直接返回英文版本
-                    return Json(new { advice = cachedEnglishAdvice });
-                }
-                else
-                {
-                    // 翻譯英文版本為繁體中文
-                    _logger.LogInformation("將英文版本翻譯為繁體中文");
-                    var translatedAdvice = await TranslateEnglishToTraditionalChinese(cachedEnglishAdvice);
-                    return Json(new { advice = translatedAdvice });
-                }
-            }
-            
-            // 如果沒有英文版本，檢查是否有中文版本（向後兼容，但不強制重新生成時才使用）
-            if (isEnglish && !forceRegenerate)
-            {
-                var chineseAdvice = HttpContext.Session.GetString("PersonalizedAdvice_zh-TW");
-                if (!string.IsNullOrEmpty(chineseAdvice))
-                {
-                    // 有中文版本，翻譯為英文（保留原有邏輯）
-                    _logger.LogInformation("發現中文版本的風險改善建議，翻譯為英文");
-                    var translatedAdvice = await TranslateAdviceToEnglish(chineseAdvice);
-                    // 同時存儲英文版本，確保一致性
-                    HttpContext.Session.SetString("PersonalizedAdvice_en-US", translatedAdvice);
-                    return Json(new { advice = translatedAdvice });
-                }
-            }
-
-            // 生成英文版本（作為基礎，避免大陸用語）
             var systemPrompt = @"You are a senior project management and documentation risk assessment expert. Based on the user's risk assessment scores, provide actionable risk improvement recommendations.
 
 Analysis requirements:
@@ -251,53 +372,17 @@ Provide 1-2 concise, actionable recommendations in professional business English
 
 Please provide risk improvement recommendations.";
 
-            var requestBody = new
-            {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-                    new { role = "system", content = systemPrompt },
-                    new { role = "user", content = userPrompt }
-                },
-                temperature = 0.8,
-                max_tokens = 200
-            };
+            var advice = await _aiContentService.GenerateContentAsync(
+                cacheKey: "PersonalizedAdvice",
+                systemPrompt: systemPrompt,
+                userPrompt: userPrompt,
+                targetLang: lang,
+                forceRegenerate: forceRegenerate,
+                temperature: 0.8,
+                maxTokens: 200
+            );
 
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            var englishAdvice = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-
-            // 存儲英文版本到 Session（作為基礎）
-            if (!string.IsNullOrEmpty(englishAdvice))
-            {
-                HttpContext.Session.SetString("PersonalizedAdvice_en-US", englishAdvice);
-                _logger.LogInformation("已將英文版本的風險改善建議存儲到 Session");
-                
-                if (isEnglish)
-                {
-                    // 直接返回英文版本
-                    return Json(new { advice = englishAdvice });
-                }
-                else
-                {
-                    // 翻譯英文版本為繁體中文（避免大陸用語）
-                    var translatedAdvice = await TranslateEnglishToTraditionalChinese(englishAdvice);
-                    return Json(new { advice = translatedAdvice });
-                }
-            }
-            
-            return Json(new { advice = englishAdvice });
+            return Json(new { advice = advice });
         }
         catch (Exception ex)
         {
@@ -310,151 +395,99 @@ Please provide risk improvement recommendations.";
         }
     }
 
-    // 翻譯英文建議為台灣繁體中文（使用明確的台灣用詞指南，避免大陸用語）
-    private async Task<string> TranslateEnglishToTraditionalChinese(string englishAdvice)
+
+    // 30 天行動清單 API
+    [HttpPost]
+    public async Task<IActionResult> GenerateActionPlan([FromBody] Dictionary<string, string> data)
     {
         try
         {
-            var translationPrompt = @"You are a professional translator specializing in translating English technical and business documents to Traditional Chinese (Taiwan standard). 
-
-**CRITICAL: You MUST use Taiwan Traditional Chinese official terminology. ABSOLUTELY FORBIDDEN to use Mainland China Simplified Chinese or Mainland Chinese colloquialisms (even if they are Traditional Chinese). This is an official government report, and the terminology must comply with Taiwan official standards.**
-
-**ABSOLUTELY FORBIDDEN Mainland Chinese terms (even if Traditional Chinese):**
-- FORBIDDEN 「質量」→ USE 「品質」
-- FORBIDDEN 「渠道」→ USE 「管道」、「途徑」
-- FORBIDDEN 「數據」→ USE 「資料」
-- FORBIDDEN 「網絡」→ USE 「網路」
-- FORBIDDEN 「軟件」→ USE 「軟體」
-- FORBIDDEN 「信息」→ USE 「資訊」
-- FORBIDDEN 「項目」→ USE 「專案」
-- FORBIDDEN 「招聘」→ USE 「招募」、「徵才」
-- FORBIDDEN 「推進」、「推動」→ USE 「執行」、「實施」
-- FORBIDDEN 「開展」→ USE 「進行」、「執行」
-- FORBIDDEN 「搭建」→ USE 「建置」、「建立」
-- FORBIDDEN 「优化」、「改进」→ USE 「優化」、「改進」
-- FORBIDDEN 「跟踪」→ USE 「追蹤」
-- FORBIDDEN 「落实」、「实施」→ USE 「落實」、「執行」
-- FORBIDDEN 「建设」→ USE 「建立」、「建置」
-- FORBIDDEN 「过程」→ USE 「程序」、「流程」
-- FORBIDDEN 「人手」→ USE 「人力」、「人員」
-- FORBIDDEN 「提高」→ USE 「提升」、「增進」
-
-**Language style requirements:**
-- Use formal official terminology, avoid colloquial expressions
-- Avoid excessive use of colloquial particles like 「的」、「了」
-- Use complete, rigorous sentence structures
-- Comply with Taiwan government official document style
-- Use 「應」、「應該」not 「应」、「应该」
-- Use 「將」、「將會」not 「将」、「将会」
-- Use 「於」、「在」not 「于」、「在」(Note: Taiwan mostly uses 「在」)
-- Use 「與」、「及」not 「与」、「及」(Note: Taiwan mostly uses 「與」)
-
-Translate the following English text to Taiwan Traditional Chinese while maintaining:
-1. The exact same meaning and tone
-2. Professional business language appropriate for government and enterprise contexts
-3. Keep it concise (1-2 sentences as the original)
-4. Use Taiwan Traditional Chinese official terminology only
-
-Translate the following text:";
-
-            var requestBody = new
+            var lang = data?.GetValueOrDefault("lang") ?? "zh-TW";
+            var mKey = data?.GetValueOrDefault("mKey") ?? "";
+            var mValue = data?.GetValueOrDefault("mValue") ?? "0";
+            var mName = data?.GetValueOrDefault("mName") ?? "";
+            var basicDeliverable = data?.GetValueOrDefault("basicDeliverable") ?? "";
+            var allDeliverablesStr = data?.GetValueOrDefault("allDeliverables") ?? "[]";
+            
+            // 解析 allDeliverables（可能是 JSON 字符串或陣列）
+            List<string> allDeliverables = new List<string>();
+            try
             {
-                model = "gpt-3.5-turbo",
-                messages = new[]
+                if (allDeliverablesStr.StartsWith("["))
                 {
-                    new { role = "system", content = translationPrompt },
-                    new { role = "user", content = englishAdvice }
-                },
-                temperature = 0.3,  // 較低溫度，確保翻譯一致性和用詞準確性
-                max_tokens = 500  // 增加token數量，避免截斷
-            };
-
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            var translatedText = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-            
-            if (string.IsNullOrEmpty(translatedText))
+                    allDeliverables = JsonSerializer.Deserialize<List<string>>(allDeliverablesStr) ?? new List<string>();
+                }
+                else
+                {
+                    allDeliverables = new List<string> { allDeliverablesStr };
+                }
+            }
+            catch
             {
-                _logger.LogWarning("翻譯結果為空，返回原始英文版本");
-                return englishAdvice;
+                allDeliverables = new List<string>();
             }
             
-            _logger.LogInformation("成功將英文風險改善建議翻譯為台灣繁體中文");
-            return translatedText;
+            var allDeliverablesText = string.Join(", ", allDeliverables);
+
+            if (string.IsNullOrEmpty(mKey) || string.IsNullOrEmpty(basicDeliverable))
+            {
+                return Json(new { success = false, message = "Missing required parameters" });
+            }
+
+            var systemPrompt = @"You are a senior project management expert. Generate a 30-day action plan based on the risk assessment results. The plan should be practical, actionable, and time-bound.";
+
+            var userPrompt = $@"Based on the risk assessment, the highest risk indicator is {mKey} ({mName}) with a score of {mValue} points (0-10 scale, lower is riskier).
+
+The basic deliverable for this indicator is: {basicDeliverable}
+All deliverables for this indicator: {allDeliverablesText}
+
+Generate a 30-day action plan with three phases:
+
+1. **Within 7 Days | Establish Foundation**
+   - Describe what needs to be done (about the basic deliverable: {basicDeliverable})
+   - Explain why this should be done first
+
+2. **Within 14 Days | Form Mechanism**
+   - Describe how to make the 7-day deliverable usable
+   - Explain the mechanism to strengthen and reduce risk
+
+3. **Within 30 Days | Practice and Verify**
+   - Describe how to practice using a real case
+   - Explain verification goals and feedback focus
+
+Output format: Return a JSON object with three fields: day7, day14, day30. Each field should contain a concise, actionable description (one sentence or short paragraph).";
+
+            var actionPlan = await _aiContentService.GenerateJsonContentAsync(
+                cacheKey: "ActionPlan",
+                systemPrompt: systemPrompt,
+                userPrompt: userPrompt,
+                requiredKeys: new[] { "day7", "day14", "day30" },
+                targetLang: lang,
+                forceRegenerate: false,
+                temperature: 0.7,
+                maxTokens: 800
+            );
+
+            if (actionPlan == null)
+            {
+                return Json(new { success = false, message = "Failed to generate action plan" });
+            }
+
+            return Json(new
+            {
+                success = true,
+                actionPlan = new
+                {
+                    day7 = actionPlan["day7"],
+                    day14 = actionPlan["day14"],
+                    day30 = actionPlan["day30"]
+                }
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "翻譯失敗，返回原始英文版本");
-            // 如果翻譯失敗，返回英文版本（前端可以處理）
-            return englishAdvice;
-        }
-    }
-
-    // 翻譯中文建議為英文（保持格式和結構一致）- 保留作為向後兼容
-    private async Task<string> TranslateAdviceToEnglish(string chineseAdvice)
-    {
-        try
-        {
-            var translationPrompt = @"You are a professional translator specializing in technical and business documents. Translate the following Traditional Chinese text to English while maintaining:
-
-1. The exact same meaning and tone
-2. Professional business English appropriate for government and enterprise contexts
-3. Keep it concise (1-2 sentences as the original)
-
-Translate the following text:";
-
-            var requestBody = new
-            {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-                    new { role = "system", content = translationPrompt },
-                    new { role = "user", content = chineseAdvice }
-                },
-                temperature = 0.3,  // 較低溫度，確保翻譯一致性
-                max_tokens = 300
-            };
-
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            var translatedText = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-            
-            if (string.IsNullOrEmpty(translatedText))
-            {
-                _logger.LogWarning("翻譯結果為空，返回原始中文版本");
-                return chineseAdvice;
-            }
-            
-            _logger.LogInformation("成功將中文風險改善建議翻譯為英文");
-            return translatedText;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "翻譯失敗，返回原始中文版本");
-            // 如果翻譯失敗，返回中文版本（前端可以處理）
-            return chineseAdvice;
+            _logger.LogError(ex, "Error generating action plan");
+            return Json(new { success = false, message = ex.Message });
         }
     }
 
@@ -487,51 +520,6 @@ Translate the following text:";
                 return Json(new { insights = noDataMsg });
             }
 
-            // 如果強制重新生成，清除Session中的緩存
-            if (forceRegenerate)
-            {
-                HttpContext.Session.Remove("AIInsights_en-US");
-                HttpContext.Session.Remove("AIInsights_zh-TW");
-                _logger.LogInformation("強制重新生成，已清除Session緩存");
-            }
-
-            // 優先生成英文版本作為基礎（避免大陸用語問題），確保內容一致性
-            // 檢查 Session 中是否已有英文版本
-            var cachedEnglishInsights = HttpContext.Session.GetString("AIInsights_en-US");
-            if (!string.IsNullOrEmpty(cachedEnglishInsights) && !forceRegenerate)
-            {
-                _logger.LogInformation("發現已存在的英文版本 AI 洞察");
-                if (isEnglish)
-                {
-                    // 直接返回英文版本
-                    return Json(new { insights = cachedEnglishInsights });
-                }
-                else
-                {
-                    // 翻譯英文版本為繁體中文
-                    _logger.LogInformation("將英文版本翻譯為繁體中文");
-                    var translatedInsights = await TranslateEnglishToTraditionalChineseForInsights(cachedEnglishInsights);
-                    return Json(new { insights = translatedInsights });
-                }
-            }
-            
-            // 如果沒有英文版本，檢查是否有中文版本（向後兼容，但不強制重新生成時才使用）
-            if (isEnglish && !forceRegenerate)
-            {
-                var chineseInsights = HttpContext.Session.GetString("AIInsights_zh-TW");
-                if (!string.IsNullOrEmpty(chineseInsights))
-                {
-                    // 有中文版本，翻譯為英文（保留原有邏輯）
-                    _logger.LogInformation("發現中文版本的 AI 洞察，翻譯為英文");
-                    var translatedInsights = await TranslateToEnglish(chineseInsights);
-                    // 同時存儲英文版本，確保一致性
-                    HttpContext.Session.SetString("AIInsights_en-US", translatedInsights);
-                    return Json(new { insights = translatedInsights });
-                }
-            }
-
-            // 生成英文版本（作為基礎，避免大陸用語）
-            // 構建 OpenAI API 請求 - 統一使用英文 prompt
             var systemPrompt = @"You are a senior project management and documentation risk assessment expert. Deeply analyze the user's risk assessment results, combining quantitative scores and qualitative descriptions to identify root causes and provide specific, actionable recommendations.
 
 Important terminology clarification:
@@ -555,6 +543,12 @@ Analysis requirements:
 5. Total word count should be approximately 600-800 words, ensuring detailed and complete content
 6. Use bulleted list format to make recommendations clear and easy to read
 7. Ensure complete output without truncation - use full sentences and finish all thoughts
+
+**CRITICAL - Structure Requirements (for translation consistency):**
+- Use clear, countable bullet points (•) for each action item
+- Maintain consistent structure: Each recommendation should have a title followed by bullet points
+- Ensure each bullet point is a distinct, separate conclusion/action item (do not merge multiple points into one bullet)
+- The structure must be easily parseable for translation to maintain exact bullet point counts
 
 Output format (in English):
 【Core Issue】
@@ -598,65 +592,49 @@ Qualitative Descriptions (Open-ended Questions):
 
 Please conduct a deep analysis and provide improvement recommendations.";
 
-            var requestBody = new
-            {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-                    new { role = "system", content = systemPrompt },
-                    new { role = "user", content = userPrompt }
-                },
-                temperature = 0.8,
-                max_tokens = 1200  // 設定為 1200，支援更長篇且詳實的條列式內容（AI 會控制在 600-800 字左右）
-            };
+            var additionalInstructions = @"**CRITICAL - Content Equivalence Requirements (中英文等值交付):**
 
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+1. **Bullet Point Count**: MUST maintain EXACTLY the same number of bullet points (•) as the English source. Count each bullet point carefully - if English has 5 bullets, Chinese MUST have 5 bullets (not 4 or 6).
 
-            _logger.LogInformation("發送 OpenAI API 請求，語言: {Lang}", lang);
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogError("OpenAI API 錯誤: {StatusCode}, {Error}", response.StatusCode, errorContent);
-                throw new HttpRequestException($"OpenAI API 錯誤: {response.StatusCode} - {errorContent}");
-            }
+2. **Conclusion Granularity**: MUST maintain the same granularity level of conclusions. If English has 3 main recommendations with 4 sub-points each, Chinese MUST have the same structure (3 recommendations with 4 sub-points each). Do NOT merge or split recommendations or bullet points.
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation("收到 OpenAI API 回應，長度: {Length}", responseContent.Length);
-            
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            var englishInsights = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
+3. **Section Structure**: MUST preserve all section headings (【】), recommendation titles, and summary sections exactly as in English. Every section in English must appear in Chinese.
 
-            // 存儲英文版本到 Session（作為基礎）
-            if (!string.IsNullOrEmpty(englishInsights))
-            {
-                HttpContext.Session.SetString("AIInsights_en-US", englishInsights);
-                _logger.LogInformation("已將英文版本的 AI 洞察存儲到 Session");
-                
-                if (isEnglish)
-                {
-                    // 直接返回英文版本
-                    _logger.LogInformation("AI 洞察生成成功（英文），長度: {Length}", englishInsights.Length);
-                    return Json(new { insights = englishInsights });
-                }
-                else
-                {
-                    // 翻譯英文版本為繁體中文（避免大陸用語）
-                    var translatedInsights = await TranslateEnglishToTraditionalChineseForInsights(englishInsights);
-                    _logger.LogInformation("AI 洞察生成成功（繁體中文），長度: {Length}", translatedInsights?.Length ?? 0);
-                    return Json(new { insights = translatedInsights });
-                }
-            }
-            
-            _logger.LogInformation("AI 洞察生成成功，長度: {Length}", englishInsights?.Length ?? 0);
-            return Json(new { insights = englishInsights });
+4. **Recommendation Count**: If English has 3 recommendations, Chinese MUST have 3 recommendations (not 2 or 4). Count recommendations carefully.
+
+5. **Action Items Mapping**: Each bullet point in English must have a corresponding bullet point in Chinese. Maintain one-to-one mapping of conclusions/action items.
+
+6. **Content Depth**: Text length can vary between languages, but the NUMBER and DEPTH of conclusions/points must be identical.
+
+7. **Language Style**: Use professional consultant/advisory report style (NOT explanatory or instructional tone) - match the formality level of the English source.
+
+8. **Voice**: Use authoritative, analytical consultant voice - avoid casual or conversational expressions.
+
+9. **Terminology**: All technical terminology (PG, SA, PM, PL, etc.) correctly translated. Use Taiwan Traditional Chinese official terminology only.
+
+10. **Connectors**: Use formal connectors (「因此」、「據此」、「基於此」、「綜上所述」) instead of casual ones (「然後」、「還有」).
+
+**Before translating, count:**
+- Number of main sections (【】)
+- Number of recommendations
+- Number of bullet points under each recommendation
+- Number of action items
+
+**After translating, verify:**
+- All counts match exactly with English source";
+
+            var insights = await _aiContentService.GenerateContentAsync(
+                cacheKey: "AIInsights",
+                systemPrompt: systemPrompt,
+                userPrompt: userPrompt,
+                targetLang: lang,
+                forceRegenerate: forceRegenerate,
+                temperature: 0.8,
+                maxTokens: 1200,
+                additionalTranslationInstructions: additionalInstructions
+            );
+
+            return Json(new { insights = insights });
         }
         catch (Exception ex)
         {
@@ -670,160 +648,177 @@ Please conduct a deep analysis and provide improvement recommendations.";
         }
     }
 
-    // 翻譯英文洞察為台灣繁體中文（使用明確的台灣用詞指南，避免大陸用語）
-    private async Task<string> TranslateEnglishToTraditionalChineseForInsights(string englishInsights)
+    // 翻譯中文內容為英文（用於開放式問題等用戶輸入內容）
+    // 注意：此方法已改用 TranslationService，保留作為向後兼容
+    private async Task<string> TranslateToEnglish(string chineseInsights)
+    {
+        // 此方法已被 TranslationService.TranslateToEnglishAsync 取代
+        // 保留此方法以避免編譯錯誤，但實際使用 TranslationService
+        return await _translationService.TranslateToEnglishAsync(chineseInsights);
+    }
+
+    // 翻譯 M6-M8 開放式問題內容 API
+    [HttpPost]
+    public async Task<IActionResult> TranslateOpenQuestions([FromBody] Dictionary<string, string> data)
     {
         try
         {
-            var translationPrompt = @"You are a professional translator specializing in translating English technical and business documents to Traditional Chinese (Taiwan standard). 
+            var lang = data?.GetValueOrDefault("lang") ?? "zh-TW";
+            var open1 = data?.GetValueOrDefault("open1") ?? data?.GetValueOrDefault("m6") ?? "";
+            var open2 = data?.GetValueOrDefault("open2") ?? data?.GetValueOrDefault("m7") ?? "";
+            var open3 = data?.GetValueOrDefault("open3") ?? data?.GetValueOrDefault("m8") ?? "";
 
-**CRITICAL: You MUST use Taiwan Traditional Chinese official terminology. ABSOLUTELY FORBIDDEN to use Mainland China Simplified Chinese or Mainland Chinese colloquialisms (even if they are Traditional Chinese). This is an official government report, and the terminology must comply with Taiwan official standards.**
-
-**ABSOLUTELY FORBIDDEN Mainland Chinese terms (even if Traditional Chinese):**
-- FORBIDDEN 「質量」→ USE 「品質」
-- FORBIDDEN 「渠道」→ USE 「管道」、「途徑」
-- FORBIDDEN 「數據」→ USE 「資料」
-- FORBIDDEN 「網絡」→ USE 「網路」
-- FORBIDDEN 「軟件」→ USE 「軟體」
-- FORBIDDEN 「信息」→ USE 「資訊」
-- FORBIDDEN 「項目」→ USE 「專案」
-- FORBIDDEN 「招聘」→ USE 「招募」、「徵才」
-- FORBIDDEN 「推進」、「推動」→ USE 「執行」、「實施」
-- FORBIDDEN 「開展」→ USE 「進行」、「執行」
-- FORBIDDEN 「搭建」→ USE 「建置」、「建立」
-- FORBIDDEN 「优化」、「改进」→ USE 「優化」、「改進」
-- FORBIDDEN 「跟踪」→ USE 「追蹤」
-- FORBIDDEN 「落实」、「实施」→ USE 「落實」、「執行」
-- FORBIDDEN 「建设」→ USE 「建立」、「建置」
-- FORBIDDEN 「过程」→ USE 「程序」、「流程」
-- FORBIDDEN 「人手」→ USE 「人力」、「人員」
-- FORBIDDEN 「提高」→ USE 「提升」、「增進」
-
-**Language style requirements:**
-- Use formal official terminology, avoid colloquial expressions
-- Avoid excessive use of colloquial particles like 「的」、「了」
-- Use complete, rigorous sentence structures
-- Comply with Taiwan government official document style
-- Use 「應」、「應該」not 「应」、「应该」
-- Use 「將」、「將會」not 「将」、「将会」
-- Use 「於」、「在」not 「于」、「在」(Note: Taiwan mostly uses 「在」)
-- Use 「與」、「及」not 「与」、「及」(Note: Taiwan mostly uses 「與」)
-
-Translate the following English text to Taiwan Traditional Chinese while maintaining:
-1. The exact same structure and formatting (including section headings with 【】, bullet points, etc.)
-2. The same number of recommendations and action items
-3. Professional business language appropriate for government and enterprise contexts
-4. All technical terminology (PG, SA, PM, PL, etc.) correctly translated
-5. Use Taiwan Traditional Chinese official terminology only
-
-Translate the following text:";
-
-            var requestBody = new
-            {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-                    new { role = "system", content = translationPrompt },
-                    new { role = "user", content = englishInsights }
-                },
-                temperature = 0.3,  // 較低溫度，確保翻譯一致性和用詞準確性
-                max_tokens = 1500
-            };
-
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
+            var isEnglish = lang == "en-US";
             
-            var translatedText = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-            
-            if (string.IsNullOrEmpty(translatedText))
+            // 如果語言是中文，直接返回原始內容
+            if (!isEnglish)
             {
-                _logger.LogWarning("翻譯結果為空，返回原始英文版本");
-                return englishInsights;
+                return Json(new 
+                { 
+                    success = true,
+                    open1 = open1,
+                    open2 = open2,
+                    open3 = open3
+                });
             }
-            
-            _logger.LogInformation("成功將英文 AI 洞察翻譯為台灣繁體中文");
-            return translatedText;
+
+            // 如果語言是英文，翻譯中文內容為英文
+            // 使用翻譯服務翻譯用戶輸入的開放式問題
+            var translatedOpen1 = string.IsNullOrWhiteSpace(open1) ? "" : await _translationService.TranslateToEnglishAsync(open1);
+            var translatedOpen2 = string.IsNullOrWhiteSpace(open2) ? "" : await _translationService.TranslateToEnglishAsync(open2);
+            var translatedOpen3 = string.IsNullOrWhiteSpace(open3) ? "" : await _translationService.TranslateToEnglishAsync(open3);
+
+            return Json(new 
+            { 
+                success = true,
+                open1 = translatedOpen1,
+                open2 = translatedOpen2,
+                open3 = translatedOpen3
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "翻譯失敗，返回原始英文版本");
-            // 如果翻譯失敗，返回英文版本（前端可以處理）
-            return englishInsights;
+            _logger.LogError(ex, "翻譯 M6-M8 內容失敗");
+            var lang = data?.GetValueOrDefault("lang") ?? "zh-TW";
+            var isEnglish = lang == "en-US";
+            var errorMsg = isEnglish 
+                ? $"Failed to translate open questions: {ex.Message}"
+                : $"翻譯開放式問題失敗：{ex.Message}";
+            return Json(new { success = false, message = errorMsg });
         }
     }
 
-    // 翻譯中文洞察為英文（保持格式和結構一致）- 保留作為向後兼容
-    private async Task<string> TranslateToEnglish(string chineseInsights)
+    // 保存報告編號到 Session
+    [HttpPost]
+    public IActionResult SaveReportId([FromBody] Dictionary<string, string> data)
     {
         try
         {
-            var translationPrompt = @"You are a professional translator specializing in technical and business documents. Translate the following Traditional Chinese text to English while maintaining:
-
-1. The exact same structure and formatting (including section headings with 【】, bullet points, etc.)
-2. The same number of recommendations and action items
-3. Professional business English appropriate for government and enterprise contexts
-4. All technical terminology (PG, SA, PM, PL, etc.) correctly translated
-
-Translate the following text:";
-
-            var requestBody = new
+            var reportId = data?.GetValueOrDefault("reportId") ?? "";
+            if (!string.IsNullOrEmpty(reportId))
             {
-                model = "gpt-3.5-turbo",
-                messages = new[]
-                {
-                    new { role = "system", content = translationPrompt },
-                    new { role = "user", content = chineseInsights }
-                },
-                temperature = 0.3,  // 較低溫度，確保翻譯一致性
-                max_tokens = 1500
-            };
-
-            var jsonContent = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            
-            var translatedText = jsonDoc.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
-            
-            if (string.IsNullOrEmpty(translatedText))
-            {
-                _logger.LogWarning("翻譯結果為空，返回原始中文版本");
-                return chineseInsights;
+                HttpContext.Session.SetString("ReportId", reportId);
+                return Json(new { success = true });
             }
-            
-            _logger.LogInformation("成功將中文洞察翻譯為英文");
-            return translatedText;
+            return Json(new { success = false, message = "Report ID is empty" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "翻譯失敗，返回原始中文版本");
-            // 如果翻譯失敗，返回中文版本（前端可以處理）
-            return chineseInsights;
+            _logger.LogError(ex, "保存報告編號失敗");
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    // 獲取報告編號（從 Session）
+    [HttpGet]
+    public IActionResult GetReportId()
+    {
+        try
+        {
+            var reportId = HttpContext.Session.GetString("ReportId");
+            return Json(new { success = true, reportId = reportId ?? "-" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "獲取報告編號失敗");
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    // 生成報告編號 API
+    [HttpPost]
+    public async Task<IActionResult> GenerateReportId([FromBody] Dictionary<string, string> data)
+    {
+        try
+        {
+            var systemCode = data?.GetValueOrDefault("systemCode") ?? "";
+            
+            if (string.IsNullOrWhiteSpace(systemCode))
+            {
+                return Json(new { success = false, message = "系統代號不能為空" });
+            }
+
+            var reportId = await _reportIdService.GenerateReportIdAsync(systemCode);
+            
+            return Json(new { success = true, reportId = reportId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "生成報告編號失敗");
+            return Json(new { success = false, message = ex.Message });
+        }
+    }
+
+    // 設置語言偏好（使用 HttpOnly Cookie）
+    [HttpPost]
+    public IActionResult SetLanguage([FromBody] Dictionary<string, string> data)
+    {
+        try
+        {
+            var lang = data?.GetValueOrDefault("lang") ?? "zh-TW";
+            
+            // CookieRequestCultureProvider 需要的格式：c=zh-TW|uic=zh-TW
+            var cookieValue = $"c={lang}|uic={lang}";
+            
+            // 設置 HttpOnly Cookie（更安全）
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,  // 防止 XSS 攻擊
+                Secure = Request.IsHttps,  // HTTPS 環境使用 Secure
+                SameSite = SameSiteMode.Lax,  // 使用 Lax 以確保跨頁面導航時 Cookie 可用（仍防止 CSRF POST 攻擊）
+                Expires = DateTimeOffset.UtcNow.AddYears(1),  // 1 年有效期
+                Path = "/"
+            };
+            
+            // 設置 ASP.NET Core 本地化 Cookie（CookieRequestCultureProvider 使用）
+            Response.Cookies.Append(".AspNetCore.Culture", cookieValue, cookieOptions);
+            
+            // 同時設置簡單的 lang Cookie（前端 i18n.js 使用）
+            var simpleCookieOptions = new CookieOptions
+            {
+                HttpOnly = false,  // 前端需要讀取
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Path = "/"
+            };
+            Response.Cookies.Append("lang", lang, simpleCookieOptions);
+            
+            return Json(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "設置語言 Cookie 失敗");
+            return Json(new { success = false, message = ex.Message });
         }
     }
 
     // Report頁使用
     public IActionResult Report()
     {
-        // 前端通過 localStorage 和 AJAX 獲取數據，這裡不需要讀取表單
+        ViewData["IsDevelopment"] = _environment.IsDevelopment();
+        ViewData["Environment"] = _environment.EnvironmentName;
+        // 前端通過 Session 和 AJAX 獲取數據，這裡不需要讀取表單
         // 如果需要從後端傳遞數據，可以在 ViewBag 中設置
         ViewBag.AIEInsights = "【建議】等待AI分析...";
         return View();

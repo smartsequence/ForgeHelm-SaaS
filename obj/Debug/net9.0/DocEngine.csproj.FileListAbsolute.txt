@@ -114,5 +114,13 @@ C:\charleen\DocEngine\bin\Debug\net9.0\OpenAI.dll
 C:\charleen\DocEngine\bin\Debug\net9.0\System.ClientModel.dll
 C:\charleen\DocEngine\bin\Debug\net9.0\System.Memory.Data.dll
 C:\charleen\DocEngine\bin\Debug\net9.0\System.Net.ServerSentEvents.dll
-C:\charleen\DocEngine\obj\Debug\net9.0\compressed\fnygs2z5k7-p79lcm4k5y.gz
-C:\charleen\DocEngine\obj\Debug\net9.0\compressed\3iprxordhh-324zhmdvcb.gz
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\web.config
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\appsettings.Development.json
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\appsettings.json
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\DocEngine.deps.json
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\DocEngine.runtimeconfig.json
+C:\charleen\DocEngine\bin\Debug\net9.0\publish\DocEngine.staticwebassets.endpoints.json
+C:\charleen\DocEngine\obj\Debug\net9.0\compressed\fnygs2z5k7-xywre3534y.gz
+C:\charleen\DocEngine\bin\Debug\net9.0\Data\report_ids.json
+C:\charleen\DocEngine\obj\Debug\net9.0\compressed\dcpmtke6b2-zmoxmq5lmn.gz
+C:\charleen\DocEngine\obj\Debug\net9.0\compressed\3iprxordhh-5j12mogmtp.gz

@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var isDevelopment = ViewData["IsDevelopment"] as bool? ?? false;
+    var environment = ViewData["Environment"] as string ?? "Production";
 }
 
 <div class="app-container">
@@ -35,7 +37,7 @@
                 <span class="nav-icon">📊</span>
                 <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
             </a>
-            <a href="#" class="nav-item" data-page="projects">
+            <a href="@Url.Action("Projects", "Home")" class="nav-item" data-page="projects">
                 <span class="nav-icon">📁</span>
                 <span class="nav-text" data-i18n="Nav.Projects">專案</span>
             </a>
@@ -47,11 +49,11 @@
                 <span class="nav-icon">📋</span>
                 <span class="nav-text" data-i18n="Nav.Report">報告</span>
             </a>
-            <a href="#" class="nav-item" data-page="documentation">
+            <a href="@Url.Action("Documentation", "Home")" class="nav-item" data-page="documentation">
                 <span class="nav-icon">📄</span>
                 <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
             </a>
-            <a href="#" class="nav-item" data-page="risks">
+            <a href="@Url.Action("Risks", "Home")" class="nav-item" data-page="risks">
                 <span class="nav-icon">⚠️</span>
                 <span class="nav-text" data-i18n="Nav.Risks">風險</span>
             </a>
@@ -100,47 +102,6 @@
                 </div>
             </div>
 
-            <!-- KPI Cards -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-icon projects-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label" data-i18n="Dashboard.Projects">專案數</div>
-                        <div class="kpi-value">0</div>
-                    </div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-icon completion-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                        </svg>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label" data-i18n="Dashboard.Completion">文件完成度</div>
-                        <div class="kpi-value">0%</div>
-                    </div>
-                </div>
-
-                <div class="kpi-card">
-                    <div class="kpi-icon risk-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <div class="kpi-content">
-                        <div class="kpi-label" data-i18n="Dashboard.RiskLevel">風險等級</div>
-                        <div class="kpi-value risk-low" data-i18n="Dashboard.RiskLow">低</div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Risk Fingerprint Radar Chart (M1-M5) -->
             <div class="dashboard-section">
@@ -148,8 +109,8 @@
                     <h2 class="section-title" data-i18n="Dashboard.RiskFingerprint">風險指紋</h2>
                     <p class="section-description" data-i18n="Report.RadarDesc">視覺化顯示五項關鍵風險指標</p>
                 </div>
-                <div class="radar-chart-container">
-                    <div class="radar-chart">
+                <div class="radar-chart-container" style="display: flex; gap: 24px; align-items: flex-start;">
+                    <div class="radar-chart" style="flex: 1;">
                         <svg id="dashboardRadar" class="radar-svg" viewBox="-20 -20 240 240" preserveAspectRatio="xMidYMid meet">
                             <!-- Background circles -->
                             <circle cx="100" cy="100" r="80" class="radar-circle" />
@@ -175,8 +136,13 @@
                             <text x="20" y="75" class="radar-label" data-i18n="Report.RadarM5">M5 溝通</text>
                         </svg>
                     </div>
+                    <!-- 風險等級顯示（右側） -->
+                    <div id="dashboardRiskLevel" style="flex: 0 0 160px; padding: 12px 16px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; display: none; flex-direction: column; justify-content: center; align-items: center;">
+                        <div style="font-size: 11px; color: #b0b0b0; margin-bottom: 6px; text-align: center;" data-i18n="Dashboard.RiskLevel">風險等級</div>
+                        <div id="dashboardRiskLevelValue" style="font-size: 28px; font-weight: 600; color: #e0e0e0; text-align: center; line-height: 1.2;">-</div>
+                    </div>
                     <!-- No Data Message -->
-                    <div id="dashboardNoData" class="dashboard-no-data" style="display: none; text-align: center; padding: 20px; color: #888;">
+                    <div id="dashboardNoData" class="dashboard-no-data" style="display: none; text-align: center; padding: 20px; color: #888; flex: 1;">
                         <p data-i18n="Score.NoData">尚未有評估數據</p>
                         <a href="@Url.Action("Assessment", "Home")" class="report-button primary" style="display: inline-block; margin-top: 10px;">
                             <span data-i18n="Report.GoToAssessment">前往評估問卷</span>
@@ -192,7 +158,7 @@
                     <p class="section-description" data-i18n="Dashboard.QuickAccess">快速存取主要功能</p>
                 </div>
                 <div class="function-grid">
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Projects", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"></path>
@@ -218,7 +184,7 @@
                         <p class="function-description" data-i18n="Dashboard.AssessmentDesc">系統風險評估問卷</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Documentation", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -232,7 +198,7 @@
                         <p class="function-description" data-i18n="Dashboard.DocumentationDesc">文件管理與編輯</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Risks", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -244,7 +210,7 @@
                         <p class="function-description" data-i18n="Dashboard.RisksDesc">風險評估與監控</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Team", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -257,7 +223,7 @@
                         <p class="function-description" data-i18n="Dashboard.TeamDesc">團隊協作管理</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Analytics", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -271,7 +237,7 @@
                         <p class="function-description" data-i18n="Dashboard.AnalyticsDesc">數據分析報表</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Security", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -281,7 +247,7 @@
                         <p class="function-description" data-i18n="Dashboard.SecurityDesc">安全設定與權限</p>
                     </a>
 
-                    <a href="#" class="function-card">
+                    <a href="@Url.Action("Settings", "Home")" class="function-card">
                         <div class="function-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="3"></circle>
@@ -381,28 +347,69 @@
                 const n = Number(value);
                 return Number.isFinite(n) ? n : 0;
             }
+            
+            // 計算風險等級（與 Report.cshtml 相同的邏輯）
+            function computeRiskLevel(total) {
+                // 根據總分（0-50）計算風險等級，始終返回中文，在顯示時再翻譯
+                // 0-20：高、21-35：中、36-50：低
+                if (total >= 36) return '低';
+                if (total >= 21) return '中';
+                return '高';
+            }
 
             const data = parseSurveyData();
             const radarSvg = document.getElementById('dashboardRadar');
             const radarPolygon = document.getElementById('dashboardRadarPolygon');
             const noDataMsg = document.getElementById('dashboardNoData');
+            const riskLevelContainer = document.getElementById('dashboardRiskLevel');
+            const riskLevelValue = document.getElementById('dashboardRiskLevelValue');
 
             if (!data || (!data.M1 && !data.M2 && !data.M3 && !data.M4 && !data.M5)) {
                 // 沒有數據，顯示提示訊息
                 if (radarSvg) radarSvg.style.display = 'none';
+                if (riskLevelContainer) riskLevelContainer.style.display = 'none';
                 if (noDataMsg) noDataMsg.style.display = 'block';
                 return;
             }
 
-            // 有數據，顯示雷達圖
+            // 有數據，顯示雷達圖和風險等級
             if (radarSvg) radarSvg.style.display = 'block';
             if (noDataMsg) noDataMsg.style.display = 'none';
+            if (riskLevelContainer) riskLevelContainer.style.display = 'block';
 
             const m1 = toNumber(data.M1 || data.m1 || 0);
             const m2 = toNumber(data.M2 || data.m2 || 0);
             const m3 = toNumber(data.M3 || data.m3 || 0);
             const m4 = toNumber(data.M4 || data.m4 || 0);
             const m5 = toNumber(data.M5 || data.m5 || 0);
+            
+            // 計算總分和風險等級
+            const total = m1 + m2 + m3 + m4 + m5;
+            const level = computeRiskLevel(total);
+            
+            // 更新風險等級顯示
+            if (riskLevelValue) {
+                const levelMap = {
+                    'zh-TW': { '低': '低', '中': '中', '高': '高' },
+                    'en-US': { '低': 'Low', '中': 'Medium', '高': 'High' }
+                };
+                const currentLang = i18n.currentLang || 'zh-TW';
+                const levelText = levelMap[currentLang]?.[level] || level;
+                riskLevelValue.textContent = levelText;
+                
+                // 設定顏色
+                riskLevelValue.classList.remove('risk-low', 'risk-medium', 'risk-high');
+                if (level === '低') {
+                    riskLevelValue.classList.add('risk-low');
+                    riskLevelValue.style.color = '#388e3c';
+                } else if (level === '中') {
+                    riskLevelValue.classList.add('risk-medium');
+                    riskLevelValue.style.color = '#f57c00';
+                } else {
+                    riskLevelValue.classList.add('risk-high');
+                    riskLevelValue.style.color = '#d32f2f';
+                }
+            }
 
             if (radarPolygon) {
                 const centerX = 100;
@@ -428,7 +435,7 @@
             updateDashboardRadar();
         }, 300);
 
-        // 監聽語言變更事件，更新雷達圖標籤
+        // 監聽語言變更事件，更新雷達圖標籤和風險等級
         window.addEventListener('languageChanged', function() {
             setTimeout(function() {
                 updateDashboardRadar();
