@@ -1,0 +1,726 @@
+@{
+    ViewData["Title"] = "Agent 管理";
+    var agents = ViewData["Agents"] as List<DocEngine.Services.AgentInfo> ?? new List<DocEngine.Services.AgentInfo>();
+}
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">
+                    <img src="~/images/logo.svg" alt="智序資訊" class="logo-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                    <svg class="logo-svg" style="display:none;" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="20" y="20" width="40" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="60" width="60" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="60" y="100" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 20 L140 80 L180 80 L180 60 L160 60 L160 20 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M140 100 L140 140 L180 140 L180 120 L160 120 L160 100 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M120 140 L120 160 L180 160 L180 140 Z" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="140" y="20" width="40" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <h2 class="sidebar-title">DocEngine</h2>
+                    <p class="sidebar-subtitle">智序資訊</p>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Home")" class="nav-item" data-page="dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text" data-i18n="Nav.Dashboard">儀表板</span>
+            </a>
+            <a href="@Url.Action("Projects", "Home")" class="nav-item" data-page="projects">
+                <span class="nav-icon">📁</span>
+                <span class="nav-text" data-i18n="Nav.Projects">專案</span>
+            </a>
+            <a href="@Url.Action("Assessment", "Home")" class="nav-item" data-page="assessment">
+                <span class="nav-icon">📝</span>
+                <span class="nav-text" data-i18n="Nav.Assessment">評估</span>
+            </a>
+            <a href="@Url.Action("Report", "Home")" class="nav-item" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text" data-i18n="Nav.Report">報告</span>
+            </a>
+            <a href="@Url.Action("Documentation", "Home")" class="nav-item" data-page="documentation">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text" data-i18n="Nav.Documentation">文件</span>
+            </a>
+            <a href="@Url.Action("Risks", "Home")" class="nav-item" data-page="risks">
+                <span class="nav-icon">⚠️</span>
+                <span class="nav-text" data-i18n="Nav.Risks">風險</span>
+            </a>
+            <a href="@Url.Action("Index", "Agent")" class="nav-item active" data-page="agents">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-text">Agent 管理</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="mobile-title">Agent 管理</h1>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-wrapper">
+            <div class="desktop-header">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Agent 管理</h1>
+                    <p class="dashboard-subtitle">管理已連接的 Agent 並觸發分析任務</p>
+                </div>
+            </div>
+
+            <!-- Agent List -->
+            <div class="agent-container">
+                <div class="agent-header">
+                    <h2>已連接的 Agent</h2>
+                    <button class="btn btn-primary" onclick="refreshAgents()">刷新</button>
+                </div>
+
+                <div id="agentList" class="agent-list">
+                    @if (agents.Any())
+                    {
+                        @foreach (var agent in agents)
+                        {
+                            <div class="agent-card" data-agent-id="@agent.AgentId">
+                                <div class="agent-card-header">
+                                    <div class="agent-info">
+                                        <h3>@agent.AgentName</h3>
+                                        <p class="agent-id">ID: @agent.AgentId</p>
+                                        <p class="agent-machine">機器: @agent.MachineName</p>
+                                    </div>
+                                    <div class="agent-status">
+                                        <span class="status-badge status-@agent.Status.ToString().ToLower()">
+                                            @GetStatusText(agent.Status)
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="agent-card-body">
+                                    <div class="agent-meta">
+                                        <p><strong>連接時間:</strong> @agent.ConnectedAt.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                                        @if (!string.IsNullOrEmpty(agent.CurrentTaskId))
+                                        {
+                                            <p><strong>當前任務:</strong> @agent.CurrentTaskId</p>
+                                        }
+                                    </div>
+                                    <div class="agent-actions">
+                                        <button class="btn btn-success" onclick="triggerAgent('@agent.AgentId')" 
+                                                @(agent.Status == DocEngine.Services.AgentStatus.Working ? "disabled" : "")>
+                                            觸發分析
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-agents">
+                            <p>目前沒有已連接的 Agent</p>
+                            <p class="hint">請確保 Agent 程式正在運行並已連接到 SaaS 平台</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Trigger Task Modal -->
+            <div id="triggerModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>觸發分析任務</h2>
+                        <span class="close" onclick="closeTriggerModal()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="triggerForm">
+                            <div class="form-group">
+                                <label for="taskType">任務類型:</label>
+                                <select id="taskType" name="taskType" class="form-control">
+                                    <option value="analyze">分析程式碼和資料庫</option>
+                                    <option value="analyze-code">僅分析程式碼</option>
+                                    <option value="analyze-db">僅分析資料庫</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="projectPath">專案路徑:</label>
+                                <input type="text" id="projectPath" name="projectPath" class="form-control" 
+                                       placeholder="例如: C:\Projects\MyProject 或 C:/Projects/MyProject" />
+                                <small class="form-text text-muted">留空則使用 Agent 配置檔中的路徑</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="databaseConnectionString">資料庫連接字串 (選填):</label>
+                                <input type="text" id="databaseConnectionString" name="databaseConnectionString" 
+                                       class="form-control" placeholder="例如: Data Source=..." />
+                            </div>
+                            
+                            <!-- 配置更新區塊 -->
+                            <div class="form-group">
+                                <div class="settings-toggle">
+                                    <label>
+                                        <input type="checkbox" id="enableSettingsUpdate" onchange="toggleSettingsUpdate()" />
+                                        <span>動態更新 Agent 配置</span>
+                                    </label>
+                                </div>
+                                <div id="settingsUpdateSection" style="display: none; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+                                    <p class="settings-hint">
+                                        <strong>說明：</strong>更新 Agent 的 appsettings.json 配置<br/>
+                                        格式：<code>Section.Key</code>（例如：<code>Analysis.SourceCodePath</code>、<code>Database.ConnectionString</code>）
+                                    </p>
+                                    <div id="settingsUpdateList">
+                                        <div class="settings-item">
+                                            <div class="settings-row">
+                                                <input type="text" class="form-control settings-key" placeholder="配置鍵 (例如: Analysis.SourceCodePath)" style="flex: 1; margin-right: 10px;" />
+                                                <input type="text" class="form-control settings-value" placeholder="配置值 (例如: C:/path/to/project)" style="flex: 1; margin-right: 10px;" />
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="removeSettingsItem(this)">移除</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="addSettingsItem()" style="margin-top: 10px;">
+                                        + 新增配置項
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeTriggerModal()">取消</button>
+                        <button class="btn btn-primary" onclick="submitTriggerTask()">確認觸發</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+@functions {
+    private string GetStatusText(DocEngine.Services.AgentStatus status)
+    {
+        return status switch
+        {
+            DocEngine.Services.AgentStatus.Connected => "已連接",
+            DocEngine.Services.AgentStatus.Idle => "空閒",
+            DocEngine.Services.AgentStatus.Working => "工作中",
+            DocEngine.Services.AgentStatus.Disconnected => "已斷線",
+            _ => "未知"
+        };
+    }
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+    <script>
+        let currentAgentId = null;
+        let connection = null;
+
+        // 初始化 SignalR 連接
+        function initSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/agentHub")
+                .build();
+
+            // 監聽任務進度更新
+            connection.on("TaskProgressUpdated", function (taskId, progress, message) {
+                console.log(`任務進度: ${taskId} - ${progress}% - ${message}`);
+                // 可以在這裡更新 UI 顯示進度
+            });
+
+            // 監聽任務完成
+            connection.on("TaskCompleted", function (taskId, success, result, error) {
+                console.log(`任務完成: ${taskId} - ${success ? '成功' : '失敗'}`);
+                if (success) {
+                    alert(`任務 ${taskId} 已完成！`);
+                } else {
+                    alert(`任務 ${taskId} 失敗: ${error || '未知錯誤'}`);
+                }
+                refreshAgents();
+            });
+
+            // 監聽分析結果
+            connection.on("AnalysisResultReceived", function (taskId, analysisResult) {
+                console.log(`收到分析結果: ${taskId}`, analysisResult);
+            });
+
+            connection.start().catch(function (err) {
+                console.error("SignalR 連接失敗:", err);
+            });
+        }
+
+        // 刷新 Agent 列表
+        function refreshAgents() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(data => {
+                    updateAgentList(data);
+                })
+                .catch(error => {
+                    console.error('刷新 Agent 列表失敗:', error);
+                });
+        }
+
+        // 更新 Agent 列表 UI
+        function updateAgentList(agents) {
+            const agentList = document.getElementById('agentList');
+            if (agents.length === 0) {
+                agentList.innerHTML = `
+                    <div class="no-agents">
+                        <p>目前沒有已連接的 Agent</p>
+                        <p class="hint">請確保 Agent 程式正在運行並已連接到 SaaS 平台</p>
+                    </div>
+                `;
+                return;
+            }
+
+            agentList.innerHTML = agents.map(agent => `
+                <div class="agent-card" data-agent-id="${agent.agentId}">
+                    <div class="agent-card-header">
+                        <div class="agent-info">
+                            <h3>${agent.agentName || 'Unknown'}</h3>
+                            <p class="agent-id">ID: ${agent.agentId}</p>
+                            <p class="agent-machine">機器: ${agent.machineName || 'Unknown'}</p>
+                        </div>
+                        <div class="agent-status">
+                            <span class="status-badge status-${agent.status.toLowerCase()}">
+                                ${getStatusText(agent.status)}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="agent-card-body">
+                        <div class="agent-meta">
+                            <p><strong>連接時間:</strong> ${new Date(agent.connectedAt).toLocaleString()}</p>
+                            ${agent.currentTaskId ? `<p><strong>當前任務:</strong> ${agent.currentTaskId}</p>` : ''}
+                        </div>
+                        <div class="agent-actions">
+                            <button class="btn btn-success" onclick="triggerAgent('${agent.agentId}')" 
+                                    ${agent.status === 'Working' ? 'disabled' : ''}>
+                                觸發分析
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'Connected': '已連接',
+                'Idle': '空閒',
+                'Working': '工作中',
+                'Disconnected': '已斷線'
+            };
+            return statusMap[status] || '未知';
+        }
+
+        // 觸發 Agent
+        function triggerAgent(agentId) {
+            currentAgentId = agentId;
+            document.getElementById('triggerModal').style.display = 'block';
+        }
+
+        // 關閉觸發模態框
+        function closeTriggerModal() {
+            document.getElementById('triggerModal').style.display = 'none';
+            currentAgentId = null;
+            document.getElementById('triggerForm').reset();
+            document.getElementById('enableSettingsUpdate').checked = false;
+            toggleSettingsUpdate();
+            // 重置配置項列表為預設
+            const list = document.getElementById('settingsUpdateList');
+            list.innerHTML = `
+                <div class="settings-item">
+                    <div class="settings-row">
+                        <input type="text" class="form-control settings-key" placeholder="配置鍵 (例如: Analysis.SourceCodePath)" style="flex: 1; margin-right: 10px;" />
+                        <input type="text" class="form-control settings-value" placeholder="配置值 (例如: C:/path/to/project)" style="flex: 1; margin-right: 10px;" />
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeSettingsItem(this)">移除</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 切換配置更新區塊顯示
+        function toggleSettingsUpdate() {
+            const checkbox = document.getElementById('enableSettingsUpdate');
+            const section = document.getElementById('settingsUpdateSection');
+            section.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // 新增配置項
+        function addSettingsItem() {
+            const list = document.getElementById('settingsUpdateList');
+            const item = document.createElement('div');
+            item.className = 'settings-item';
+            item.innerHTML = `
+                <div class="settings-row">
+                    <input type="text" class="form-control settings-key" placeholder="配置鍵 (例如: Analysis.SourceCodePath)" style="flex: 1; margin-right: 10px;" />
+                    <input type="text" class="form-control settings-value" placeholder="配置值 (例如: C:/path/to/project)" style="flex: 1; margin-right: 10px;" />
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSettingsItem(this)">移除</button>
+                </div>
+            `;
+            list.appendChild(item);
+        }
+
+        // 移除配置項
+        function removeSettingsItem(button) {
+            const item = button.closest('.settings-item');
+            item.remove();
+        }
+
+        // 提交觸發任務
+        function submitTriggerTask() {
+            const form = document.getElementById('triggerForm');
+            const formData = new FormData(form);
+            
+            const taskData = {
+                taskType: formData.get('taskType') || 'analyze',
+                projectPath: formData.get('projectPath') || null,
+                databaseConnectionString: formData.get('databaseConnectionString') || null
+            };
+
+            // 收集配置更新參數
+            const enableSettingsUpdate = document.getElementById('enableSettingsUpdate').checked;
+            if (enableSettingsUpdate) {
+                const settingsUpdates = {};
+                const settingsItems = document.querySelectorAll('.settings-item');
+                let hasValidSettings = false;
+
+                settingsItems.forEach(item => {
+                    const key = item.querySelector('.settings-key').value.trim();
+                    const value = item.querySelector('.settings-value').value.trim();
+                    
+                    if (key && value) {
+                        settingsUpdates[key] = value;
+                        hasValidSettings = true;
+                    }
+                });
+
+                if (hasValidSettings) {
+                    taskData.settingsUpdates = settingsUpdates;
+                } else if (enableSettingsUpdate) {
+                    alert('請至少輸入一個有效的配置項（鍵和值）');
+                    return;
+                }
+            }
+
+            fetch(`/api/agents/${currentAgentId}/trigger`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.taskId) {
+                    alert(`任務已成功發送！任務 ID: ${data.taskId}`);
+                    closeTriggerModal();
+                    refreshAgents();
+                } else {
+                    alert(`任務發送失敗: ${data.error || '未知錯誤'}`);
+                }
+            })
+            .catch(error => {
+                console.error('觸發任務失敗:', error);
+                alert('觸發任務失敗，請稍後再試');
+            });
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initSignalR();
+            refreshAgents();
+            // 每 5 秒自動刷新一次
+            setInterval(refreshAgents, 5000);
+        });
+
+        // 點擊模態框外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('triggerModal');
+            if (event.target == modal) {
+                closeTriggerModal();
+            }
+        }
+    </script>
+    <style>
+        .agent-container {
+            padding: 20px;
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .agent-header h2 {
+            margin: 0;
+        }
+
+        .agent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .agent-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .agent-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .agent-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2em;
+        }
+
+        .agent-id, .agent-machine {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-connected {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-idle {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .status-working {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .status-disconnected {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .agent-meta {
+            margin-bottom: 15px;
+        }
+
+        .agent-meta p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .agent-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .no-agents {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-agents .hint {
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 8px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: #218838;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .settings-toggle {
+            margin-bottom: 10px;
+        }
+
+        .settings-toggle label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .settings-toggle input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .settings-hint {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .settings-hint code {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .settings-item {
+            margin-bottom: 10px;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+    </style>
+}

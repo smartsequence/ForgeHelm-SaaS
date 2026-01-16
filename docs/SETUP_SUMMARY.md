@@ -56,7 +56,26 @@ DocEngine-Agent/
 
 **分支策略**：
 - `main`：已發佈版本（無 Agent）
-- `develop-agent`：Agent 整合分支（待創建）
+- `develop-agent`：Agent 整合分支（若尚未建立請建立）
+
+### 4. 本機快速啟動（SaaS + Agent）
+
+**位置**：`C:\charleen\DocEngine\scripts`
+
+**狀態**：✅ 已加入一鍵啟動與停止腳本
+
+**使用方式**：
+```powershell
+# 同時啟動 SaaS + Agent（單視窗）
+.\scripts\run-all.ps1
+
+# 停止本次啟動的 SaaS + Agent
+.\scripts\stop-all.ps1
+```
+
+**launchSettings**：
+- `SaaS+Agent`：同時啟動 SaaS + Agent
+- `Stop SaaS+Agent`：停止 SaaS + Agent
 
 ## 📋 待辦事項
 
@@ -85,7 +104,7 @@ DocEngine-Agent/
    git push -u origin main
    ```
 
-4. **在 SaaS 倉庫中創建 develop-agent 分支**
+4. **在 SaaS 倉庫中創建 develop-agent 分支（若尚未建立）**
    ```bash
    cd C:\charleen\DocEngine
    git checkout -b develop-agent

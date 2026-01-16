@@ -45,6 +45,18 @@ builder.Services.AddScoped<DocEngine.Services.AIContentService>();
 // 註冊報告編號服務
 builder.Services.AddScoped<DocEngine.Services.ReportIdService>();
 
+// 配置 SignalR
+builder.Services.AddSignalR();
+
+// 註冊 Agent 服務（Singleton，因為需要維護全局狀態）
+// 注意：需要在 AddSignalR 之後註冊，以便可以注入 IHubContext
+builder.Services.AddSingleton<DocEngine.Services.AgentService>(serviceProvider =>
+{
+    var logger = serviceProvider.GetRequiredService<ILogger<DocEngine.Services.AgentService>>();
+    var hubContext = serviceProvider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<DocEngine.Hubs.AgentHub>>();
+    return new DocEngine.Services.AgentService(logger, hubContext);
+});
+
 // 配置 Session（用於安全存儲問卷數據）
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -110,5 +122,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// 映射 SignalR Hub
+app.MapHub<DocEngine.Hubs.AgentHub>("/agentHub");
 
 app.Run();

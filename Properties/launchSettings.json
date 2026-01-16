@@ -12,6 +12,18 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7225;http://localhost:5163"
+    },
+    "SaaS+Agent": {
+      "commandName": "Executable",
+      "executablePath": "cmd",
+      "commandLineArgs": "/c scripts\\run-all.cmd",
+      "workingDirectory": "."
+    },
+    "Stop SaaS+Agent": {
+      "commandName": "Executable",
+      "executablePath": "cmd",
+      "commandLineArgs": "/c scripts\\stop-all.cmd",
+      "workingDirectory": "."
     }
   }
 }
