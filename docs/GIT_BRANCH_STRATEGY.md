@@ -10,7 +10,7 @@
    - 所有提交都應該經過測試
    - 受保護分支（建議在 GitHub 設置）
 
-2. **`develop-agent`** - Agent 開發分支（私有開發）
+2. **`with-agent`** - Agent 開發分支（私有開發）
    - 包含 Agent 相關功能
    - 從 `main` 分支創建
    - 定期同步 `main` 的更新（避免分叉過遠）
@@ -20,7 +20,7 @@
 
 3. **`hotfix/*`** - 生產環境緊急修復
    - 從 `main` 創建
-   - 修復後合併回 `main` 和 `develop-agent`
+   - 修復後合併回 `main` 和 `with-agent`
    - 命名：`hotfix/issue-description`
 
 4. **`feature/*`** - 功能開發分支
@@ -49,18 +49,18 @@ git push origin hotfix/fix-description
 # 4. 創建 Pull Request 合併到 main
 # （在 GitHub 上操作）
 
-# 5. 合併後，同步到 develop-agent
-git checkout develop-agent
+# 5. 合併後，同步到 with-agent
+git checkout with-agent
 git pull origin main  # 或 git merge main
-git push origin develop-agent
+git push origin with-agent
 ```
 
 ### 場景 2：開發 Agent 功能
 
 ```bash
-# 1. 從 develop-agent 創建功能分支
-git checkout develop-agent
-git pull origin develop-agent
+# 1. 從 with-agent 創建功能分支
+git checkout with-agent
+git pull origin with-agent
 git checkout -b feature/agent-communication
 
 # 2. 開發功能
@@ -71,16 +71,16 @@ git add .
 git commit -m "feat: 添加 Agent 通訊功能"
 git push origin feature/agent-communication
 
-# 4. 創建 Pull Request 合併到 develop-agent
+# 4. 創建 Pull Request 合併到 with-agent
 # （在 GitHub 上操作，確保倉庫是私有的）
 ```
 
-### 場景 3：定期同步 main 的更新到 develop-agent
+### 場景 3：定期同步 main 的更新到 with-agent
 
 ```bash
-# 1. 確保 develop-agent 是最新的
-git checkout develop-agent
-git pull origin develop-agent
+# 1. 確保 with-agent 是最新的
+git checkout with-agent
+git pull origin with-agent
 
 # 2. 合併 main 的更新
 git merge main
@@ -91,22 +91,22 @@ git merge main
 # ... 解決衝突 ...
 
 # 4. 推送到遠程
-git push origin develop-agent
+git push origin with-agent
 ```
 
 ### 場景 4：Agent 版本準備發佈（融合）
 
 ```bash
-# 1. 確保 main 和 develop-agent 都是最新的
+# 1. 確保 main 和 with-agent 都是最新的
 git checkout main
 git pull origin main
 
-git checkout develop-agent
-git pull origin develop-agent
+git checkout with-agent
+git pull origin with-agent
 
-# 2. 合併 develop-agent 到 main
+# 2. 合併 with-agent 到 main
 git checkout main
-git merge develop-agent --no-ff -m "merge: 合併 Agent 功能到主分支"
+git merge with-agent --no-ff -m "merge: 合併 Agent 功能到主分支"
 
 # 3. 解決衝突（如果有）
 # ... 解決衝突 ...
@@ -136,17 +136,17 @@ git push origin v2.0.0
 
 **選項 A：使用私有倉庫（推薦）**
 - 創建一個新的私有倉庫 `DocEngine-Agent`（或 `DocEngine-Private`）
-- 將 `develop-agent` 分支推送到私有倉庫
+- 將 `with-agent` 分支推送到私有倉庫
 - 這樣可以完全保密 Agent 開發
 
 **選項 B：使用私有分支（較簡單）**
-- 在同一個倉庫中，`develop-agent` 分支不設置為默認分支
+- 在同一個倉庫中，`with-agent` 分支不設置為默認分支
 - 不在 README 或文檔中提及此分支
 - 限制協作者權限（只有開發團隊可以訪問）
 
 ### 3. 協作權限
 
-- **Maintainer**：可以合併到 `main` 和 `develop-agent`
+- **Maintainer**：可以合併到 `main` 和 `with-agent`
 - **Developer**：可以推送到 `feature/*` 和 `hotfix/*`
 - **Read-only**：只能查看 `main` 分支
 
@@ -174,11 +174,11 @@ docs: 更新 Git 分支策略文檔
 
 - `feature/agent-signalr` - Agent SignalR 功能
 - `hotfix/payment-session` - 支付 Session 修復
-- `develop-agent` - Agent 開發主分支
+- `with-agent` - Agent 開發主分支
 
 ## 最佳實踐
 
-1. **定期同步**：每週至少一次將 `main` 的更新同步到 `develop-agent`
+1. **定期同步**：每週至少一次將 `main` 的更新同步到 `with-agent`
 2. **小步提交**：頻繁提交，每次提交都有明確的目的
 3. **代碼審查**：所有合併到 `main` 的 PR 都需要審查
 4. **測試優先**：合併前確保所有測試通過
@@ -186,25 +186,25 @@ docs: 更新 Git 分支策略文檔
 
 ## 應急情況
 
-### 如果 main 和 develop-agent 分叉太遠
+### 如果 main 和 with-agent 分叉太遠
 
 ```bash
 # 使用 rebase 重新整理歷史（謹慎使用）
-git checkout develop-agent
+git checkout with-agent
 git rebase main
 
 # 如果有衝突，解決後繼續
 git rebase --continue
 
 # 強制推送（僅在私有分支）
-git push origin develop-agent --force-with-lease
+git push origin with-agent --force-with-lease
 ```
 
 ### 如果需要在兩個分支間共享代碼
 
 ```bash
 # 使用 cherry-pick 選擇性合併特定提交
-git checkout develop-agent
+git checkout with-agent
 git cherry-pick <commit-hash-from-main>
 ```
 
@@ -225,13 +225,13 @@ git push origin --tags
 ### Q: 如果客戶要求在 Production 版本中添加功能，但這個功能在 Agent 版本中已經有了怎麼辦？
 
 A: 有兩種選擇：
-1. **從 develop-agent cherry-pick**：將相關提交選擇性合併到 main
+1. **從 with-agent cherry-pick**：將相關提交選擇性合併到 main
 2. **在 main 重新實現**：如果代碼差異太大，在 main 重新實現
 
 ### Q: 如何確保 Agent 功能不會意外洩露？
 
 A: 
-1. 使用私有倉庫存放 `develop-agent` 分支
+1. 使用私有倉庫存放 `with-agent` 分支
 2. 設置分支保護規則
 3. 限制協作者權限
 4. 代碼審查時特別注意

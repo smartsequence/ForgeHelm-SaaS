@@ -29,9 +29,9 @@
 ### 2.1 倉庫結構
 
 ```
-DocEngine (公開/私有，SaaS 主倉庫)
+DocEngine-SaaS (公開/私有，SaaS 主倉庫)
 ├── main (已發佈版本，無 Agent)
-├── develop-agent (Agent 開發分支，私有)
+├── with-agent (Agent 開發分支，私有)
 └── hotfix/* (緊急修復)
 
 DocEngine-Agent (私有倉庫，Agent 專案)
@@ -46,25 +46,27 @@ DocEngine-Contracts (私有倉庫，共享協議庫)
 
 ### 2.2 方案說明
 
-#### 倉庫 1：DocEngine (SaaS 主倉庫)
+#### 倉庫 1：DocEngine-SaaS (SaaS 主倉庫)
 - **用途**：SaaS 平台代碼
 - **可見性**：公開或私有（根據需求）
+- **GitHub**：`https://github.com/smartsequence/DocEngine-SaaS`
 - **分支**：
   - `main`：已發佈版本（無 Agent）
-  - `develop-agent`：包含 Agent 整合的開發分支（私有）
+  - `with-agent`：包含 Agent 整合的開發分支（私有）
   - `hotfix/*`：緊急修復
 
 #### 倉庫 2：DocEngine-Agent (Agent 專案)
 - **用途**：Agent 應用程式代碼
 - **可見性**：**完全私有**
+- **GitHub**：`https://github.com/smartsequence/DocEngine-Agent`
 - **分支**：
   - `main`：Agent 主分支
   - `feature/*`：Agent 功能分支
-  - `develop`：Agent 開發分支
 
 #### 倉庫 3：DocEngine-Contracts (共享協議庫)
 - **用途**：定義 Agent 和 SaaS 之間的通信協議
 - **可見性**：**私有**（包含 API 契約）
+- **GitHub**：`https://github.com/smartsequence/DocEngine-Contracts`
 - **內容**：
   - DTO（Data Transfer Objects）
   - API 介面定義
@@ -201,7 +203,7 @@ dotnet nuget push DocEngine.Contracts.1.0.0.nupkg --source "私有Feed"
 
 **3. SaaS 專案引用**
 ```xml
-<!-- DocEngine.csproj -->
+<!-- DocEngine-SaaS/DocEngine.csproj -->
 <ItemGroup>
   <PackageReference Include="DocEngine.Contracts" Version="1.0.0" />
 </ItemGroup>
@@ -209,7 +211,7 @@ dotnet nuget push DocEngine.Contracts.1.0.0.nupkg --source "私有Feed"
 
 **4. Agent 專案引用**
 ```xml
-<!-- DocEngine.Agent.csproj -->
+<!-- DocEngine-Agent/DocEngine.Agent.csproj -->
 <ItemGroup>
   <PackageReference Include="DocEngine.Contracts" Version="1.0.0" />
 </ItemGroup>
@@ -230,7 +232,7 @@ dotnet nuget push DocEngine.Contracts.1.0.0.nupkg --source "私有Feed"
 
 **1. 在 SaaS 倉庫中添加 Submodule**
 ```bash
-cd DocEngine
+cd DocEngine-SaaS
 git submodule add https://github.com/smartsequence/DocEngine-Contracts.git src/Contracts
 git submodule update --init --recursive
 ```
@@ -288,8 +290,8 @@ git push origin feature/new-analysis-feature
 
 ```bash
 # 1. 在 SaaS 倉庫中更新協議庫版本
-cd DocEngine
-git checkout develop-agent
+cd DocEngine-SaaS
+git checkout with-agent
 
 # 2. 更新 NuGet 包版本（或更新 Submodule）
 # NuGet 方式：
@@ -308,14 +310,14 @@ git commit -m "feat: 支援新的分析結果格式"
 ### 5.3 融合兩個版本
 
 ```bash
-# 1. 確保 develop-agent 分支包含所有 Agent 整合
-cd DocEngine
-git checkout develop-agent
-git pull origin develop-agent
+# 1. 確保 with-agent 分支包含所有 Agent 整合
+cd DocEngine-SaaS
+git checkout with-agent
+git pull origin with-agent
 
 # 2. 合併到 main
 git checkout main
-git merge develop-agent --no-ff -m "merge: 合併 Agent 功能到主分支"
+git merge with-agent --no-ff -m "merge: 合併 Agent 功能到主分支"
 
 # 3. 解決衝突（如果有）
 # ... 解決衝突 ...
@@ -387,9 +389,9 @@ public class AgentHub : Hub, IAgentHub
 
 ### 7.1 倉庫權限設置
 
-#### DocEngine (SaaS 主倉庫)
+#### DocEngine-SaaS (SaaS 主倉庫)
 - **main 分支**：公開或私有（根據需求）
-- **develop-agent 分支**：**私有**（不設置為默認分支）
+- **with-agent 分支**：**私有**（不設置為默認分支）
 - **協作者**：開發團隊
 
 #### DocEngine-Agent (Agent 專案)
@@ -594,7 +596,7 @@ A:
 
 **分離倉庫 + NuGet 協議庫**：
 
-1. ✅ **DocEngine**：SaaS 主倉庫（公開/私有）
+1. ✅ **DocEngine-SaaS**：SaaS 主倉庫（公開/私有）
 2. ✅ **DocEngine-Agent**：Agent 專案（完全私有）
 3. ✅ **DocEngine-Contracts**：共享協議庫（私有 NuGet 包）
 

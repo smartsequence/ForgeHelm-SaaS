@@ -48,19 +48,21 @@ DocEngine-Agent/
 2. 開發 Agent 功能
 3. 引用協議庫（NuGet 或 Submodule）
 
-### 3. SaaS 主倉庫（DocEngine）
+### 3. SaaS 主倉庫（DocEngine-SaaS）
 
-**位置**：`C:\charleen\DocEngine`
+**位置**：`C:\charleen\DocEngine-SaaS`
 
 **狀態**：✅ 已存在
 
+**GitHub**：`https://github.com/smartsequence/DocEngine-SaaS`
+
 **分支策略**：
 - `main`：已發佈版本（無 Agent）
-- `develop-agent`：Agent 整合分支（若尚未建立請建立）
+- `with-agent`：Agent 整合分支
 
 ### 4. 本機快速啟動（SaaS + Agent）
 
-**位置**：`C:\charleen\DocEngine\scripts`
+**位置**：`C:\charleen\DocEngine-SaaS\scripts`
 
 **狀態**：✅ 已加入一鍵啟動與停止腳本
 
@@ -104,11 +106,10 @@ DocEngine-Agent/
    git push -u origin main
    ```
 
-4. **在 SaaS 倉庫中創建 develop-agent 分支（若尚未建立）**
+4. **切換到 with-agent 分支進行開發**
    ```bash
-   cd C:\charleen\DocEngine
-   git checkout -b develop-agent
-   git push origin develop-agent
+   cd C:\charleen\DocEngine-SaaS
+   git checkout with-agent
    ```
 
 ### 後續開發
@@ -124,7 +125,7 @@ DocEngine-Agent/
    - REST API 客戶端
 
 3. **整合到 SaaS**
-   - 在 `develop-agent` 分支中整合 Agent 功能
+   - 在 `with-agent` 分支中整合 Agent 功能
    - 實現 SignalR Hub
    - 實現 REST API 端點
 

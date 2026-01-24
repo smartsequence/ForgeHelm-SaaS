@@ -1,5 +1,5 @@
 param(
-    [string]$SaaSPath = "C:\charleen\DocEngine",
+    [string]$SaaSPath = "C:\charleen\DocEngine-SaaS",
     [string]$AgentPath = "C:\charleen\DocEngine-Agent"
 )
 

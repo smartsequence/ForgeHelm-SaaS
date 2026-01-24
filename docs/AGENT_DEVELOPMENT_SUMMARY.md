@@ -1,7 +1,7 @@
 # Agent 功能開發總結
 
 **開發日期：** 2026-01-16  
-**分支：** develop-agent  
+**分支：** with-agent  
 **狀態：** ✅ 已完成核心功能與 UI 擴充
 
 ---
@@ -221,7 +221,7 @@ http://localhost:5163/Agent
 ## 六、檔案結構
 
 ```
-DocEngine/
+DocEngine-SaaS/
 ├── Hubs/
 │   └── AgentHub.cs              # SignalR Hub
 ├── Services/
