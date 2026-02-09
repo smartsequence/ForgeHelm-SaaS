@@ -10,14 +10,14 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("DocEngine")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("ForgeHelm.SaaS")]
 [assembly: System.Reflection.AssemblyCopyrightAttribute(" ")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d9b633ca893fc3182d7ee74f670b3319a002381a")]
-[assembly: System.Reflection.AssemblyProductAttribute("DocEngine")]
-[assembly: System.Reflection.AssemblyTitleAttribute("DocEngine")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bbb69f1dd29373b076f8f77745b91dfec213f7d9")]
+[assembly: System.Reflection.AssemblyProductAttribute("ForgeHelm.SaaS")]
+[assembly: System.Reflection.AssemblyTitleAttribute("ForgeHelm.SaaS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyCultureAttribute("en-US")]
+[assembly: System.Reflection.AssemblyCultureAttribute("zh-TW")]
 
 // 由 MSBuild WriteCodeFragment 類別產生。
 

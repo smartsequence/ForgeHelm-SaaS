@@ -2,7 +2,7 @@
 
 **文件版本：** v1.0  
 **最後更新：** 2025-01-XX  
-**作者：** DocEngine Development Team
+**作者：** ForgeHelm Development Team
 
 ---
 
@@ -29,24 +29,24 @@
 ### 2.1 倉庫結構
 
 ```
-DocEngine (公開/私有，SaaS 主倉庫)
+ForgeHelm (公開/私有，SaaS 主倉庫)
 ├── main (已發佈版本，無 Agent)
 ├── develop-agent (Agent 開發分支，私有)
 └── hotfix/* (緊急修復)
 
-DocEngine-Agent (私有倉庫，Agent 專案)
+ForgeHelm-Agent (私有倉庫，Agent 專案)
 ├── main (Agent 主分支)
 ├── feature/* (Agent 功能分支)
 └── develop (Agent 開發分支)
 
-DocEngine-Contracts (私有倉庫，共享協議庫)
+ForgeHelm-Contracts (私有倉庫，共享協議庫)
 ├── main (協議定義主分支)
 └── version/* (版本標記)
 ```
 
 ### 2.2 方案說明
 
-#### 倉庫 1：DocEngine (SaaS 主倉庫)
+#### 倉庫 1：ForgeHelm (SaaS 主倉庫)
 - **用途**：SaaS 平台代碼
 - **可見性**：公開或私有（根據需求）
 - **分支**：
@@ -54,7 +54,7 @@ DocEngine-Contracts (私有倉庫，共享協議庫)
   - `develop-agent`：包含 Agent 整合的開發分支（私有）
   - `hotfix/*`：緊急修復
 
-#### 倉庫 2：DocEngine-Agent (Agent 專案)
+#### 倉庫 2：ForgeHelm-Agent (Agent 專案)
 - **用途**：Agent 應用程式代碼
 - **可見性**：**完全私有**
 - **分支**：
@@ -62,7 +62,7 @@ DocEngine-Contracts (私有倉庫，共享協議庫)
   - `feature/*`：Agent 功能分支
   - `develop`：Agent 開發分支
 
-#### 倉庫 3：DocEngine-Contracts (共享協議庫)
+#### 倉庫 3：ForgeHelm-Contracts (共享協議庫)
 - **用途**：定義 Agent 和 SaaS 之間的通信協議
 - **可見性**：**私有**（包含 API 契約）
 - **內容**：
@@ -78,9 +78,9 @@ DocEngine-Contracts (私有倉庫，共享協議庫)
 ### 3.1 協議庫結構
 
 ```
-DocEngine-Contracts/
+ForgeHelm-Contracts/
 ├── src/
-│   ├── DocEngine.Contracts/
+│   ├── ForgeHelm.Contracts/
 │   │   ├── Models/
 │   │   │   ├── AnalysisTask.cs
 │   │   │   ├── AnalysisResult.cs
@@ -92,11 +92,11 @@ DocEngine-Contracts/
 │   │   ├── SignalR/
 │   │   │   ├── IAgentHub.cs (SignalR Hub 介面)
 │   │   │   └── ...
-│   │   └── DocEngine.Contracts.csproj
-│   └── DocEngine.Contracts.Client/
+│   │   └── ForgeHelm.Contracts.csproj
+│   └── ForgeHelm.Contracts.Client/
 │       └── (Agent 端使用的客戶端實現)
 ├── tests/
-│   └── DocEngine.Contracts.Tests/
+│   └── ForgeHelm.Contracts.Tests/
 └── README.md
 ```
 
@@ -104,7 +104,7 @@ DocEngine-Contracts/
 
 #### Models/AnalysisTask.cs
 ```csharp
-namespace DocEngine.Contracts.Models;
+namespace ForgeHelm.Contracts.Models;
 
 public class AnalysisTask
 {
@@ -125,7 +125,7 @@ public enum AnalysisType
 
 #### Models/AnalysisResult.cs
 ```csharp
-namespace DocEngine.Contracts.Models;
+namespace ForgeHelm.Contracts.Models;
 
 public class AnalysisResult
 {
@@ -139,7 +139,7 @@ public class AnalysisResult
 
 #### SignalR/IAgentHub.cs
 ```csharp
-namespace DocEngine.Contracts.SignalR;
+namespace ForgeHelm.Contracts.SignalR;
 
 public interface IAgentHub
 {
@@ -156,7 +156,7 @@ public interface IAgentHub
 
 #### Api/IAgentApi.cs
 ```csharp
-namespace DocEngine.Contracts.Api;
+namespace ForgeHelm.Contracts.Api;
 
 public interface IAgentApi
 {
@@ -194,24 +194,24 @@ public interface IAgentApi
 
 **2. 發布協議庫**
 ```bash
-cd DocEngine-Contracts
+cd ForgeHelm-Contracts
 dotnet pack -c Release
-dotnet nuget push DocEngine.Contracts.1.0.0.nupkg --source "私有Feed"
+dotnet nuget push ForgeHelm.Contracts.1.0.0.nupkg --source "私有Feed"
 ```
 
 **3. SaaS 專案引用**
 ```xml
-<!-- DocEngine.csproj -->
+<!-- ForgeHelm.csproj -->
 <ItemGroup>
-  <PackageReference Include="DocEngine.Contracts" Version="1.0.0" />
+  <PackageReference Include="ForgeHelm.Contracts" Version="1.0.0" />
 </ItemGroup>
 ```
 
 **4. Agent 專案引用**
 ```xml
-<!-- DocEngine.Agent.csproj -->
+<!-- ForgeHelm.Agent.csproj -->
 <ItemGroup>
-  <PackageReference Include="DocEngine.Contracts" Version="1.0.0" />
+  <PackageReference Include="ForgeHelm.Contracts" Version="1.0.0" />
 </ItemGroup>
 ```
 
@@ -230,15 +230,15 @@ dotnet nuget push DocEngine.Contracts.1.0.0.nupkg --source "私有Feed"
 
 **1. 在 SaaS 倉庫中添加 Submodule**
 ```bash
-cd DocEngine
-git submodule add https://github.com/smartsequence/DocEngine-Contracts.git src/Contracts
+cd ForgeHelm
+git submodule add https://github.com/smartsequence/ForgeHelm-Contracts.git src/Contracts
 git submodule update --init --recursive
 ```
 
 **2. 在 Agent 倉庫中添加 Submodule**
 ```bash
-cd DocEngine-Agent
-git submodule add https://github.com/smartsequence/DocEngine-Contracts.git src/Contracts
+cd ForgeHelm-Agent
+git submodule add https://github.com/smartsequence/ForgeHelm-Contracts.git src/Contracts
 git submodule update --init --recursive
 ```
 
@@ -259,11 +259,11 @@ Git Subtree 會將代碼複製到主倉庫，失去獨立性，不適合此場�
 
 ```bash
 # 1. 在 Agent 倉庫開發
-cd DocEngine-Agent
+cd ForgeHelm-Agent
 git checkout -b feature/new-analysis-feature
 
 # 2. 如果需要修改協議，先在 Contracts 倉庫修改
-cd DocEngine-Contracts
+cd ForgeHelm-Contracts
 git checkout -b feature/update-contracts
 # ... 修改協議 ...
 git commit -m "feat: 新增分析結果欄位"
@@ -274,7 +274,7 @@ dotnet pack -c Release
 dotnet nuget push --source "私有Feed"
 
 # 4. 在 Agent 專案中更新協議庫版本
-cd DocEngine-Agent
+cd ForgeHelm-Agent
 # 更新 .csproj 中的版本號
 dotnet restore
 # ... 使用新協議開發功能 ...
@@ -288,12 +288,12 @@ git push origin feature/new-analysis-feature
 
 ```bash
 # 1. 在 SaaS 倉庫中更新協議庫版本
-cd DocEngine
+cd ForgeHelm
 git checkout develop-agent
 
 # 2. 更新 NuGet 包版本（或更新 Submodule）
 # NuGet 方式：
-dotnet add package DocEngine.Contracts --version 1.1.0
+dotnet add package ForgeHelm.Contracts --version 1.1.0
 
 # Submodule 方式：
 git submodule update --remote
@@ -309,7 +309,7 @@ git commit -m "feat: 支援新的分析結果格式"
 
 ```bash
 # 1. 確保 develop-agent 分支包含所有 Agent 整合
-cd DocEngine
+cd ForgeHelm
 git checkout develop-agent
 git pull origin develop-agent
 
@@ -387,17 +387,17 @@ public class AgentHub : Hub, IAgentHub
 
 ### 7.1 倉庫權限設置
 
-#### DocEngine (SaaS 主倉庫)
+#### ForgeHelm (SaaS 主倉庫)
 - **main 分支**：公開或私有（根據需求）
 - **develop-agent 分支**：**私有**（不設置為默認分支）
 - **協作者**：開發團隊
 
-#### DocEngine-Agent (Agent 專案)
+#### ForgeHelm-Agent (Agent 專案)
 - **所有分支**：**完全私有**
 - **協作者**：僅 Agent 開發人員
 - **不設置為公開**
 
-#### DocEngine-Contracts (共享協議庫)
+#### ForgeHelm-Contracts (共享協議庫)
 - **所有分支**：**私有**（包含 API 契約）
 - **協作者**：SaaS 和 Agent 開發人員
 - **GitHub Packages**：設置為私有 NuGet Feed
@@ -427,7 +427,7 @@ public class AgentHub : Hub, IAgentHub
 **3. 發布協議庫**
 ```bash
 dotnet pack -c Release
-dotnet nuget push DocEngine.Contracts.1.0.0.nupkg \
+dotnet nuget push ForgeHelm.Contracts.1.0.0.nupkg \
   --source "github" \
   --api-key YOUR_TOKEN
 ```
@@ -486,12 +486,12 @@ dotnet nuget push DocEngine.Contracts.1.0.0.nupkg \
 
 ```bash
 # 1. 創建 Contracts 倉庫（私有）
-gh repo create DocEngine-Contracts --private
+gh repo create ForgeHelm-Contracts --private
 
 # 2. 創建 Agent 倉庫（私有）
-gh repo create DocEngine-Agent --private
+gh repo create ForgeHelm-Agent --private
 
-# 3. SaaS 倉庫已存在（DocEngine）
+# 3. SaaS 倉庫已存在（ForgeHelm）
 # 確保 develop-agent 分支是私有的
 ```
 
@@ -499,12 +499,12 @@ gh repo create DocEngine-Agent --private
 
 ```bash
 # 1. Clone Contracts 倉庫
-git clone https://github.com/smartsequence/DocEngine-Contracts.git
-cd DocEngine-Contracts
+git clone https://github.com/smartsequence/ForgeHelm-Contracts.git
+cd ForgeHelm-Contracts
 
 # 2. 創建 .NET 類庫專案
-dotnet new classlib -n DocEngine.Contracts
-cd DocEngine.Contracts
+dotnet new classlib -n ForgeHelm.Contracts
+cd ForgeHelm.Contracts
 
 # 3. 添加必要的 NuGet 包
 dotnet add package Microsoft.AspNetCore.SignalR
@@ -533,29 +533,29 @@ dotnet nuget add source https://nuget.pkg.github.com/smartsequence/index.json \
   --store-password-in-clear-text
 
 # 2. 添加協議庫引用
-cd DocEngine
-dotnet add package DocEngine.Contracts --version 1.0.0 --source github
+cd ForgeHelm
+dotnet add package ForgeHelm.Contracts --version 1.0.0 --source github
 
 # 3. 使用協議庫
-# ... 在代碼中使用 DocEngine.Contracts ...
+# ... 在代碼中使用 ForgeHelm.Contracts ...
 ```
 
 ### 9.4 Agent 專案引用協議庫
 
 ```bash
 # 1. Clone Agent 倉庫
-git clone https://github.com/smartsequence/DocEngine-Agent.git
-cd DocEngine-Agent
+git clone https://github.com/smartsequence/ForgeHelm-Agent.git
+cd ForgeHelm-Agent
 
 # 2. 創建 Agent 專案
-dotnet new console -n DocEngine.Agent
-cd DocEngine.Agent
+dotnet new console -n ForgeHelm.Agent
+cd ForgeHelm.Agent
 
 # 3. 添加協議庫引用
-dotnet add package DocEngine.Contracts --version 1.0.0 --source github
+dotnet add package ForgeHelm.Contracts --version 1.0.0 --source github
 
 # 4. 使用協議庫
-# ... 在代碼中使用 DocEngine.Contracts ...
+# ... 在代碼中使用 ForgeHelm.Contracts ...
 ```
 
 ---
@@ -594,9 +594,9 @@ A:
 
 **分離倉庫 + NuGet 協議庫**：
 
-1. ✅ **DocEngine**：SaaS 主倉庫（公開/私有）
-2. ✅ **DocEngine-Agent**：Agent 專案（完全私有）
-3. ✅ **DocEngine-Contracts**：共享協議庫（私有 NuGet 包）
+1. ✅ **ForgeHelm**：SaaS 主倉庫（公開/私有）
+2. ✅ **ForgeHelm-Agent**：Agent 專案（完全私有）
+3. ✅ **ForgeHelm-Contracts**：共享協議庫（私有 NuGet 包）
 
 ### 優勢
 

@@ -1,4 +1,4 @@
-# Git 分支策略 - DocEngine
+# Git 分支策略 - ForgeHelm
 
 ## 分支架構
 
@@ -135,7 +135,7 @@ git push origin v2.0.0
 ### 2. 私有倉庫選項
 
 **選項 A：使用私有倉庫（推薦）**
-- 創建一個新的私有倉庫 `DocEngine-Agent`（或 `DocEngine-Private`）
+- 創建一個新的私有倉庫 `ForgeHelm-Agent`（或 `ForgeHelm-Private`）
 - 將 `develop-agent` 分支推送到私有倉庫
 - 這樣可以完全保密 Agent 開發
 

@@ -1,4 +1,4 @@
-namespace DocEngine.Models;
+namespace ForgeHelm.SaaS.Models;
 
 public class ErrorViewModel
 {

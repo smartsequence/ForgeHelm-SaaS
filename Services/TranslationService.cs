@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
-using DocEngine.Services;
+using ForgeHelm.SaaS.Services;
 using Microsoft.Extensions.Logging;
 
-namespace DocEngine.Services;
+namespace ForgeHelm.SaaS.Services;
 
 /// <summary>
 /// 翻譯服務，處理英文到繁體中文的翻譯
