@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using DocEngine.Models;
+using ForgeHelm.SaaS.Models;
 using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
@@ -10,10 +10,10 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Text.RegularExpressions;
-using DocEngine.Services;
+using ForgeHelm.SaaS.Services;
 using Microsoft.AspNetCore.Hosting;
 
-namespace DocEngine.Controllers;
+namespace ForgeHelm.SaaS.Controllers;
 
 public class HomeController : Controller
 {
@@ -297,7 +297,7 @@ public class HomeController : Controller
             // 記錄所有 Cookie（用於診斷）
             var cookies = Request.Cookies;
             var cookieKeys = cookies.Keys.ToList();
-            var sessionCookie = cookies[".DocEngine.Session"];
+            var sessionCookie = cookies[".ForgeHelm.Session"];
             var cookieInfo = $"共有 {cookieKeys.Count} 個 Cookie: {string.Join(", ", cookieKeys)}";
             if (sessionCookie != null)
             {

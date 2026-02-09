@@ -6,19 +6,19 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "DocEngine/1.0.0": {
+      "ForgeHelm.SaaS/1.0.0": {
         "dependencies": {
           "MudBlazor": "7.0.0",
           "OpenAI": "2.8.0"
         },
         "runtime": {
-          "DocEngine.dll": {}
+          "ForgeHelm.SaaS.dll": {}
         },
         "resources": {
-          "en-US/DocEngine.resources.dll": {
+          "en-US/ForgeHelm.SaaS.resources.dll": {
             "locale": "en-US"
           },
-          "zh-TW/DocEngine.resources.dll": {
+          "zh-TW/ForgeHelm.SaaS.resources.dll": {
             "locale": "zh-TW"
           }
         }
@@ -138,7 +138,7 @@
     }
   },
   "libraries": {
-    "DocEngine/1.0.0": {
+    "ForgeHelm.SaaS/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

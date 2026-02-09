@@ -27,7 +27,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;        // ✅ 防止 XSS 攻擊
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // ✅ HTTPS 環境使用 Secure
     options.Cookie.SameSite = SameSiteMode.Strict; // ✅ CSRF 防護
-    options.Cookie.Name = ".DocEngine.Session";
+    options.Cookie.Name = ".ForgeHelm.Session";
 });
 ```
 

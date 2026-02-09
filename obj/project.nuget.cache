@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "mvSt0j8s1k4=",
+  "dgSpecHash": "4iJN/EvLVrc=",
   "success": true,
-  "projectFilePath": "C:\\charleen\\DocEngine\\DocEngine.csproj",
+  "projectFilePath": "C:\\charleen\\DocEngine-SaaS\\DocEngine.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\charl\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.6\\microsoft.aspnetcore.authorization.8.0.6.nupkg.sha512",
     "C:\\Users\\charl\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.6\\microsoft.aspnetcore.components.8.0.6.nupkg.sha512",

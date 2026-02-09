@@ -870,11 +870,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\charleen\\DocEngine\\DocEngine.csproj",
-      "projectName": "DocEngine",
-      "projectPath": "C:\\charleen\\DocEngine\\DocEngine.csproj",
+      "projectUniqueName": "C:\\charleen\\DocEngine-SaaS\\DocEngine.csproj",
+      "projectName": "ForgeHelm.SaaS",
+      "projectPath": "C:\\charleen\\DocEngine-SaaS\\DocEngine.csproj",
       "packagesPath": "C:\\Users\\charl\\.nuget\\packages\\",
-      "outputPath": "C:\\charleen\\DocEngine\\obj\\",
+      "outputPath": "C:\\charleen\\DocEngine-SaaS\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 
-// 使用自定義環境變數 DOCENGINE_ENVIRONMENT，避免與同一伺服器上的其他 ASP.NET Core 應用程式衝突
-// 如果 DOCENGINE_ENVIRONMENT 不存在，預設為 Production（生產環境）
-var docEngineEnv = Environment.GetEnvironmentVariable("DOCENGINE_ENVIRONMENT");
-var environmentName = !string.IsNullOrEmpty(docEngineEnv) 
-    ? docEngineEnv 
+// 使用自定義環境變數 FORGEHELM_ENVIRONMENT，避免與同一伺服器上的其他 ASP.NET Core 應用程式衝突
+// 如果 FORGEHELM_ENVIRONMENT 不存在，預設為 Production（生產環境）
+var forgeHelmEnv = Environment.GetEnvironmentVariable("FORGEHELM_ENVIRONMENT");
+var environmentName = !string.IsNullOrEmpty(forgeHelmEnv) 
+    ? forgeHelmEnv 
     : "Production"; // 預設為生產環境，確保安全性
 
 // 使用 WebApplicationOptions 直接指定環境名稱，不依賴 ASPNETCORE_ENVIRONMENT
@@ -24,7 +24,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
 // 配置 OpenAI HttpClient
-builder.Services.AddHttpClient<DocEngine.Services.OpenAIService>((serviceProvider, client) =>
+builder.Services.AddHttpClient<ForgeHelm.SaaS.Services.OpenAIService>((serviceProvider, client) =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
     var apiKey = configuration["OpenAI:ApiKey"]?.Trim();
@@ -39,11 +39,11 @@ builder.Services.AddHttpClient<DocEngine.Services.OpenAIService>((serviceProvide
 });
 
 // 註冊 AI 相關服務
-builder.Services.AddScoped<DocEngine.Services.TranslationService>();
-builder.Services.AddScoped<DocEngine.Services.AIContentService>();
+builder.Services.AddScoped<ForgeHelm.SaaS.Services.TranslationService>();
+builder.Services.AddScoped<ForgeHelm.SaaS.Services.AIContentService>();
 
 // 註冊報告編號服務
-builder.Services.AddScoped<DocEngine.Services.ReportIdService>();
+builder.Services.AddScoped<ForgeHelm.SaaS.Services.ReportIdService>();
 
 // 配置 Session（用於安全存儲問卷數據）
 builder.Services.AddDistributedMemoryCache();
@@ -56,7 +56,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true; // 防止 XSS 攻擊
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTPS 環境使用 Secure
     options.Cookie.SameSite = SameSiteMode.Lax; // 允許從外部支付網站跳轉回來時攜帶 Cookie（仍防止 CSRF POST 攻擊）
-    options.Cookie.Name = ".DocEngine.Session";
+    options.Cookie.Name = ".ForgeHelm.Session";
 });
 
 // 配置本地化服務
