@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace DocEngine.Services;
+namespace ForgeHelm.SaaS.Services;
 
 /// <summary>
 /// AI 內容生成服務，統一處理「先生成英文，再翻譯成繁體中文」的流程

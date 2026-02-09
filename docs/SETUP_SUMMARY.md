@@ -2,16 +2,16 @@
 
 ## ✅ 已完成的設置
 
-### 1. 協議庫（DocEngine-Contracts）
+### 1. 協議庫（ForgeHelm-Contracts）
 
-**位置**：`C:\charleen\DocEngine-Contracts`
+**位置**：`C:\charleen\ForgeHelm-Contracts`
 
 **狀態**：✅ 已創建並編譯成功
 
 **結構**：
 ```
-DocEngine-Contracts/
-├── DocEngine.Contracts/
+ForgeHelm-Contracts/
+├── ForgeHelm.Contracts/
 │   ├── Models/          # 資料模型
 │   │   ├── AnalysisTask.cs
 │   │   ├── AnalysisResult.cs
@@ -25,59 +25,38 @@ DocEngine-Contracts/
 ```
 
 **下一步**：
-1. 在 GitHub 創建私有倉庫 `DocEngine-Contracts`
+1. 在 GitHub 創建私有倉庫 `ForgeHelm-Contracts`
 2. 推送代碼到 GitHub
 3. 設置為私有 NuGet Feed（GitHub Packages）
 
-### 2. Agent 專案（DocEngine-Agent）
+### 2. Agent 專案（ForgeHelm-Agent）
 
-**位置**：`C:\charleen\DocEngine-Agent`
+**位置**：`C:\charleen\ForgeHelm-Agent`
 
 **狀態**：✅ 已創建基本結構
 
 **結構**：
 ```
-DocEngine-Agent/
-├── DocEngine.Agent/    # Console Application
+ForgeHelm-Agent/
+├── ForgeHelm.Agent/    # Console Application
 ├── README.md
 └── .gitignore
 ```
 
 **下一步**：
-1. 在 GitHub 創建私有倉庫 `DocEngine-Agent`
+1. 在 GitHub 創建私有倉庫 `ForgeHelm-Agent`
 2. 開發 Agent 功能
 3. 引用協議庫（NuGet 或 Submodule）
 
-### 3. SaaS 主倉庫（DocEngine-SaaS）
+### 3. SaaS 主倉庫（ForgeHelm）
 
-**位置**：`C:\charleen\DocEngine-SaaS`
+**位置**：`C:\charleen\ForgeHelm`
 
 **狀態**：✅ 已存在
 
-**GitHub**：`https://github.com/smartsequence/DocEngine-SaaS`
-
 **分支策略**：
 - `main`：已發佈版本（無 Agent）
-- `with-agent`：Agent 整合分支
-
-### 4. 本機快速啟動（SaaS + Agent）
-
-**位置**：`C:\charleen\DocEngine-SaaS\scripts`
-
-**狀態**：✅ 已加入一鍵啟動與停止腳本
-
-**使用方式**：
-```powershell
-# 同時啟動 SaaS + Agent（單視窗）
-.\scripts\run-all.ps1
-
-# 停止本次啟動的 SaaS + Agent
-.\scripts\stop-all.ps1
-```
-
-**launchSettings**：
-- `SaaS+Agent`：同時啟動 SaaS + Agent
-- `Stop SaaS+Agent`：停止 SaaS + Agent
+- `develop-agent`：Agent 整合分支（待創建）
 
 ## 📋 待辦事項
 
@@ -86,30 +65,31 @@ DocEngine-Agent/
 1. **創建 GitHub 倉庫**
    ```bash
    # 在 GitHub 網頁上創建：
-   # - DocEngine-Contracts (私有)
-   # - DocEngine-Agent (私有)
+   # - ForgeHelm-Contracts (私有)
+   # - ForgeHelm-Agent (私有)
    ```
 
 2. **推送協議庫到 GitHub**
    ```bash
-   cd C:\charleen\DocEngine-Contracts
-   git remote add origin https://github.com/smartsequence/DocEngine-Contracts.git
+   cd C:\charleen\ForgeHelm-Contracts
+   git remote add origin https://github.com/smartsequence/ForgeHelm-Contracts.git
    git push -u origin main
    ```
 
 3. **推送 Agent 專案到 GitHub**
    ```bash
-   cd C:\charleen\DocEngine-Agent
+   cd C:\charleen\ForgeHelm-Agent
    git add .
    git commit -m "feat: 初始 Agent 專案結構"
-   git remote add origin https://github.com/smartsequence/DocEngine-Agent.git
+   git remote add origin https://github.com/smartsequence/ForgeHelm-Agent.git
    git push -u origin main
    ```
 
-4. **切換到 with-agent 分支進行開發**
+4. **在 SaaS 倉庫中創建 develop-agent 分支**
    ```bash
-   cd C:\charleen\DocEngine-SaaS
-   git checkout with-agent
+   cd C:\charleen\ForgeHelm
+   git checkout -b develop-agent
+   git push origin develop-agent
    ```
 
 ### 後續開發
@@ -125,7 +105,7 @@ DocEngine-Agent/
    - REST API 客戶端
 
 3. **整合到 SaaS**
-   - 在 `with-agent` 分支中整合 Agent 功能
+   - 在 `develop-agent` 分支中整合 Agent 功能
    - 實現 SignalR Hub
    - 實現 REST API 端點
 

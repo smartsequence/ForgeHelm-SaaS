@@ -1,254 +1,63 @@
-# DocEngine SaaS 平台
+# DocEngine-SaaS
 
-DocEngine SaaS 平台是一個文件自動生成系統，整合 AI 能力自動分析專案程式碼和資料庫，生成各類技術文件。
+DocEngine-SaaS 是一個以 ASP.NET Core MVC (.NET 9) 開發的 Web 應用程式，負責專案管理、文件生成與（未來）Agent 整合。
 
----
-
-## 📖 專案說明
-
-### 這個專案是做什麼的？
-
-**DocEngine SaaS** 是一個網頁應用程式平台，提供：
-
-1. **專案管理**：管理多個專案的文件生成任務
-2. **Agent 管理**：管理連接的 Agent，分配分析任務
-3. **AI 文件生成**：使用 AI 服務根據分析結果生成文件
-4. **文件版本控制**：管理文件的多個版本
-5. **用戶管理**：管理用戶權限和存取控制
-
-### 系統架構
-
-```
-DocEngine 系統
-├── DocEngine-SaaS (本專案)
-│   ├── Web UI - 使用者介面
-│   ├── SignalR Hub - Agent 通訊
-│   ├── REST API - 資料存取
-│   ├── AI 服務整合 - OpenAI / 內網 AI
-│   └── PostgreSQL - 資料儲存
-│
-├── DocEngine-Agent
-│   └── 客戶端程式碼/資料庫分析工具
-│
-└── DocEngine-Contracts
-    └── 共享通訊協議庫
-```
-
----
-
-## 🎯 主要功能
-
-### ✅ 已實現功能
-
-- ✅ **用戶認證與授權**
-  - Cookie-based 認證
-  - 角色權限管理
-
-- ✅ **Agent 管理**
-  - SignalR 即時通訊
-  - Agent 連接狀態監控
-  - 任務分配與排程
-
-- ✅ **系統風險評估**
-  - 問卷調查系統
-  - 風險評分計算
-  - 評估報告生成
-
-### 🚧 開發中功能
-
-- 🚧 AI 文件生成整合
-- 🚧 文件版本控制
-- 🚧 更多專案管理功能
-
----
-
-## 📁 專案結構
-
-```
-DocEngine-SaaS/
-├── Controllers/              # MVC 控制器
-│   ├── HomeController.cs
-│   ├── AgentController.cs
-│   └── ...
-├── Views/                    # Razor 視圖
-│   ├── Home/
-│   ├── Agent/
-│   └── ...
-├── Hubs/                     # SignalR Hubs
-│   └── AgentHub.cs
-├── Services/                 # 服務層
-│   └── AgentService.cs
-├── Models/                   # 資料模型
-├── wwwroot/                  # 靜態資源
-├── docs/                     # 專案文檔
-│   ├── SETUP_SUMMARY.md
-│   ├── GIT_BRANCH_STRATEGY.md
-│   ├── REPO_ORGANIZATION_STRATEGY.md
-│   └── ...
-├── scripts/                  # 輔助腳本
-│   ├── run-all.ps1          # 同時啟動 SaaS + Agent
-│   └── stop-all.ps1         # 停止所有服務
-├── appsettings.json         # 應用配置
-├── Program.cs               # 應用入口
-└── DocEngine.csproj         # 專案檔
-```
-
----
-
-## 🚀 快速開始
-
-### 前置需求
-
-- ✅ .NET 9.0 SDK 或更新版本
-- ✅ PostgreSQL 資料庫
-- ✅ （可選）OpenAI API Key 或內網 AI Server
-
-### 步驟 1：配置資料庫
-
-1. 安裝 PostgreSQL
-2. 建立資料庫：`CREATE DATABASE docengine;`
-3. 更新 `appsettings.json` 中的連線字串
-
-### 步驟 2：配置應用程式
-
-編輯 `appsettings.json`：
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=docengine;Username=postgres;Password=yourpassword"
-  },
-  "OpenAI": {
-    "ApiKey": "your-openai-api-key"
-  }
-}
-```
-
-### 步驟 3：建置與執行
+## 開發環境啟動
 
 ```bash
-# 還原套件
 dotnet restore
-
-# 建置專案
-dotnet build
-
-# 執行
 dotnet run
 ```
 
-應用程式會啟動在 `https://localhost:7225` 或 `http://localhost:5163`
+應用程式預設會在 `http://localhost:5163`（或 `launchSettings.json` 設定的 URL）啟動。
 
-### 步驟 4：同時啟動 SaaS + Agent（開發模式）
+## 設定檔與連線字串
 
-```bash
-# PowerShell
-.\scripts\run-all.ps1
+- `appsettings.json`
+  - 共用設定（含 `ConnectionStrings:Postgres` 預留鍵值）。
+- `appsettings.Development.json`
+  - 開發環境專用設定，可在這裡放 Postgres 開發用連線字串。
 
-# 或使用 Visual Studio launchSettings
-# 選擇 "SaaS+Agent" 啟動設定
-```
+在 Azure / Container 環境中建議使用環境變數覆寫連線字串，例如：
 
----
+- `ConnectionStrings__Postgres`：PostgreSQL 連線字串
+- `OpenAI__ApiKey`：OpenAI API Key
 
-## ⚙️ Git 分支策略
+## Container 部署說明（Azure / On-Prem 共用）
 
-### 分支說明
+專案根目錄已提供多階段建置的 `Dockerfile`：
 
-- **main** - 穩定發布版本（無 Agent 功能）
-  - 已發布的穩定版本
-  - 可接受客戶意見修改
-  
-- **with-agent** - Agent 整合開發分支
-  - 包含 Agent 相關功能
-  - 定期同步 main 的更新
+- 建置階段：使用 `mcr.microsoft.com/dotnet/sdk:9.0` 還原與發佈
+- 執行階段：使用 `mcr.microsoft.com/dotnet/aspnet:9.0` 作為 runtime
+- 服務對外監聽埠：`8080`（`ASPNETCORE_URLS=http://+:8080`）
 
-### 切換分支
+### 本機或 On-Prem 簡易示例（若環境有 Docker）
 
 ```bash
-# 切換到穩定版本（無 Agent）
-git checkout main
-
-# 切換到 Agent 開發版本
-git checkout with-agent
+docker build -t docengine-saas .
+docker run -d -p 8080:8080 \
+  -e ConnectionStrings__Postgres="Host=...;Port=...;Database=...;Username=...;Password=..." \
+  -e OpenAI__ApiKey="your-key" \
+  --name docengine-saas \
+  docengine-saas
 ```
 
-詳細的分支策略請參考 [GIT_BRANCH_STRATEGY.md](docs/GIT_BRANCH_STRATEGY.md)
+### Azure 容器部署（搭配 GitHub Actions）
 
----
+Repo 內的 `.github/workflows/azure-container-deploy.yml` 會在 push 到 `main` 時：
 
-## 🛠️ 開發指南
+1. 使用 .NET 9 建置與測試專案
+2. 透過 `Dockerfile` 建置映像並推送到 Azure Container Registry (ACR)
+3. 使用 `azure/webapps-deploy` 將最新映像佈署到 Azure App Service（Container 模式）
 
-### 建置專案
+你需要在 GitHub Repo 的 Secrets 中設定：
 
-```bash
-# 編譯
-dotnet build
+- `ACR_LOGIN_SERVER`：例如 `acrdocenginedev.azurecr.io`
+- `ACR_USERNAME` / `ACR_PASSWORD`：對應 ACR 的登入帳號與密碼（或 Service Principal）
+- `AZURE_WEBAPP_PUBLISH_PROFILE`：從 Azure Portal 匯出的 App Service 發佈設定檔內容
 
-# 編譯 Release 版本
-dotnet build -c Release
+並在 workflow 檔案中將：
 
-# 執行測試
-dotnet test
+- `AZURE_WEBAPP_NAME` 改成實際 App Service 名稱
+- `DOCKER_IMAGE_NAME` 改成你希望在 ACR 中使用的映像名稱
 
-# 發布
-dotnet publish -c Release
-```
-
-### 資料庫遷移
-
-```bash
-# 建立遷移
-dotnet ef migrations add MigrationName
-
-# 套用遷移
-dotnet ef database update
-```
-
-### 開發環境配置
-
-在 `appsettings.Development.json` 中設置開發環境專用配置：
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Debug"
-    }
-  },
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=docengine_dev;..."
-  }
-}
-```
-
----
-
-## 📚 相關文檔
-
-- [SETUP_SUMMARY.md](docs/SETUP_SUMMARY.md) - 設置總結
-- [GIT_BRANCH_STRATEGY.md](docs/GIT_BRANCH_STRATEGY.md) - Git 分支策略
-- [REPO_ORGANIZATION_STRATEGY.md](docs/REPO_ORGANIZATION_STRATEGY.md) - 倉庫組織策略
-- [AGENT_DEVELOPMENT_SUMMARY.md](docs/AGENT_DEVELOPMENT_SUMMARY.md) - Agent 功能開發總結
-- [Deployment_Architecture.md](docs/Deployment_Architecture.md) - 部署架構
-- [Agent_Trigger_Design_Analysis.md](docs/Agent_Trigger_Design_Analysis.md) - Agent 觸發機制設計
-
----
-
-## 🔗 相關專案
-
-- **DocEngine-Agent** - 客戶端分析工具 (https://github.com/smartsequence/DocEngine-Agent)
-- **DocEngine-Contracts** - 共享協議庫 (https://github.com/smartsequence/DocEngine-Contracts)
-
----
-
-## 📄 授權
-
-此專案為私有專案。
-
----
-
-**最後更新**：2026-01-25  
-**當前版本**：v1.0.0  
-**GitHub**：https://github.com/smartsequence/DocEngine-SaaS  
-**開發狀態**：🚀 活躍開發中

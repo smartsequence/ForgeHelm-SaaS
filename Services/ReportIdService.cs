@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 
-namespace DocEngine.Services;
+namespace ForgeHelm.SaaS.Services;
 
 /// <summary>
 /// 報告編號生成服務

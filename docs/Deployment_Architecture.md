@@ -1,8 +1,8 @@
-# DocEngine 部署架構設計文件
+# ForgeHelm 部署架構設計文件
 
 **文件版本：** v1.0  
 **最後更新：** 2024-12-XX  
-**作者：** DocEngine Development Team
+**作者：** ForgeHelm Development Team
 
 ---
 
@@ -22,7 +22,7 @@
 ```
 客戶內網環境
 ├─ SaaS 平台（部署在客戶內網伺服器）
-│  ├─ DocEngine Web App
+│  ├─ ForgeHelm Web App
 │  ├─ PostgreSQL
 │  ├─ 內網 AI Server
 │  └─ Git Repository
@@ -34,7 +34,7 @@
 ```
 雲端環境
 ├─ SaaS 平台（雲端）
-│  ├─ DocEngine Web App
+│  ├─ ForgeHelm Web App
 │  ├─ PostgreSQL
 │  ├─ OpenAI API 或 內網 AI Server（透過 VPN）
 │  └─ Git Repository
@@ -48,7 +48,7 @@
 │              SaaS 平台 (內網部署 - 客戶內網伺服器)            │
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │  DocEngine Web Application (ASP.NET Core)          │   │
+│  │  ForgeHelm Web Application (ASP.NET Core)          │   │
 │  │  - 專案管理 UI                                       │   │
 │  │  - 文件管理 UI                                       │   │
 │  │  - 任務排程                                          │   │
@@ -86,7 +86,7 @@
                        │ (認證：API Key / OAuth)
                        │
 ┌──────────────────────▼───────────────────────────────────────┐
-│              客戶端 Agent (DocEngine.Agent.exe)              │
+│              客戶端 Agent (ForgeHelm.Agent.exe)              │
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │  程式碼分析器 (Code Analyzer)                         │   │
@@ -139,7 +139,7 @@
 
 ### 2.1 SaaS 平台組件
 
-#### 2.1.1 DocEngine Web Application
+#### 2.1.1 ForgeHelm Web Application
 - **技術棧**: ASP.NET Core MVC (現有專案擴展)
 - **功能**:
   - 專案管理介面
@@ -174,7 +174,7 @@
 
 ### 2.2 客戶端 Agent 組件
 
-#### 2.2.1 DocEngine.Agent.exe
+#### 2.2.1 ForgeHelm.Agent.exe
 - **技術棧**: .NET 9.0 Console Application
 - **執行模式**:
   - **模式一**: 手動執行（一次性分析）
@@ -217,7 +217,7 @@
 1. 使用者在 SaaS 平台建立專案
    └─> 產生專案 ID 和 API Key
 
-2. 客戶端啟動 DocEngine.Agent.exe（作為本地服務）
+2. 客戶端啟動 ForgeHelm.Agent.exe（作為本地服務）
    ├─> Agent 啟動本地 HTTP 服務（localhost:8888）
    ├─> Agent 連接到 SaaS 平台的 SignalR Hub
    ├─> Agent 註冊到 SaaS 平台（告知 Agent 已就緒）
@@ -255,7 +255,7 @@
 1. 使用者在 SaaS 平台建立專案
    └─> 產生專案 ID 和 API Key
 
-2. 客戶端手動執行 DocEngine.Agent.exe
+2. 客戶端手動執行 ForgeHelm.Agent.exe
    ├─> 輸入專案 ID 和 API Key
    ├─> 指定專案路徑和資料庫連線字串
    └─> 開始分析
@@ -271,7 +271,7 @@ Agent 作為本地 HTTP 服務運行，同時連接 SignalR，等待 SaaS 平台
 
 ```bash
 # 啟動 Agent 作為本地服務
-DocEngine.Agent.exe --mode service --port 8888 --saas-url "http://internal-docengine:5000"
+ForgeHelm.Agent.exe --mode service --port 8888 --saas-url "http://internal-docengine:5000"
 ```
 
 **工作流程**：
@@ -284,7 +284,7 @@ DocEngine.Agent.exe --mode service --port 8888 --saas-url "http://internal-docen
 
 #### 模式二：手動執行（一次性分析）
 ```bash
-DocEngine.Agent.exe --project-id "xxx" --api-key "yyy" --project-path "C:\Projects\MyApp" --db-connection "Data Source=..."
+ForgeHelm.Agent.exe --project-id "xxx" --api-key "yyy" --project-path "C:\Projects\MyApp" --db-connection "Data Source=..."
 ```
 
 #### 模式三：排程執行
@@ -300,7 +300,7 @@ DocEngine.Agent.exe --project-id "xxx" --api-key "yyy" --project-path "C:\Projec
   </Triggers>
   <Actions>
     <Exec>
-      <Command>DocEngine.Agent.exe</Command>
+      <Command>ForgeHelm.Agent.exe</Command>
       <Arguments>--project-id "xxx" --api-key "yyy" ...</Arguments>
     </Exec>
   </Actions>
@@ -518,7 +518,7 @@ Response:
     }
   },
   "LocalCache": {
-    "DatabasePath": "%AppData%\\DocEngine\\cache.db"
+    "DatabasePath": "%AppData%\\ForgeHelm\\cache.db"
   }
 }
 ```
@@ -747,7 +747,7 @@ var response = await httpClient.PostAsJsonAsync(agentUrl, task);
 ```
 客戶內網環境
 ├─ 應用伺服器
-│  └─ DocEngine Web App (IIS / Nginx)
+│  └─ ForgeHelm Web App (IIS / Nginx)
 ├─ 資料庫伺服器
 │  └─ PostgreSQL
 ├─ AI 伺服器
@@ -755,7 +755,7 @@ var response = await httpClient.PostAsJsonAsync(agentUrl, task);
 ├─ 版控伺服器
 │  └─ GitLab / Gitea (內網)
 └─ 開發人員電腦
-   └─ DocEngine.Agent.exe
+   └─ ForgeHelm.Agent.exe
 ```
 
 ## 十一、替代方案比較

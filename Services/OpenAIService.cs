@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace DocEngine.Services;
+namespace ForgeHelm.SaaS.Services;
 
 /// <summary>
 /// OpenAI API 服務，處理所有 AI 生成請求

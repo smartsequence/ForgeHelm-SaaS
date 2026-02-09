@@ -3,13 +3,13 @@
   "ManifestType": "Build",
   "Endpoints": [
     {
-      "Route": "DocEngine.3j4f5o4hv9.styles.css",
-      "AssetFile": "DocEngine.styles.css.gz",
+      "Route": "ForgeHelm.SaaS.ac9ll5a9cp.styles.css",
+      "AssetFile": "ForgeHelm.SaaS.styles.css.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.001841620626"
+          "Quality": "0.001828153565"
         }
       ],
       "ResponseHeaders": [
@@ -27,7 +27,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "542"
+          "Value": "546"
         },
         {
           "Name": "Content-Type",
@@ -35,15 +35,15 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA=\""
+          "Value": "\"IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8=\""
         },
         {
           "Name": "ETag",
-          "Value": "W/\"r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao=\""
+          "Value": "W/\"imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         },
         {
           "Name": "Vary",
@@ -53,21 +53,21 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "3j4f5o4hv9"
+          "Value": "ac9ll5a9cp"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao="
+          "Value": "sha256-imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0="
         },
         {
           "Name": "label",
-          "Value": "DocEngine.styles.css"
+          "Value": "ForgeHelm.SaaS.styles.css"
         }
       ]
     },
     {
-      "Route": "DocEngine.3j4f5o4hv9.styles.css",
-      "AssetFile": "DocEngine.styles.css",
+      "Route": "ForgeHelm.SaaS.ac9ll5a9cp.styles.css",
+      "AssetFile": "ForgeHelm.SaaS.styles.css",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -80,7 +80,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1127"
+          "Value": "1132"
         },
         {
           "Name": "Content-Type",
@@ -88,31 +88,31 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao=\""
+          "Value": "\"imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "3j4f5o4hv9"
+          "Value": "ac9ll5a9cp"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao="
+          "Value": "sha256-imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0="
         },
         {
           "Name": "label",
-          "Value": "DocEngine.styles.css"
+          "Value": "ForgeHelm.SaaS.styles.css"
         }
       ]
     },
     {
-      "Route": "DocEngine.3j4f5o4hv9.styles.css.gz",
-      "AssetFile": "DocEngine.styles.css.gz",
+      "Route": "ForgeHelm.SaaS.ac9ll5a9cp.styles.css.gz",
+      "AssetFile": "ForgeHelm.SaaS.styles.css.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -129,7 +129,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "542"
+          "Value": "546"
         },
         {
           "Name": "Content-Type",
@@ -137,11 +137,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA=\""
+          "Value": "\"IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         },
         {
           "Name": "Vary",
@@ -151,26 +151,26 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "3j4f5o4hv9"
+          "Value": "ac9ll5a9cp"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA="
+          "Value": "sha256-IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8="
         },
         {
           "Name": "label",
-          "Value": "DocEngine.styles.css.gz"
+          "Value": "ForgeHelm.SaaS.styles.css.gz"
         }
       ]
     },
     {
-      "Route": "DocEngine.styles.css",
-      "AssetFile": "DocEngine.styles.css.gz",
+      "Route": "ForgeHelm.SaaS.styles.css",
+      "AssetFile": "ForgeHelm.SaaS.styles.css.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.001841620626"
+          "Quality": "0.001828153565"
         }
       ],
       "ResponseHeaders": [
@@ -188,7 +188,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "542"
+          "Value": "546"
         },
         {
           "Name": "Content-Type",
@@ -196,15 +196,15 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA=\""
+          "Value": "\"IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8=\""
         },
         {
           "Name": "ETag",
-          "Value": "W/\"r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao=\""
+          "Value": "W/\"imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         },
         {
           "Name": "Vary",
@@ -214,13 +214,13 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao="
+          "Value": "sha256-imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0="
         }
       ]
     },
     {
-      "Route": "DocEngine.styles.css",
-      "AssetFile": "DocEngine.styles.css",
+      "Route": "ForgeHelm.SaaS.styles.css",
+      "AssetFile": "ForgeHelm.SaaS.styles.css",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -233,7 +233,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1127"
+          "Value": "1132"
         },
         {
           "Name": "Content-Type",
@@ -241,23 +241,23 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao=\""
+          "Value": "\"imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-r8l7EVusbuFByamKVEfewWv8g+Uw0eOCYKXijB/WBao="
+          "Value": "sha256-imv1PTGRvpxEZ6Tcuv6YOlERuQQh0IZwjSMJA2HXBe0="
         }
       ]
     },
     {
-      "Route": "DocEngine.styles.css.gz",
-      "AssetFile": "DocEngine.styles.css.gz",
+      "Route": "ForgeHelm.SaaS.styles.css.gz",
+      "AssetFile": "ForgeHelm.SaaS.styles.css.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -274,7 +274,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "542"
+          "Value": "546"
         },
         {
           "Name": "Content-Type",
@@ -282,11 +282,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA=\""
+          "Value": "\"IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 13 Jan 2026 21:52:29 GMT"
+          "Value": "Mon, 09 Feb 2026 15:49:36 GMT"
         },
         {
           "Name": "Vary",
@@ -296,7 +296,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-Of4IJU94dD/k0gp9ljOF9GMgVAnNUTn9Zxc0lEhlFgA="
+          "Value": "sha256-IDxLnbtOWLexkl3+dWuhia2Wx/jCH5n6Rkh28VRB+O8="
         }
       ]
     },
