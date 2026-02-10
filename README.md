@@ -1,6 +1,6 @@
-# DocEngine-SaaS
+# ForgeHelm-SaaS
 
-DocEngine-SaaS 是一個以 ASP.NET Core MVC (.NET 9) 開發的 Web 應用程式，負責專案管理、文件生成與（未來）Agent 整合。
+ForgeHelm-SaaS 是一個以 ASP.NET Core MVC (.NET 9) 開發的 Web 應用程式，負責專案管理、文件生成與（未來）Agent 整合。
 
 ## 開發環境啟動
 
@@ -34,12 +34,12 @@ dotnet run
 ### 本機或 On-Prem 簡易示例（若環境有 Docker）
 
 ```bash
-docker build -t docengine-saas .
+docker build -t forgehelm-saas .
 docker run -d -p 8080:8080 \
   -e ConnectionStrings__Postgres="Host=...;Port=...;Database=...;Username=...;Password=..." \
   -e OpenAI__ApiKey="your-key" \
-  --name docengine-saas \
-  docengine-saas
+  --name forgehelm-saas \
+  forgehelm-saas
 ```
 
 ### Azure 容器部署（搭配 GitHub Actions）
@@ -52,7 +52,7 @@ Repo 內的 `.github/workflows/azure-container-deploy.yml` 會在 push 到 `main
 
 你需要在 GitHub Repo 的 Secrets 中設定：
 
-- `ACR_LOGIN_SERVER`：例如 `acrdocenginedev.azurecr.io`
+- `ACR_LOGIN_SERVER`：例如 `acrforgehelmdev.azurecr.io`
 - `ACR_USERNAME` / `ACR_PASSWORD`：對應 ACR 的登入帳號與密碼（或 Service Principal）
 - `AZURE_WEBAPP_PUBLISH_PROFILE`：從 Azure Portal 匯出的 App Service 發佈設定檔內容
 
